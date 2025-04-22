@@ -225,3 +225,38 @@ benthos_reefs_pts <- readRDS(file = paste0(
 ))
 benthos_reefs_pts |> head()
 ```
+
+5. convert the synthetic data to an sf object and convert responses to
+   a natural scale
+
+```{r}
+#| label: synthetic landscape benthos reefs response scale
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+5. visualise the spatio-temporal pattern of each response and covariate
+
+::: {.panel-tabset}
+
+### HCC
+
+```{r}
+#| label: plot benthos reefs HCC
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 10
+#| fig-height: 10
+#| cache: false
+benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
+benthos_reefs_sf |>
+    ggplot() +
+    geom_sf(aes(fill = HCC, color = HCC)) +
+    facet_wrap(~Year) +
+    scale_fill_viridis_c() +
+    scale_color_viridis_c() +
+    theme_bw()
+```
