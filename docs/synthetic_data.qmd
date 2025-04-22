@@ -361,3 +361,108 @@ benthos_reefs_sf |>
     theme_bw()
 ```
 :::
+
+6. visualise the temporal trend in each of the responses and covariates marginalised
+   over space
+
+::: {.panel-tabset}
+
+### HCC
+
+```{r}
+#| label: plot benthos reefs HCC part2
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+benthos_reefs_sf |>
+    st_drop_geometry() |>
+    group_by(Year) |>
+    summarise(HCC = mean(HCC)) |>
+    ggplot() +
+    geom_line(aes(x = Year, y = HCC)) +
+    theme_bw()
+```
+
+### SC
+
+```{r}
+#| label: plot benthos reefs SC part2
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+benthos_reefs_sf |>
+    st_drop_geometry() |>
+    group_by(Year) |>
+    summarise(SC = mean(SC)) |>
+    ggplot() +
+    geom_line(aes(x = Year, y = SC)) +
+    theme_bw()
+```
+### MA
+
+```{r}
+#| label: plot benthos reefs MA part2
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+benthos_reefs_sf |>
+    st_drop_geometry() |>
+    group_by(Year) |>
+    summarise(MA = mean(MA)) |>
+    ggplot() +
+    geom_line(aes(x = Year, y = MA)) +
+    theme_bw()
+```
+### CYC
+
+```{r}
+#| label: plot benthos reefs CYC part2
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+benthos_reefs_sf |>
+    st_drop_geometry() |>
+    group_by(Year) |>
+    summarise(CYC = mean(CYC)) |>
+    ggplot() +
+    geom_line(aes(x = Year, y = CYC)) +
+    theme_bw()
+```
+### DHW
+
+```{r}
+#| label: plot benthos reefs DHW part2
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+benthos_reefs_sf |>
+    st_drop_geometry() |>
+    group_by(Year) |>
+    summarise(DHW = mean(DHW)) |>
+    ggplot() +
+    geom_line(aes(x = Year, y = DHW)) +
+    theme_bw()
+```
+
+### OTHER
+
+```{r}
+#| label: plot benthos reefs OTHER part2
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+benthos_reefs_sf |>
+    st_drop_geometry() |>
+    group_by(Year) |>
+    summarise(OTHER = mean(OTHER)) |>
+    ggplot() +
+    geom_line(aes(x = Year, y = OTHER)) +
+    theme_bw()
+```
+:::
