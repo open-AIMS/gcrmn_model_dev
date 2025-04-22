@@ -18,14 +18,136 @@ RUN apt-get update \
     git \ 
   && rm -rf /var/lib/apt/lists/*
 
-## A selection of tidyverse packages
+# Install R packages
 RUN R -e "options(repos = \
-  list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
-  install.packages('dplyr'); \
-  install.packages('lubridate'); \
-  install.packages('ggplot2'); \
-  install.packages('readr'); \
-  install.packages('stringr'); \
-  install.packages('tidyr'); \
-  install.packages('tidyverse'); \
-"  
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
+  install.packages(\"pak\"); \
+"
+
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
+  pak::pkg_install(c('rmarkdown', 'quarto', 'tidyverse', 'ggplot2', 'sf', 'dplyr', 'knitr', 'patchwork')); \
+"
+
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
+  pak::pkg_install(c('testthat', 'usethis')); \
+"
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
+  pak::pkg_install(c('glmmTMB', 'emmeans', 'DHARMa', 'performance', 'see')); \
+  pak::pkg_install(c('gbm', 'dbarts')); \
+"
+
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
+  pak::pkg_install(c('stan-dev/cmdstanr')); \
+  pak::pkg_install(c('brms')); \
+  pak::pkg_install(c('tidybayes', 'posterior', 'bayesplot', 'HDInterval', 'jmgirard/standist', 'bayestestR')); \
+"
+
+# Install CmdStan
+RUN R -e "cmdstanr::check_cmdstan_toolchain(fix = TRUE); \
+  cmdstanr::install_cmdstan(cores = parallel::detectCores()); \
+"
+
+
+
+
+## ## A selection of tidyverse packages
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('dplyr'); \
+##   install.packages('lubridate'); \
+##   install.packages('ggplot2'); \
+##   install.packages('readr'); \
+##   install.packages('stringr'); \
+##   install.packages('tidyr'); \
+##   install.packages('tidyverse'); \
+## "  
+
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('crayon'); \
+##   install.packages('cli'); \
+##   install.packages('validate'); \
+## "  
+
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('remotes'); \
+## "
+
+## ## Project specific packages
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   remotes::install_github('open-AIMS/status'); \
+## "
+
+## ## Other packages
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('markdown'); \
+##   install.packages('bookdown'); \
+##   install.packages('rmarkdown'); \
+##   install.packages('quarto'); \
+## "  
+
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('testthat'); \
+##   install.packages('assertthat'); \
+## "  
+
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('plotly'); \
+## "  
+
+## ## Install extra packages required for quarto 
+## RUN apt-get update \
+##   && apt-get install -y --no-install-recommends \
+##     curl \
+##     gdebi-core \
+##   && rm -rf /var/lib/apt/lists/*
+
+## ARG QUARTO_VERSION="1.3.450"
+## RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
+## RUN gdebi --non-interactive quarto-linux-amd64.deb
+
+
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('sf'); \
+## "  
+
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('emmeans');   \
+##   install.packages('DHARMa');   \
+##   install.packages('patchwork');   \
+## "  
+
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('future');   \
+##   install.packages('purrr');   \
+##   install.packages('insight');   \
+##   install.packages('gridGraphics');   \
+## "  
+
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages("fmesher"); \
+##   remotes::install_version("INLA", version="24.05.10",repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/testing"), dep=TRUE); \
+## "
+  
+## RUN R -e "options(repos = \
+##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+##   install.packages('glmmTMB');   \
+##   install.packages('brms');   \
+##   install.packages('emdstanr');   \
+##   install.packages('cmdstanr');   \
+## "  
+
+RUN apt-get clean
