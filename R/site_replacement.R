@@ -213,6 +213,7 @@ list(
     ## All sampled reefs ----------------------------------------------
     tar_target(site_replacements_data_prep_0_, {
       benthos_fixed_locs_obs_0 <- read_sampled_reefs_data_
+      data_path <- site_replacement_global_parameters_$data_path
       ## ---- sampled data prep 0
       benthos_fixed_locs_obs_0 <- benthos_fixed_locs_obs_0 |>
         mutate(
@@ -222,6 +223,10 @@ list(
           Transect = interaction(Site, Transect),
           cover = HCC/100
         )
+    write_csv(
+      benthos_fixed_locs_obs_0,
+      paste0(data_path, "synthetic/benthos_fixed_locs_obs_0.csv")
+    )
       ## ----end
       benthos_fixed_locs_obs_0 
     }),
