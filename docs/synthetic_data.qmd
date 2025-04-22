@@ -260,3 +260,104 @@ benthos_reefs_sf |>
     scale_color_viridis_c() +
     theme_bw()
 ```
+
+### SC
+
+```{r}
+#| label: plot benthos reefs SC
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 10
+#| fig-height: 10
+#| cache: false
+benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
+benthos_reefs_sf |>
+    ggplot() +
+    geom_sf(aes(fill = SC, color = SC)) +
+    facet_wrap(~Year) +
+    scale_fill_viridis_c() +
+    scale_color_viridis_c() +
+    theme_bw()
+```
+
+### MA
+
+```{r}
+#| label: plot benthos reefs MA
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 10
+#| fig-height: 10
+#| cache: false
+benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
+benthos_reefs_sf |>
+    ggplot() +
+    geom_sf(aes(fill = MA, color = MA)) +
+    facet_wrap(~Year) +
+    scale_fill_viridis_c() +
+    scale_color_viridis_c() +
+    theme_bw()
+```
+
+### CYC
+
+```{r}
+#| label: plot benthos reefs CYC
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 10
+#| fig-height: 10
+#| cache: false
+benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
+benthos_reefs_sf |>
+    ggplot() +
+    geom_sf(aes(fill = CYC, color = CYC)) +
+    facet_wrap(~Year) +
+    scale_fill_viridis_c() +
+    scale_color_viridis_c() +
+    theme_bw()
+```
+
+### DHW
+
+```{r}
+#| label: plot benthos reefs DHW
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 10
+#| fig-height: 10
+#| cache: false
+benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
+benthos_reefs_sf |>
+    ggplot() +
+    geom_sf(aes(fill = DHW, color = DHW)) +
+    facet_wrap(~Year) +
+    scale_fill_viridis_c() +
+    scale_color_viridis_c() +
+    theme_bw()
+```
+
+### OTHER
+
+```{r}
+#| label: plot benthos reefs OTHER
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 10
+#| fig-height: 10
+#| cache: false
+benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
+benthos_reefs_sf |>
+    ggplot() +
+    geom_sf(aes(fill = OTHER, color = OTHER)) +
+    facet_wrap(~Year) +
+    scale_fill_viridis_c() +
+    scale_color_viridis_c() +
+    theme_bw()
+```
+:::
