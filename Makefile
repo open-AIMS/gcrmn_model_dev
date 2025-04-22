@@ -28,10 +28,21 @@ build_docker:
 	@echo "Building Docker image..."
 	docker build --tag gcrmn_dev .
 
+docs_container:
+	docker run --rm -v "$(shell pwd)":/home/Project gcrmn_dev $(MAKE) render_docs
+
+python_container:
+	@echo "Running Python scripts..."
+	docker run --rm -v "$(shell pwd)":/home/Project gcrmn_dev $(MAKE) run_python
+	
+R_container:
+	@echo "Running R targets pipeline..."
+	docker run --rm -v "$(shell pwd)":/home/Project gcrmn_dev $(MAKE) run_R
+
 # Rule to run Python scripts
 run_python: $(PYTHON_SCRIPTS)
 	@echo "Running Python scripts..."
-	python $^
+	python3 $^
 
 # Rule to run the R targets pipeline
 run_R:

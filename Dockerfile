@@ -53,6 +53,18 @@ RUN R -e "cmdstanr::check_cmdstan_toolchain(fix = TRUE); \
   cmdstanr::install_cmdstan(cores = parallel::detectCores()); \
 "
 
+# Install quarto
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    curl \
+    libcurl4-openssl-dev \
+    gdebi-core \
+  && rm -rf /var/lib/apt/lists/*
+
+ARG QUARTO_VERSION="1.7.26"
+RUN curl -o quarto-linux-amd64.deb -L https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb
+RUN gdebi --non-interactive quarto-linux-amd64.deb
+
 
 ## Python
 
@@ -60,10 +72,23 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   python3 \
   python3-pip \
+  python3-dev \
   && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --break-system-packages pymc
 RUN pip3 install --break-system-packages pymc-bart
+RUN pip3 install --break-system-packages preliz
+
+
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
+  pak::pkg_install(c('reticulate', 'styler')); \
+"
+
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
+  pak::pkg_install(c('targets', 'tarchetypes')); \
+"
 
 ## ## A selection of tidyverse packages
 ## RUN R -e "options(repos = \
@@ -162,3 +187,6 @@ RUN pip3 install --break-system-packages pymc-bart
 ## "  
 
 RUN apt-get clean
+
+RUN mkdir /home/Project
+WORKDIR /home/Project
