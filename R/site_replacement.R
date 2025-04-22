@@ -87,6 +87,7 @@ list(
       benthos_reefs_temporal_summary 
     }),
     tar_target(read_all_temporal_summary_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_$benthos_reefs_temporal_summary
       data_path <- site_replacement_global_parameters_$data_path
       ## ---- all reefs temporal summary plot
       benthos_reefs_temporal_summary <- 
