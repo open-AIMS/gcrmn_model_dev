@@ -17,6 +17,6 @@ source("synthetic_data.R")  # Load the synthetic data generation script
 source("site_replacement.R")  # Load the modelling of site replacement script
 
 list(
-  synthetic_data()
-  ## site_replacement()
+  synthetic_data(),
+  site_replacement()
 )

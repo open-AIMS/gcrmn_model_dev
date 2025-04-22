@@ -1,6 +1,7 @@
  
 source("model_functions.R")
-list(
+site_replacement <- function() {
+  list(
     # Target: Load raw data
     tar_target(
       site_replacement_libraries_,
@@ -1291,5 +1292,5 @@ list(
     ##   ) 
     ##   ## ----end
     ## })
-)
-
+  )
+}
