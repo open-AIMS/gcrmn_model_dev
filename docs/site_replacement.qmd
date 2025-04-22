@@ -121,3 +121,34 @@ Establish the global environment and paths
 :::
 
 ## Import data
+
+::: {.panel-tabset}
+
+### R
+
+:::: {.panel-tabset}
+
+#### 1. Full reef level spatio-temporal benthic data
+
+```{r}
+#| label: read all reefs data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+```{r}
+#| label: read all reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+#| dependson: "read all reefs data"
+#| code-fold: false
+benthos_reefs_sf 
+```
+
+::::
+
+:::

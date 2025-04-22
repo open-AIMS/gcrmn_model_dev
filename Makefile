@@ -24,6 +24,10 @@ $(info ************************************)
 # Default target
 all: build_docker run_python run_R render_docs
 
+run_container: python_container R_container docs_container
+
+run_local: run_python run_R render_docs
+
 build_docker:
 	@echo "Building Docker image..."
 	docker build --tag gcrmn_dev .
@@ -34,7 +38,7 @@ docs_container:
 python_container:
 	@echo "Running Python scripts..."
 	docker run --rm -v "$(shell pwd)":/home/Project gcrmn_dev $(MAKE) run_python
-	
+
 R_container:
 	@echo "Running R targets pipeline..."
 	docker run --rm -v "$(shell pwd)":/home/Project gcrmn_dev $(MAKE) run_R

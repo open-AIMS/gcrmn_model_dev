@@ -13,9 +13,10 @@ import os
 # script_dir = "/home/murray/Work/AIMS/Projects/GCRMN/2025/dev/python/"
 # os.chdir(script_dir)
 
+# os.chdir(os.path.join(os.getcwd(), "..", "python"))
+# print(os.getcwd())
+
 ## ---- python site replacement global parameters
-os.chdir(os.path.join(os.getcwd(), "..", "python"))
-print(os.getcwd())
 # Assign a variable to the global namespace
 data_path = "../data/"
 output_path = "../output/"
@@ -28,9 +29,9 @@ paths = {
 }
 
 # Ensure the directories exist
-# for path in paths.values():
-#     if not os.path.exists(path):
-#         os.makedirs(path)
+for path in paths.values():
+    if not os.path.exists(path):
+        os.makedirs(path)
 ## ----end
 
 # ## ---- python read all reefs data
