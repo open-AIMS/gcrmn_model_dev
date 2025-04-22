@@ -466,3 +466,123 @@ benthos_reefs_sf |>
     theme_bw()
 ```
 :::
+
+## Simulate a fixed site sampling design
+
+1. select a set of sites to repeatedly sample
+
+- **n_locs**: number of locations (e.g. reefs)
+- **n_sites**: number of sites within each location
+- **seed**: random seed used in the random selection of locations and
+  sites
+
+```{r}
+#| label: synthetic landscape benthos reefs locs
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: temp
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 10
+#| fig-height: 10
+#| cache: true
+benthos_fixed_locs_sf <- readRDS(file = paste0(
+  data_path,
+  "synthetic/benthos_fixed_locs_sf.rds"
+))
+head(benthos_fixed_locs_sf)
+benthos_fixed_locs_sf |>
+    ggplot() +
+    geom_sf(aes(fill = plogis(HCC), color = plogis(HCC))) +
+    facet_wrap(~Year) +
+    scale_fill_viridis_c() +
+    scale_color_viridis_c() +
+    theme_bw()
+```
+
+2. generate the within site structural hierarchy (transects/photos and
+   points)
+
+::: {.columns}
+:::: {.column width="50%"}
+- **Number_of_transects_per_site**: number of transects per site
+- **Depths**: depths to sample at
+- **Number_of_frames_per_transect**: number of photo frames per transect
+- **Points_per_frame**: number of points on each photo
+- **hcc_site_sigma**: HCC variability between sites within locations
+  (logit scale)
+- **hcc_transect_sigma**: HCC variability between transects within sites
+  (logit scale)
+- **hcc_sigma**: HCC stoichastic noise not attributed to anything else
+  (logit scale)
+::::
+
+:::: {.column width="50%"}
+- **sc_site_sigma**: SC variability between sites within locations
+  (logit scale)
+- **sc_transect_sigma**: SC variability between transects within sites
+  (logit scale)
+- **sc_sigma**: SC stoichastic noise not attributed to anything else
+  (logit scale)
+- **ma_site_sigma**: MA variability between sites within locations
+  (logit scale)
+- **ma_transect_sigma**: MA variability between transects within sites
+  (logit scale)
+- **ma_sigma**: MA stoichastic noise not attributed to anything else
+  (logit scale)
+::::
+:::
+
+```{r}
+#| label: synthetic landscape benthos reefs locs obs
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+3. inspect the resulting dataset
+
+```{r}
+#| label: synthetic landscape benthos reefs locs obs show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+benthos_fixed_locs_obs <- readRDS(file = paste0(
+  data_path,
+  "synthetic/benthos_fixed_locs_obs.rds"
+))
+benthos_fixed_locs_obs
+```
+
+4. join in the disturbances
+
+```{r}
+#| label: synthetic landscape benthos reefs locs obs disturb
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: synthetic landscape benthos reefs locs obs disturb show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+benthos_fixed_locs_obs_disturb <- readRDS(file = paste0(
+  data_path,
+  "synthetic/benthos_fixed_locs_obs_disturb.rds"
+))
+benthos_fixed_locs_obs_disturb |>
+    as.data.frame() |>
+    head()
+```
