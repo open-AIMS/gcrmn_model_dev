@@ -90,6 +90,11 @@ RUN R -e "options(repos = \
   pak::pkg_install(c('targets', 'tarchetypes')); \
 "
 
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
+  pak::pkg_install(c('open-AIMS/synthos')); \
+"
+
 ## ## A selection of tidyverse packages
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
