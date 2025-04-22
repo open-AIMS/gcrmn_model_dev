@@ -200,3 +200,28 @@ Establish the global environment and paths
 #| echo: true
 #| cache: false
 ```
+
+3. create the synthetic landscape
+
+```{r}
+#| label: synthetic landscape benthos reefs
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+4. inspect the synthetic data
+
+```{r}
+#| label: benthods reefs pts show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+benthos_reefs_pts <- readRDS(file = paste0(
+  data_path,
+  "synthetic/benthos_reefs_pts.rds"
+))
+benthos_reefs_pts |> head()
+```
