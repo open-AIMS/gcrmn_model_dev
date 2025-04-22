@@ -586,3 +586,176 @@ benthos_fixed_locs_obs_disturb |>
     as.data.frame() |>
     head()
 ```
+
+## Specific data issue scenarios
+
+The goal of the model comparisons exercise is to be able to evaluate
+how well different models can accommodate different issues. These
+issues include:
+
+- situations in which certain monitored reefs are discontinued and
+  replaced by alternative reefs for the rest of a time series. The
+  most extreme form of this would be if a poor reef (a reef with very
+  low cover) was replaced by a good reef (higher cover).
+- it might be expected that the severity of replacing reefs would
+  intensify with fewer reefs. To explore this, we will create a
+  version of the reef replacement when the pool of reefs is smaller
+- a common scenario is when there are gaps in time series. We will
+  create a versions of the data where there are times when no samples
+  are collected from selected reefs
+- a more extreme version might be when there is a temporal gap in all
+  sampled reefs
+- using covariates (disturbances) to refine predictions in areas where
+  there are no samples
+
+::: {.panel-tabset}
+
+## Replace a reef
+
+```{r}
+#| label: synthetic replace reefs
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: synthetic replace reefs plot
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: true
+benthos_fixed_locs_obs_1 <- readRDS(
+  file = paste0(data_path, "synthetic/benthos_fixed_locs_obs_1.rds")
+)
+benthos_fixed_locs_obs_1 |>
+    ggplot() +
+    geom_line(aes(
+        y = HCC, x = Year, colour = Site,
+        group = interaction(Site, Transect)
+    )) +
+    facet_wrap(~Reef) +
+    theme_bw()
+```
+
+## Replace a reef (V2)
+
+```{r}
+#| label: synthetic replace reefs 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: synthetic replace reefs plot 2
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: true
+benthos_fixed_locs_obs_2 <- readRDS(
+  file = paste0(data_path, "synthetic/benthos_fixed_locs_obs_2.rds")
+)
+benthos_fixed_locs_obs_2 |>
+    ggplot() +
+    geom_line(aes(
+        y = HCC, x = Year, colour = Site,
+        group = interaction(Site, Transect)
+    )) +
+    facet_wrap(~Reef) +
+    theme_bw()
+```
+
+## Temporal gap
+
+```{r}
+#| label: synthetic temporal gap
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: synthetic temporal gap plot
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: true
+benthos_fixed_locs_obs_3 <- readRDS(
+  file = paste0(data_path, "synthetic/benthos_fixed_locs_obs_3.rds")
+)
+benthos_fixed_locs_obs_3 |>
+  dplyr::select(-MA, -SC) |>
+  pivot_wider(
+    id_cols = c(Reef, Longitude, Latitude, Site, Transect),
+    names_from = Year,
+    values_from = HCC
+  ) |>
+  pivot_longer(
+    cols = -c(Reef, Longitude, Latitude, Site, Transect),
+    names_to = "Year",
+    values_to = "HCC"
+  ) |> 
+    ggplot() +
+    geom_line(aes(
+        y = HCC, x = Year, colour = Site,
+        group = interaction(Site, Transect)
+    )) +
+    facet_wrap(~Reef) +
+    theme_bw()
+```
+
+## Temporal gap 2
+
+```{r}
+#| label: synthetic temporal gap 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: synthetic temporal gap plot 2
+#| results: markup
+#| eval: true
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: true
+benthos_fixed_locs_obs_4 <- readRDS(
+  file = paste0(data_path, "synthetic/benthos_fixed_locs_obs_4.rds")
+)
+yrs <- 1:12
+benthos_fixed_locs_obs_4 |>
+    complete(Year = yrs, nesting(Reef, Longitude, Latitude, Site, Transect)) |> 
+    ggplot() +
+    geom_line(aes(
+        y = HCC, x = Year, colour = Site,
+        group = interaction(Site, Transect)
+    )) +
+    facet_wrap(~Reef) +
+    theme_bw()
+```
+
+## Covariates
+
+```{r}
+#| label: synthetic covariates
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+:::
+ 

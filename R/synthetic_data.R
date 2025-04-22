@@ -1,4 +1,5 @@
-
+synthetic_data <- function() {
+  
 list(
   # Target: Load raw data
   tar_target(
@@ -174,11 +175,15 @@ list(
           distinct(),
         by = c("Reef", "Year"),
         relationship = "many-to-many"
-      )
+      ) 
     saveRDS(benthos_fixed_locs_obs_disturb, file = paste0(
       data_path,
       "synthetic/benthos_fixed_locs_obs_disturb.rds"
     ))
+    write_csv(
+      benthos_fixed_locs_obs_disturb,
+      paste0(data_path, "synthetic/benthos_fixed_locs_obs_disturb.csv")
+    )
     ## ----end
     benthos_fixed_locs_obs_disturb 
   }),
@@ -305,3 +310,5 @@ list(
     ## ----end
   })
 )
+
+  }

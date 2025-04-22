@@ -16,6 +16,7 @@ tar_option_set(
 source("synthetic_data.R")  # Load the synthetic data generation script
 source("site_replacement.R")  # Load the modelling of site replacement script
 
-## list(
-##   site_replacement()
-## )
+list(
+  synthetic_data()
+  ## site_replacement()
+)
