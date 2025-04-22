@@ -59,7 +59,7 @@ run_R:
 	echo "library(quarto); quarto_render(\"$<\")" | R --no-save --no-restore;
 
 # Rule to render all Quarto documents
-render_docs: $(HTML_FILES)
+render_docs: $(HTML_FILES) $(PYTHON_SCRIPTS) $(R_SCRIPTS)
 
 # Clean up intermediate files
 clean:

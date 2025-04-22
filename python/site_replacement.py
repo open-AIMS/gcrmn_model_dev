@@ -13,6 +13,7 @@ import os
 # script_dir = "/home/murray/Work/AIMS/Projects/GCRMN/2025/dev/python/"
 # os.chdir(script_dir)
 
+os.chdir(os.path.join(os.getcwd(), "python"))
 # os.chdir(os.path.join(os.getcwd(), "..", "python"))
 # print(os.getcwd())
 
@@ -34,67 +35,71 @@ for path in paths.values():
         os.makedirs(path)
 ## ----end
 
-# ## ---- python read all reefs data
-# print("Working directory set to:", os.getcwd())
-# # benthos_reefs_sf_np = pd.read_csv("../data/synthetic/benthos_reefs_sf.csv")
-# benthos_reefs_sf_np = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
-# pd.set_option("display.max_columns", None)  # Show all columns
-# benthos_reefs_sf_np 
-# pd.reset_option("display.max_columns")
-# ## ----end
+## print("Working directory set to:", os.getcwd())
+# benthos_reefs_sf_np = pd.read_csv("../data/synthetic/benthos_reefs_sf.csv")
 
-# ## ---- python all reefs temporal summary
-# benthos_reefs_temporal_summary = (
-#     benthos_reefs_sf_np.groupby("Year").agg(
-#         Mean=("HCC", "mean"),
-#         Median=("HCC", "median"),
-#         SD=("HCC", "std"),
-#         Lower=("HCC", lambda x: x.quantile(0.025)),
-#         Upper=("HCC", lambda x: x.quantile(0.975))
-#     ).reset_index()
-# )
-# ## ----end
+## ---- python read all reefs data
+benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
+## ----end
 
-# ## ---- python all reefs temporal summary plot
-# # Create the plot
-# plt.figure(figsize=(10, 6))
+## ---- python read all reefs data show
+pd.set_option("display.max_columns", None)  # Show all columns
+benthos_reefs_sf 
+pd.reset_option("display.max_columns")
+## ----end
 
-# # Add ribbon (shaded area)
-# plt.fill_between(
-#     benthos_reefs_temporal_summary["Year"],
-#     benthos_reefs_temporal_summary["Lower"],
-#     benthos_reefs_temporal_summary["Upper"],
-#     alpha=0.2,
-#     label="Confidence Interval"
-# )
+## ---- python all reefs temporal summary
+benthos_reefs_temporal_summary = (
+    benthos_reefs_sf.groupby("Year").agg(
+        Mean=("HCC", "mean"),
+        Median=("HCC", "median"),
+        SD=("HCC", "std"),
+        Lower=("HCC", lambda x: x.quantile(0.025)),
+        Upper=("HCC", lambda x: x.quantile(0.975))
+    ).reset_index()
+)
+## ----end
 
-# # Add mean line
-# plt.plot(
-#     benthos_reefs_temporal_summary["Year"],
-#     benthos_reefs_temporal_summary["Mean"],
-#     label="Mean",
-#     color="blue"
-# )
+## ---- python all reefs temporal summary plot
+# Create the plot
+plt.figure(figsize=(10, 6))
 
-# # Add median line
-# plt.plot(
-#     benthos_reefs_temporal_summary["Year"],
-#     benthos_reefs_temporal_summary["Median"],
-#     label="Median",
-#     color="orange"
-# )
+# Add ribbon (shaded area)
+plt.fill_between(
+    benthos_reefs_temporal_summary["Year"],
+    benthos_reefs_temporal_summary["Lower"],
+    benthos_reefs_temporal_summary["Upper"],
+    alpha=0.2,
+    label="Confidence Interval"
+)
 
-# # Add labels and theme
-# plt.xlabel("Year")
-# plt.ylabel("Value")
-# plt.title("Temporal Summary")
-# plt.legend()
-# plt.grid(True)
-# # plt.show()
+# Add mean line
+plt.plot(
+    benthos_reefs_temporal_summary["Year"],
+    benthos_reefs_temporal_summary["Mean"],
+    label="Mean",
+    color="blue"
+)
 
-# # Save the plot as a PNG file
-# plt.savefig("../data/synthetic/benthos_reefs_sf_temporal_summary.png", dpi=300, bbox_inches="tight")
-# ## ----end
+# Add median line
+plt.plot(
+    benthos_reefs_temporal_summary["Year"],
+    benthos_reefs_temporal_summary["Median"],
+    label="Median",
+    color="orange"
+)
+
+# Add labels and theme
+plt.xlabel("Year")
+plt.ylabel("Value")
+plt.title("Temporal Summary")
+plt.legend()
+plt.grid(True)
+# plt.show()
+
+# Save the plot as a PNG file
+plt.savefig(f"{paths['fig_path']}Python_all_temporal_summary_plot.png", dpi=300, bbox_inches="tight")
+## ----end
 
 # ## ---- python sampled read all reefs data
 # benthos_fixed_locs_obs_0 = pd.read_csv(f"{paths['data_path']}synthetic/benthos_fixed_locs_obs_0.csv")

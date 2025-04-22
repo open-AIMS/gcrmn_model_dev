@@ -149,6 +149,97 @@ Establish the global environment and paths
 benthos_reefs_sf 
 ```
 
+```{r}
+#| label: all reefs temporal summary
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: all reefs temporal summary plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "read all reefs data"
+```
+
+![](../output/figures/R_all_temporal_summary_plot.png){width=500px}
+
+#### 2. All sampled reefs
+
+```{r}
+#| label: read sampled reefs data
+#| results: markup
+#| echo: true
+#| cache: true
+#| dependson: "read all reefs data"
+```
+
+```{r}
+#| label: sampled simple raw means
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
 ::::
 
+### Python
+
+:::: {.panel-tabset}
+
+#### 1. Full reef level spatio-temporal benthic data
+
+```{python}
+#| label: python read all reefs data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+     
+```{python}
+#| label: python read all reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+#| dependson: "read all reefs data"
+#| code-fold: false
+```
+
+```{python}
+#| label: python all reefs temporal summary
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: true
+#| code-fold: true
+```
+
+```{python}
+#| label: python all reefs temporal summary plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+```
+
+![](../output/figures/Python_all_temporal_summary_plot.png){width=500px}
+
 :::
+
+

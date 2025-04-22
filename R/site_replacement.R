@@ -42,7 +42,7 @@ site_replacement <- function() {
           data_path = data_path,
           synthetic_path = paste0(data_path, "synthetic/"),
           output_path = output_path,
-          synthetic_path = paste0(output_path, "figures/")
+          fig_path = paste0(output_path, "figures/")
         )
         lapply(paths, function(x) {
           if (!dir.exists(x)) {
@@ -90,6 +90,7 @@ site_replacement <- function() {
     tar_target(read_all_temporal_summary_plot_, {
       benthos_reefs_temporal_summary <- read_all_temporal_summary_$benthos_reefs_temporal_summary
       data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- all reefs temporal summary plot
       benthos_reefs_temporal_summary <- 
         readRDS(
@@ -98,12 +99,19 @@ site_replacement <- function() {
             "synthetic/benthos_reefs_temporal_summary.rds"
           )
         )
-      benthos_reefs_temporal_summary |>
+      g <- benthos_reefs_temporal_summary |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = Lower, ymax = Upper), alpha = 0.2) +
         geom_line(aes(x = Year, y = Mean, colour = "mean")) +
         geom_line(aes(x = Year, y = Median, colour = "median")) +
         theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_all_temporal_summary_plot.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
       ## ----end
     }),
     ## All sampled reefs ----------------------------------------------
