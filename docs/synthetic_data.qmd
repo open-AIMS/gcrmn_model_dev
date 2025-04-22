@@ -120,3 +120,83 @@ Establish the global environment and paths
 #| echo: true
 #| cache: false
 ```
+
+## Generate synthetic landscape
+
+1. create a list of configuration parameters
+
+::: {.columns}
+:::: {.column width="50%"}
+- **seed**: a random seed to use for the stoichastic processes
+- **crs**: coordinate reference system to apply to the spatial domain
+- **model**: the covariate model to use. The following models are
+  supported: "Sph", "Exp", "Gau", "Lin", "Mat", "Ste", "Pen", "Hug",
+  "Hol", "Cor", "Sphlin", "Sphexp", "Sphgaus", "Sphmat", "Sphste",
+  "Sphpen", "Sphhug", "Sphhol", "Sphcor"
+- **psill**: partial sill represents the variance explained by the spatial
+  structure. It is the difference between the total sill (the
+  asymptotic value of the variogram) and the _nugget_.In a variogram,
+  the _psill_ is the plateau value that the variogram reaches as the
+  distance increases.
+- **range**: the distance at which spatial correlation becomes negligible.
+  Beyond this distance, the variogram reaches the sill, and points are
+  considered spatially uncorrelated. It defines the spatial extent of
+  the influence of one location on another.
+- **nugget**: represents the variance at zero distance (the y-intercept of
+  the variogram). It accounts for measurement error or spatial
+  variability at scales smaller than the sampling resolution. A
+  nonzero _nugget_ indicates that there is variability that cannot be
+  explained by the spatial model.
+- **alpha**: controls the smoothness of the spatial field.
+  Larger values of ~alpha~ result in smoother spatial fields, while
+  smaller values allow for rougher fields. In the context of SPDEs,
+  _alpha_ is related to the order of the differential operator used to
+  define the spatial process.
+::::
+
+:::: {.column width="50%"}
+- **kappa**: controls the spatial scale or range of the spatial
+  process. It determines how quickly spatial correlation decays with
+  distance. Smaller values of _kappa_ correspond to larger spatial
+  ranges (more extended correlation), while larger values correspond
+  to shorter spatial ranges (localized correlation). In SPDE-based
+  models, _kappa_ is used to parameterize the precision matrix
+  of the spatial field.
+- **variance**: is used to calculate the precision of the Matérn 
+- **patch_threshold**: patch_threshold: a numeric representing the
+  threshold below which the field is masked away to leave only the
+  patches
+- **reef_width**: representing half the width of a ribbon representing
+  the reef that is centered on the outline of the patch
+- **years**: a sequence of years
+- **dhw_weight**: relative importance of degree heating weeks (how
+  much to weight the effects of dhw when calculating cover)
+- **cyc_weight**: relative importance of cyclones (how much to weight
+  the effects of cyclones when calculating cover)
+- **other_weight**: relative importance of other disturbances (how
+  much to weight the effects of other disturbances when calculating
+  cover) 
+- **hcc_cover_range**: the range of Hard Coral Cover to be observed
+  over space and time
+- **hcc_growth**: the annual rate of growth of hard coral
+- **sc_cover_range**: the range of Soft Coral Cover to be observed
+  over space and time
+- **sc_growth**: the annual rate of growth of soft coral
+
+::::
+
+:::
+
+```{r}
+#| label: synthetic landscape config
+```
+
+2. define the spatial domain
+
+```{r}
+#| label: synthetic landscape spatial domain
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
