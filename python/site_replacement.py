@@ -14,7 +14,7 @@ import os
 # os.chdir(script_dir)
 
 ## ---- python site replacement global parameters
-os.getwd()
+os.getcwd()
 # Assign a variable to the global namespace
 data_path = "../data/"
 output_path = "../output/"
