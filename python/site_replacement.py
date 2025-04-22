@@ -13,23 +13,24 @@ import os
 # script_dir = "/home/murray/Work/AIMS/Projects/GCRMN/2025/dev/python/"
 # os.chdir(script_dir)
 
-# ## ---- python site replacement global parameters
-# # Assign a variable to the global namespace
-# data_path = "../data/"
-# output_path = "../output/"
+## ---- python site replacement global parameters
+os.getwd()
+# Assign a variable to the global namespace
+data_path = "../data/"
+output_path = "../output/"
 
-# # Create a dictionary of paths
-# paths = {
-#     "data_path": data_path,
-#     "synthetic_path": f"{data_path}synthetic/",
-#     "fig_path": f"{output_path}figures/"
-# }
+# Create a dictionary of paths
+paths = {
+    "data_path": data_path,
+    "synthetic_path": f"{data_path}synthetic/",
+    "fig_path": f"{output_path}figures/"
+}
 
-# # Ensure the directories exist
+# Ensure the directories exist
 # for path in paths.values():
 #     if not os.path.exists(path):
 #         os.makedirs(path)
-# ## ----end
+## ----end
 
 # ## ---- python read all reefs data
 # print("Working directory set to:", os.getcwd())
