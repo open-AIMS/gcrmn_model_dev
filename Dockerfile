@@ -62,7 +62,7 @@ RUN apt-get update \
   python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pipx install pymc
+RUN pip3 install pymc
 
 ## ## A selection of tidyverse packages
 ## RUN R -e "options(repos = \
