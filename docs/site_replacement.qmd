@@ -1,0 +1,122 @@
+---
+title: "Comparing model types - site replacement"
+author: "Murray Logan"
+date: today
+date-format: "DD/MM/YYYY"
+format:
+  html:
+    ## Format
+    theme: [default, resources/style.scss]
+    css: resources/style.css
+    html-math-method: mathjax
+    ## Table of contents
+    toc: true
+    toc-float: true
+    ## Numbering
+    number-sections: true
+    number-depth: 3
+    ## Layout
+    page-layout: full
+    fig-caption-location: "bottom"
+    fig-align: "center"
+    fig-width: 4
+    fig-height: 4
+    fig-dpi: 72
+    tbl-cap-location: top
+    ## Code
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+    code-line-numbers: true
+    code-block-border-left: "#ccc"
+    code-copy: true
+    highlight-style: atom-one
+    ## Execution
+    execute:
+      echo: true
+      #cache: true
+    ## Rendering
+    embed-resources: true
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+## execute: 
+##   cache: true
+jupyter: python3
+output_dir: "docs"
+documentclass: article
+fontsize: 12pt
+mainfont: Arial
+mathfont: LiberationMono
+monofont: DejaVu Sans Mono
+classoption: a4paper
+bibliography: resources/references.bib
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+knitr::opts_chunk$set(
+    cache.lazy = FALSE,
+    tidy = "styler"
+)
+## allow indented chunks
+assignInNamespace(".sep.label",
+  "^\\ *(#|--)+\\s*(@knitr|----+)(.*?)-*\\s*$",
+    ns = "knitr"
+)
+knitr::read_chunk("../R/site_replacement.R")
+knitr::read_chunk("../python/site_replacement.py")
+```
+
+## Purpose
+
+## Preparations
+
+::: {.panel-tabset}
+
+### R
+Load the necessary R libraries
+
+```{r}
+#| label: site replacement libraries
+#| output: false
+#| eval: true
+#| warning: false
+#| message: false
+#| cache: false
+```
+
+Establish the global environment and paths
+
+```{r}
+#| label: site replacement global parameters
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+### Python
+
+```{python}
+#| label: python site replacement libraries
+#| output: false
+#| eval: true
+#| warning: false
+#| message: false
+#| cache: false
+```
+```{python}
+#| label: python site replacement global parameters
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+```
+:::
+
