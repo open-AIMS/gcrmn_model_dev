@@ -22,7 +22,11 @@ $(info HTML files:                $(HTML_FILES))
 $(info ************************************)
 
 # Default target
-all: run_python run_R render_docs
+all: build_docker run_python run_R render_docs
+
+build_docker:
+	@echo "Building Docker image..."
+	docker build --tag gcrmn_dev .
 
 # Rule to run Python scripts
 run_python: $(PYTHON_SCRIPTS)
