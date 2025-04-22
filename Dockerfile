@@ -63,6 +63,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --break-system-packages pymc
+RUN pip3 install --break-system-packages pymc-bart
 
 ## ## A selection of tidyverse packages
 ## RUN R -e "options(repos = \
