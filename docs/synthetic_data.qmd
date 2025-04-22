@@ -250,7 +250,7 @@ benthos_reefs_pts |> head()
 #| echo: true
 #| fig-width: 10
 #| fig-height: 10
-#| cache: false
+#| cache: true
 benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
 benthos_reefs_sf |>
     ggplot() +
@@ -270,7 +270,7 @@ benthos_reefs_sf |>
 #| echo: true
 #| fig-width: 10
 #| fig-height: 10
-#| cache: false
+#| cache: true
 benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
 benthos_reefs_sf |>
     ggplot() +
@@ -290,7 +290,7 @@ benthos_reefs_sf |>
 #| echo: true
 #| fig-width: 10
 #| fig-height: 10
-#| cache: false
+#| cache: true
 benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
 benthos_reefs_sf |>
     ggplot() +
@@ -310,7 +310,7 @@ benthos_reefs_sf |>
 #| echo: true
 #| fig-width: 10
 #| fig-height: 10
-#| cache: false
+#| cache: true
 benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
 benthos_reefs_sf |>
     ggplot() +
@@ -330,7 +330,7 @@ benthos_reefs_sf |>
 #| echo: true
 #| fig-width: 10
 #| fig-height: 10
-#| cache: false
+#| cache: true
 benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
 benthos_reefs_sf |>
     ggplot() +
@@ -350,7 +350,7 @@ benthos_reefs_sf |>
 #| echo: true
 #| fig-width: 10
 #| fig-height: 10
-#| cache: false
+#| cache: true
 benthos_reefs_sf <- readRDS(file = paste0(data_path, "synthetic/benthos_reefs_sf.rds"))
 benthos_reefs_sf |>
     ggplot() +
