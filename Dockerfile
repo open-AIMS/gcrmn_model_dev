@@ -25,24 +25,24 @@ RUN R -e "options(repos = \
 "
 
 RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
   pak::pkg_install(c('rmarkdown', 'quarto')); \
   pak::pkg_install(c('tidyverse')); \
   pak::pkg_install(c('sf', 'knitr', 'patchwork')); \
 "
 
 RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
   pak::pkg_install(c('testthat', 'usethis')); \
 "
 RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
   pak::pkg_install(c('glmmTMB', 'emmeans', 'DHARMa', 'performance', 'see')); \
   pak::pkg_install(c('gbm', 'dbarts')); \
 "
 
 RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
   pak::pkg_install(c('stan-dev/cmdstanr')); \
   pak::pkg_install(c('brms')); \
   pak::pkg_install(c('tidybayes', 'posterior', 'bayesplot', 'HDInterval', 'jmgirard/standist', 'bayestestR')); \
@@ -61,6 +61,8 @@ RUN apt-get update \
   python3 \
   python3-pip \
   && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install pymc
 
 ## ## A selection of tidyverse packages
 ## RUN R -e "options(repos = \
