@@ -26,7 +26,9 @@ RUN R -e "options(repos = \
 
 RUN R -e "options(repos = \
     list(CRAN = \"https://packagemanager.posit.co/cran/2024-01-10/\")); \
-  pak::pkg_install(c('rmarkdown', 'quarto', 'tidyverse', 'ggplot2', 'sf', 'dplyr', 'knitr', 'patchwork')); \
+  pak::pkg_install(c('rmarkdown', 'quarto')); \
+  pak::pkg_install(c('tidyverse')); \
+  pak::pkg_install(c('sf', 'knitr', 'patchwork')); \
 "
 
 RUN R -e "options(repos = \
@@ -52,7 +54,13 @@ RUN R -e "cmdstanr::check_cmdstan_toolchain(fix = TRUE); \
 "
 
 
+## Python
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+  python3 \
+  python3-pip \
+  && rm -rf /var/lib/apt/lists/*
 
 ## ## A selection of tidyverse packages
 ## RUN R -e "options(repos = \
