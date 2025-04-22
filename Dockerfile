@@ -17,3 +17,15 @@ RUN apt-get update \
     libglpk-dev \ 
     git \ 
   && rm -rf /var/lib/apt/lists/*
+
+## A selection of tidyverse packages
+RUN R -e "options(repos = \
+  list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
+  install.packages('dplyr'); \
+  install.packages('lubridate'); \
+  install.packages('ggplot2'); \
+  install.packages('readr'); \
+  install.packages('stringr'); \
+  install.packages('tidyr'); \
+  install.packages('tidyverse'); \
+"  
