@@ -14,7 +14,7 @@ import os
 # os.chdir(script_dir)
 
 ## ---- python site replacement global parameters
-os.chdir(os.path.join(os.getcwd(), "python"))
+os.chdir(os.path.join(os.getcwd(), "..", "python"))
 print(os.getcwd())
 # Assign a variable to the global namespace
 data_path = "../data/"
