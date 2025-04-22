@@ -100,3 +100,23 @@ This package can be installed by issuing the following:
 remotes::install_github("open-AIMS/synthos")
 ```
 
+Load the necessary R libraries
+
+```{r}
+#| label: synthetic libraries
+#| output: false
+#| eval: true
+#| warning: false
+#| message: false
+#| cache: false
+```
+
+Establish the global environment and paths
+
+```{r}
+#| label: synthetic global parameters
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+```
