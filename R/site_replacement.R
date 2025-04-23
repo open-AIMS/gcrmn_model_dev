@@ -430,6 +430,25 @@ site_replacement <- function() {
       ## ----end
       glmmTMB_0_dharma
     }),
+    tar_target(dharma_mod_glmmTMB_0_plot_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- glmmTMB_0_dharma plot
+      glmmTMB_0_dharma <- readRDS(
+        file = paste0(data_path, "synthetic/glmmTMB_0_dharma.rds")
+      )
+      g <- wrap_elements(~testUniformity(glmmTMB_0_dharma)) +
+        wrap_elements(~plotResiduals(glmmTMB_0_dharma)) +
+        wrap_elements(~testDispersion(glmmTMB_0_dharma))
+      ggsave(
+        filename = paste0(
+          fig_path, "R_dharma_mod_glmmTMB_0.png"
+        ),
+        g,
+        width = 10, height = 4, dpi = 72
+      )
+      ## ----end
+    }),
     tar_target(emmeans_mod_glmmTMB_0, {
       mod_glmmTMB_0 <- mod_glmmTMB_0_
       newdata_0 <- site_replacements_newdata_0_
@@ -446,47 +465,73 @@ site_replacement <- function() {
       ) 
       ## ----end
       glmmTMB_0_sum 
-    })
+    }),
+    tar_target(emmeans_mod_glmmTMB_0_plot_, {
+      glmmTMB_0_sum <- emmeans_mod_glmmTMB_0
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- glmmTMB_0_emmeans plot
+      g <- glmmTMB_0_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "glmmTMB")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_glmmTMB_0.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
     
-    ## ## brms -----------------------------------------------------------
-    ## tar_target(mod_brms_0_, {
-    ##   benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
-    ##   data_path <- site_replacement_global_parameters_$data_path
-    ##   ## ---- brms_pre_0
-    ##   benthos_fixed_locs_obs_0 |>
-    ##     group_by(fYear) |>
-    ##     summarise(mean_abundance = qlogis(mean(cover)),
-    ##       median_abundance = qlogis(median(cover)),
-    ##       sd_abundance = sd(qlogis(cover)) ,
-    ##       mad_abundance = mad(qlogis(cover)) 
-    ##     ) 
-    ##   priors <- c(
-    ##     prior(normal(0, 0.5), class = "b"),
-    ##     prior(normal(-0.741, 0.4), class = "Intercept"),
-    ##     prior(student_t(3, 0, 0.4), class = "sd")
-    ##   )
-    ##   mod_form <- bf(cover ~ fYear + (1 | Site) + (1 | Transect),
-    ##     family = "Beta"
-    ##   )
-    ##   ## ----end
-    ##   ## ---- brms_0
-    ##   mod_brms_0 <- brm(mod_form,
-    ##     data = benthos_fixed_locs_obs_0,
-    ##     iter = 5000,
-    ##     warmup = 1000,
-    ##     chains = 3,
-    ##     cores = 3,
-    ##     prior = priors,
-    ##     thin =  5,
-    ##     control = list(adapt_delta = 0.99),
-    ##     backend = "cmdstanr"
-    ##   )
-    ##   saveRDS(mod_brms_0,
-    ##     file = paste0(data_path, "synthetic/mod_brms_0.rds")
-    ##   ) 
-    ##   ## ----end
-    ##   mod_brms_0
-    ## }),
+    ## brms -----------------------------------------------------------
+    tar_target(mod_brms_0_, {
+      benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- brms_pre_0
+      benthos_fixed_locs_obs_0 |>
+        group_by(fYear) |>
+        summarise(mean_abundance = qlogis(mean(cover)),
+          median_abundance = qlogis(median(cover)),
+          sd_abundance = sd(qlogis(cover)) ,
+          mad_abundance = mad(qlogis(cover)) 
+        ) 
+      priors <- c(
+        prior(normal(0, 0.5), class = "b"),
+        prior(normal(-1.5, 0.5), class = "Intercept"),
+        prior(student_t(3, 0, 0.5), class = "sd")
+      )
+      mod_form <- bf(cover ~ fYear + (1 | Site) + (1 | Transect),
+        family = "Beta"
+      )
+      ## ----end
+      ## ---- brms_0
+      mod_brms_0 <- brm(mod_form,
+        data = benthos_fixed_locs_obs_0,
+        iter = 5000,
+        warmup = 1000,
+        chains = 3,
+        cores = 3,
+        prior = priors,
+        thin =  5,
+        control = list(adapt_delta = 0.99),
+        backend = "cmdstanr"
+      )
+      saveRDS(mod_brms_0,
+        file = paste0(data_path, "synthetic/mod_brms_0.rds")
+      ) 
+      ## ----end
+      mod_brms_0
+    }),
     ## tar_target(emmeans_mod_brms_0, {
     ##   mod_brms_0 <- mod_brms_0_
     ##   newdata_0 <- site_replacements_newdata_0_

@@ -609,8 +609,87 @@ benthos_fixed_locs_obs_2
 #| cache: false
 #| code-fold: true
 ```
+
+```{r}
+#| label: glmmTMB_0_emmeans plot
+#| eval: false
+#| results: markup
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_0"
+```
+
+![](../output/figures/R_pdp_mod_glmmTMB_0.png){width=500px}
+
+##### Model Validation
+
+```{r}
+#| label: glmmTMB_0_dharma
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_0_dharma plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 4
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_0"
+```
+
+![](../output/figures/R_dharma_mod_glmmTMB_0.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: glmmTMB_0_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_0"
+mod_glmmTMB_0 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_glmmTMB_0.rds")
+)
+mod_glmmTMB_0 |> summary()
+```
+
 :::::
+
+#### brms
+
+```{r}
+#| label: brms_pre_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: brms_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
 
 ::::
 
 :::
+ 
