@@ -242,8 +242,30 @@ site_replacement <- function() {
       )
       ## ----end
       benthos_fixed_locs_obs_2 
-    })#,
-
+    }),
+    tar_target(sampled_reefs_data_2_plot_, {
+      benthos_fixed_locs_obs_2 <- read_sampled_reefs_data_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- sampled reefs data 1 plot
+      g <- benthos_fixed_locs_obs_2 |>
+        ggplot() +
+        geom_line(aes(
+          y = HCC, x = Year, colour = Site,
+          group = interaction(Site, Transect)
+        )) +
+        facet_wrap(~Reef) +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_sampled_reefs_2_plot.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    })
+    
     ## Data preparations ==============================================
     ## All sampled reefs ----------------------------------------------
     ## tar_target(site_replacements_data_prep_0_, {

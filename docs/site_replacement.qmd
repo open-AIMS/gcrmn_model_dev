@@ -252,6 +252,41 @@ benthos_fixed_locs_obs_1
 
 ![](../output/figures/R_sampled_reefs_1_plot.png){width=500px}
 
+#### 4. Replace a reef (V2)
+
+```{r}
+#| label: read sampled reefs data 2
+#| results: markup
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+```
+
+```{r}
+#| label: read sampled reefs data 2 show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+#| code-fold: false
+benthos_fixed_locs_obs_2 
+```
+
+```{r}
+#| label: sampled reefs data 2 plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/R_sampled_reefs_2_plot.png){width=500px}
+
 ::::
 
 ### Python
@@ -372,8 +407,60 @@ benthos_fixed_locs_obs_1
 
 ![](../output/figures/Python_sampled_reefs_1_plot.png){width=500px}
 
+#### 4. Replace a reef (V2)
+
+```{python}
+#| label: python read sampled reefs data 2
+#| results: markup
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+```
+
+```{python}
+#| label: python read sampled reefs data 2 show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{python}
+#| label: python sampled reefs data 2 plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/Python_sampled_reefs_2_plot.png){width=500px}
+
 ::::
 
 :::
  
 
+## Data preparations
+
+::: {.panel-tabset}
+
+### R
+
+:::: {.panel-tabset}
+### All sampled reefs
+
+::::
+
+### Python
+
+:::: {.panel-tabset}
+
+### All sampled reefs
+
+::::
+
+:::

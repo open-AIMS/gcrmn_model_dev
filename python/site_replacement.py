@@ -306,6 +306,53 @@ g.fig.tight_layout()
 plt.savefig(f"{paths['fig_path']}Python_sampled_reefs_1_plot.png", dpi=72, bbox_inches="tight")
 ## ----end
 
+## Replace a reef (V2) ---------------------------------------------
+## ---- python read sampled reefs data 2
+benthos_fixed_locs_obs_2 = pd.read_csv(f"{paths['data_path']}synthetic/benthos_fixed_locs_obs_2.csv")
+## ----end
+## ---- python read sampled reefs data 2 show
+pd.set_option("display.max_columns", None)  # Show all columns
+benthos_fixed_locs_obs_2
+pd.reset_option("display.max_columns")
+## ----end
+
+## ---- python sampled reefs data 2 plot
+# Create the plot
+g = sns.FacetGrid(
+    data=benthos_fixed_locs_obs_2,
+    col="Reef",
+    col_wrap=3,  # Adjust the number of columns in the facet grid
+    height=3,
+    aspect=1.6,
+    sharey=True,
+    sharex=True
+)
+
+# Add line plots to each facet
+g.map_dataframe(
+    sns.lineplot,
+    x="Year",
+    y="HCC",
+    hue="Site",
+    style="Transect",
+    estimator=None,
+    units="Transect",
+    legend=False
+)
+
+# Customize the plot
+g.set_axis_labels("Year", "Hard Coral Cover (HCC)")
+g.set_titles(col_template="{col_name}")
+g.add_legend(title="Site")
+g.fig.tight_layout()
+
+# Show the plot
+#plt.show()
+
+# Save the plot as a PNG file
+plt.savefig(f"{paths['fig_path']}Python_sampled_reefs_2_plot.png", dpi=72, bbox_inches="tight")
+## ----end
+
 # ## Data transformations
 
 # ## All sampled reefs
