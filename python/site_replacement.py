@@ -6,7 +6,9 @@ import pymc as pm
 import arviz as az
 import preliz as pz
 import pymc_bart as pmb
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+import seaborn as sns
 import os
 ## ----end
 
@@ -171,7 +173,53 @@ all_sampled_sum['Year'] = pd.to_numeric(all_sampled_sum['fYear'])
 all_sampled_sum
 ## ----end
 
+## ---- alternate plotting tests
+# ax = plt.figure(figsize=(10, 6))
+# fig, ax = plt.subplots()
+# (
+#     so.Plot(all_sampled_sum, x="Year", y="response", color="type", ymin="lower", ymax="upper", fill="type")
+#     .add(so.Line(), color="type")
+#     .add(so.Band(alpha=0.2))
+#     .limit(y=(0, 1))  # Set y-axis limits
+#     .scale(y=so.Continuous().label(formatter=mpl.ticker.FuncFormatter(lambda x, _: f"{x*100:.0f}%")))  # Set y-axis labels
+#     .label(y="Hard Coral Cover (%)")
+#     .theme(sns.axes_style("whitegrid"))  # Equivalent to theme_bw()
+#     .on(ax)
+#     .plot()
+# )
+# plt.legend(loc="upper center", fontsize="medium",        # or e.g. 12
+#     handleheight=2.0,         # make handles taller
+#     handlelength=2.0,         # make them longer
+#     borderaxespad=0.5, )  # options: 'upper left', 'lower right', etc.
+# plt.show()
+
+# p = (
+#     so.Plot(all_sampled_sum, x="Year", y="response", color="type", ymin="lower", ymax="upper", fill="type")
+#     # .add(so.Line(), so.Dodge())
+#     .add(so.Line())
+#     .add(so.Band(alpha=0.2))
+#     .limit(y=(0, 1))  # Set y-axis limits
+#     # .scale(y=so.Continuous().label(like="{100*x:.0f}%"))  # Set y-axis limits
+#     .scale(y=so.Continuous().label(formatter=mpl.ticker.FuncFormatter(lambda x, _: f"{x*100:.0f}%")))  # Set y-axis labels
+#     .label(y="Hard Coral Cover (%)")
+#     # .theme(mpl.style.library["whitegrid"])  # Equivalent to theme_bw()
+#     .theme(sns.axes_style("whitegrid"))  # Equivalent to theme_bw()
+#     # .layout(mpl.legend={"loc": "upper right"})
+# )
+# p.show()
+
+# # fig, ax = plt.subplots()
+# # p.on(ax).plot()
+# # ax.legend(loc="upper right")  # options: 'upper left', 'lower right', etc.
+
+# # plt.show()
+## ----end
+
+
+
+
 ## ---- python sampled simple raw means plot
+
 # Create the plot
 plt.figure(figsize=(10, 6))
 
@@ -211,6 +259,52 @@ plt.tight_layout()
 plt.savefig(f"{paths['fig_path']}Python_full_simple_raw_means_plot.png", dpi=72, bbox_inches="tight")
 ## ----end
 
+## Replace a reef --------------------------------------------------
+## ---- python read sampled reefs data 1
+benthos_fixed_locs_obs_1 = pd.read_csv(f"{paths['data_path']}synthetic/benthos_fixed_locs_obs_1.csv")
+## ----end
+## ---- python read sampled reefs data 1 show
+pd.set_option("display.max_columns", None)  # Show all columns
+benthos_fixed_locs_obs_1
+pd.reset_option("display.max_columns")
+## ----end
+
+## ---- python sampled reefs data 1 plot
+# Create the plot
+g = sns.FacetGrid(
+    data=benthos_fixed_locs_obs_1,
+    col="Reef",
+    col_wrap=5,  # Adjust the number of columns in the facet grid
+    height=2,
+    aspect=1.6,
+    sharey=True,
+    sharex=True
+)
+
+# Add line plots to each facet
+g.map_dataframe(
+    sns.lineplot,
+    x="Year",
+    y="HCC",
+    hue="Site",
+    style="Transect",
+    estimator=None,
+    units="Transect",
+    legend=False
+)
+
+# Customize the plot
+g.set_axis_labels("Year", "Hard Coral Cover (HCC)")
+g.set_titles(col_template="{col_name}")
+g.add_legend(title="Site")
+g.fig.tight_layout()
+
+# Show the plot
+#plt.show()
+
+# Save the plot as a PNG file
+plt.savefig(f"{paths['fig_path']}Python_sampled_reefs_1_plot.png", dpi=72, bbox_inches="tight")
+## ----end
 
 # ## Data transformations
 
