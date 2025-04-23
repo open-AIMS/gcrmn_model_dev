@@ -1,5 +1,6 @@
  
 source("model_functions.R")
+source("helper_functions.R")
 site_replacement <- function() {
   targets <- list(
     # Target: Load raw data
@@ -29,6 +30,7 @@ site_replacement <- function() {
       {
         ## ---- site replacement functions
         source("model_functions.R")
+        source("helper_functions.R")
         ## ----end
       }
     ),
