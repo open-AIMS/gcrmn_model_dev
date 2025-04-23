@@ -663,7 +663,7 @@ site_replacement <- function() {
         width = 10, height = 8, dpi = 72
       )
       ## ----end
-    }),
+    })
       
     ## ## stan
     ## tar_target(mod_stan_0_, {
