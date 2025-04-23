@@ -689,6 +689,106 @@ mod_glmmTMB_0 |> summary()
 #| dependson: "read sampled reefs data"
 ```
 
+::::: {.panel-tabset}
+##### Partial dependency plot
+
+```{r}
+#| label: brms_0_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: brms_0_emmeans plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: brms_trace_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+###### Autocorrelation plots
+
+```{r}
+#| label: brms_ac_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+###### Rhat
+
+```{r}
+#| label: brms_rhat_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+###### Effective sample size
+
+```{r}
+#| label: brms_ess_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+::::::
+
+##### Model validation
+
+```{r}
+#| label: brms_ppc_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+:::::
+
 ::::
 
 :::
