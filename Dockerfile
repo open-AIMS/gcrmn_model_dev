@@ -193,6 +193,8 @@ RUN R -e "options(repos = \
 ##   install.packages('cmdstanr');   \
 ## "  
 
+RUN pip3 install --break-system-packages seaborn
+
 RUN apt-get clean
 
 RUN mkdir /home/Project
