@@ -800,7 +800,43 @@ mod_glmmTMB_0 |> summary()
 
 ![](../output/figures/R_brms_ppc_0.png){width=500px}
 
+##### Summary
+
+```{r}
+#| label: brms_0_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+mod_brms_0 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_brms_0.rds")
+)
+mod_brms_0 |> summary()
+```
+
 :::::
+
+#### stan
+
+```{r}
+#| label: stan_pre_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
 
 ::::
 

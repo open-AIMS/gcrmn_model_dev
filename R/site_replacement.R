@@ -675,53 +675,53 @@ site_replacement <- function() {
         width = 10, height = 8, dpi = 72
       )
       ## ----end
-    })
+    }),
       
-    ## ## stan
-    ## tar_target(mod_stan_0_, {
-    ##   benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
-    ##   data_path <- site_replacement_global_parameters_$data_path
-    ##   site_extra_functions_
-    ##   ## ---- stan_pre_0
-    ##   benthos_fixed_locs_obs_0 <-
-    ##     benthos_fixed_locs_obs_0 |>
-    ##     mutate(
-    ##       cYear = fYear,
-    ##       grid_id = factor(Reef),
-    ##       cSite = factor(interaction(Reef, Site)),
-    ##       cReplicate = ifelse(is.na(Transect),
-    ##         interaction(Site, Year),
-    ##         interaction(cSite, Transect)),
-    ##       Cover = cover,
-    ##       area = 1,
-    ##       sum = 1
-    ##     )
-    ##   saveRDS(benthos_fixed_locs_obs_0,
-    ##     file = paste0(data_path, "synthetic/saveRDS(benthos_fixed_locs_obs_0_forstan.rds")
-    ##   ) 
-    ##   stan_data <- prepare_data_for_stan(benthos_fixed_locs_obs_0, yrs = NULL)
-    ##   model_stan <- cmdstanr::cmdstan_model(stan_file = "model1.stan")
-    ##   ## model_stan <- cmdstanr::cmdstan_model(stan_file = "mod1a.stan")
-    ##   ## model_stan <- cmdstanr::cmdstan_model(stan_file = "mod2a.stan")
-    ##   ## ----end
-    ##   ## ---- stan_0
-    ##   mod_stan_0 <- model_stan$sample(
-    ##     data = stan_data,
-    ##     seed = 123,
-    ##     iter_sampling = 5000,
-    ##     iter_warmup = 1000,
-    ##     thin = 5,
-    ##     chains = 3,
-    ##     parallel_chains = 3,
-    ##     adapt_delta = 0.99,
-    ##     output_dir = paste0(data_path, "synthetic/"),
-    ##   )
-    ##   saveRDS(mod_stan_0,
-    ##     file = paste0(data_path, "synthetic/mod_stan_0.rds")
-    ##   ) 
-    ##   ## ----end
-    ##   mod_stan_0
-    ## }),
+    ## stan
+    tar_target(mod_stan_0_, {
+      benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
+      data_path <- site_replacement_global_parameters_$data_path
+      site_extra_functions_
+      ## ---- stan_pre_0
+      benthos_fixed_locs_obs_0 <-
+        benthos_fixed_locs_obs_0 |>
+        mutate(
+          cYear = fYear,
+          grid_id = factor(Reef),
+          cSite = factor(interaction(Reef, Site)),
+          cReplicate = ifelse(is.na(Transect),
+            interaction(Site, Year),
+            interaction(cSite, Transect)),
+          Cover = cover,
+          area = 1,
+          sum = 1
+        )
+      saveRDS(benthos_fixed_locs_obs_0,
+        file = paste0(data_path, "synthetic/saveRDS(benthos_fixed_locs_obs_0_forstan.rds")
+      ) 
+      stan_data <- prepare_data_for_stan(benthos_fixed_locs_obs_0, yrs = NULL)
+      model_stan <- cmdstanr::cmdstan_model(stan_file = "model1.stan")
+      ## model_stan <- cmdstanr::cmdstan_model(stan_file = "mod1a.stan")
+      ## model_stan <- cmdstanr::cmdstan_model(stan_file = "mod2a.stan")
+      ## ----end
+      ## ---- stan_0
+      mod_stan_0 <- model_stan$sample(
+        data = stan_data,
+        seed = 123,
+        iter_sampling = 5000,
+        iter_warmup = 1000,
+        thin = 5,
+        chains = 3,
+        parallel_chains = 3,
+        adapt_delta = 0.99,
+        output_dir = paste0(data_path, "synthetic/"),
+      )
+      saveRDS(mod_stan_0,
+        file = paste0(data_path, "synthetic/mod_stan_0.rds")
+      ) 
+      ## ----end
+      mod_stan_0
+    })
     ## tar_target(pdp_mod_stan_0, {
     ##   mod_stan_0 <- mod_stan_0_
     ##   newdata_0 <- site_replacements_newdata_0_
