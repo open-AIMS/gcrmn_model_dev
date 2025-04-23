@@ -178,8 +178,19 @@ benthos_reefs_sf
 #| label: read sampled reefs data
 #| results: markup
 #| echo: true
-#| cache: true
+#| cache: false
 #| dependson: "read all reefs data"
+```
+
+```{r}
+#| label: read sampled reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+#| code-fold: false
+benthos_fixed_locs_obs 
 ```
 
 ```{r}
@@ -188,9 +199,23 @@ benthos_reefs_sf
 #| eval: false
 #| echo: true
 #| code-fold: true
-#| cache: true
+#| cache: false
 #| dependson: "read sampled reefs data"
 ```
+
+```{r}
+#| label: sampled simple raw means plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/R_full_simple_raw_means_plot.png){width=500px}
 
 ::::
 
@@ -240,6 +265,48 @@ benthos_reefs_sf
 
 ![](../output/figures/Python_all_temporal_summary_plot.png){width=500px}
 
-:::
+#### 2. All sampled reefs
 
+```{python}
+#| label: python read sampled reefs data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python read sampled reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: python sampled simple raw means
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: false
+```
+
+```{r}
+#| label: python sampled simple raw means plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/Python_full_simple_raw_means_plot.png){width=500px}
+
+::::
+
+:::
+ 
 

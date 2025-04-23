@@ -1,7 +1,7 @@
  
 source("model_functions.R")
 site_replacement <- function() {
-  list(
+  targets <- list(
     # Target: Load raw data
     tar_target(
       site_replacement_libraries_,
@@ -136,6 +136,7 @@ site_replacement <- function() {
           Transect = interaction(Site, Transect),
           cover = HCC/100
         )
+      print(benthos_fixed_locs_obs)
       ## Raw summary means
       all_sampled_sum <-
         benthos_fixed_locs_obs |>
@@ -166,6 +167,7 @@ site_replacement <- function() {
           values_from = values
         ) |>
         mutate(Year = as.numeric(as.character(fYear)))
+      print(all_sampled_sum)
       ## ----end
       all_sampled_sum
     }),
@@ -1301,4 +1303,5 @@ site_replacement <- function() {
     ##   ## ----end
     ## })
   )
+  return(targets)
 }
