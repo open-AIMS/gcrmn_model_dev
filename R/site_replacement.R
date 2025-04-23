@@ -681,6 +681,7 @@ site_replacement <- function() {
       
     ## stan
     tar_target(mod_stan_0_, {
+      source("model_functions.R")
       benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
       data_path <- site_replacement_global_parameters_$data_path
       site_extra_functions_
