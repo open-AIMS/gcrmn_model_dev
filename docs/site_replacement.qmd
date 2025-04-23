@@ -101,6 +101,16 @@ Establish the global environment and paths
 #| cache: false
 ```
 
+Load any helper functions
+
+```{r}
+#| label: site replacement functions
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
 ### Python
 
 ```{python}
