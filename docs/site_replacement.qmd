@@ -451,7 +451,58 @@ benthos_fixed_locs_obs_2
 ### R
 
 :::: {.panel-tabset}
-### All sampled reefs
+
+#### All sampled reefs
+
+```{r}
+#| label: sampled data prep 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{r}
+#| label: newdata 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+#### Replace a reef
+
+```{r}
+#| label: sampled data prep 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: newdata 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+#### Replace a reef (V2)
+
+```{r}
+#| label: sampled data prep 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{r}
+#| label: newdata 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
 
 ::::
 
@@ -459,7 +510,106 @@ benthos_fixed_locs_obs_2
 
 :::: {.panel-tabset}
 
+#### All sampled reefs
+
+```{python}
+#| label: python sampled data prep 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python newdata 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+#### Replace a reef
+
+```{python}
+#| label: python sampled data prep 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python newdata 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+#### Replace a reef (V2)
+
+```{python}
+#| label: python sampled data prep 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python newdata 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+::::
+
+:::
+
+ 
+
+## Modelled trends
+
+| Dataset            | Description         | Legend label(s)       |
+|--------------------|---------------------|-----------------------|
+| `benthos_reefs_sf` | All reef-level data | all mean / all median |
+|                    |                     |                       |
+
+| Model  | Description                       |
+|--------|-----------------------------------|
+| Simple | Simple hierarchical means/medians |
+|        |                                   |
+
+::: {.panel-tabset}
+
 ### All sampled reefs
+
+:::: {.panel-tabset}
+
+#### glmmTMB
+
+```{r}
+#| label: glmmTMB_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: glmmTMB_0_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+:::::
 
 ::::
 

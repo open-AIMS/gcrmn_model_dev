@@ -102,10 +102,29 @@ plt.grid(True)
 # Save the plot as a PNG file
 plt.savefig(f"{paths['fig_path']}Python_all_temporal_summary_plot.png", dpi=300, bbox_inches="tight")
 ## ----end
-
+ 
 ## All sampled reefs --------------------------------------------------
 ## ---- python read sampled reefs data
 benthos_fixed_locs_obs = pd.read_csv(f"{paths['data_path']}synthetic/benthos_fixed_locs_obs.csv")
+benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
+# Group and summarize the benthos_reefs_sf DataFrame
+benthos_reefs_summary = (
+    benthos_reefs_sf
+    .drop(columns=["geometry"])  # Equivalent to st_drop_geometry()
+    .groupby(["Year", "Reef"], as_index=False)
+    .agg({
+        "CYC": "mean",
+        "DHW": "mean",
+        "OTHER": "mean"
+    })
+)
+
+# Perform the left join
+benthos_fixed_locs_obs = benthos_fixed_locs_obs.merge(
+    benthos_reefs_summary,
+    on=["Year", "Reef"],
+    how="left"
+)
 ## ----end
 ## ---- python read sampled reefs data show
 pd.set_option("display.max_columns", None)  # Show all columns
@@ -262,6 +281,25 @@ plt.savefig(f"{paths['fig_path']}Python_full_simple_raw_means_plot.png", dpi=72,
 ## Replace a reef --------------------------------------------------
 ## ---- python read sampled reefs data 1
 benthos_fixed_locs_obs_1 = pd.read_csv(f"{paths['data_path']}synthetic/benthos_fixed_locs_obs_1.csv")
+benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
+# Group and summarize the benthos_reefs_sf DataFrame
+benthos_reefs_summary = (
+    benthos_reefs_sf
+    .drop(columns=["geometry"])  # Equivalent to st_drop_geometry()
+    .groupby(["Year", "Reef"], as_index=False)
+    .agg({
+        "CYC": "mean",
+        "DHW": "mean",
+        "OTHER": "mean"
+    })
+)
+
+# Perform the left join
+benthos_fixed_locs_obs_1 = benthos_fixed_locs_obs_1.merge(
+    benthos_reefs_summary,
+    on=["Year", "Reef"],
+    how="left"
+)
 ## ----end
 ## ---- python read sampled reefs data 1 show
 pd.set_option("display.max_columns", None)  # Show all columns
@@ -309,6 +347,25 @@ plt.savefig(f"{paths['fig_path']}Python_sampled_reefs_1_plot.png", dpi=72, bbox_
 ## Replace a reef (V2) ---------------------------------------------
 ## ---- python read sampled reefs data 2
 benthos_fixed_locs_obs_2 = pd.read_csv(f"{paths['data_path']}synthetic/benthos_fixed_locs_obs_2.csv")
+benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
+# Group and summarize the benthos_reefs_sf DataFrame
+benthos_reefs_summary = (
+    benthos_reefs_sf
+    .drop(columns=["geometry"])  # Equivalent to st_drop_geometry()
+    .groupby(["Year", "Reef"], as_index=False)
+    .agg({
+        "CYC": "mean",
+        "DHW": "mean",
+        "OTHER": "mean"
+    })
+)
+
+# Perform the left join
+benthos_fixed_locs_obs_2 = benthos_fixed_locs_obs_2.merge(
+    benthos_reefs_summary,
+    on=["Year", "Reef"],
+    how="left"
+)
 ## ----end
 ## ---- python read sampled reefs data 2 show
 pd.set_option("display.max_columns", None)  # Show all columns
@@ -353,30 +410,30 @@ g.fig.tight_layout()
 plt.savefig(f"{paths['fig_path']}Python_sampled_reefs_2_plot.png", dpi=72, bbox_inches="tight")
 ## ----end
 
-# ## Data transformations
+## Data transformations
 
-# ## All sampled reefs
+## All sampled reefs
 
-# ## ---- python sampled data prep 0
-# benthos_fixed_locs_obs_0 = (
-#     benthos_fixed_locs_obs_0.assign(
-#         fYear=lambda df: df["Year"].astype("category"),
-#         Reef=lambda df: df["Reef"].astype("category"),
-#         Site=lambda df: (df["Reef"].astype("str") + "_" +
-#                          df["Site"]).astype("category"),  # Interaction of Reef and Site
-#         Transect=lambda df: (df["Site"].astype("str") + "_" +
-#                              df["Transect"]).astype("category"),  # Interaction of Site and Transect
-#         cover=lambda df: df["HCC"] / 100  # Calculate cover
-#     )
-# )
-# ## ----end
+## ---- python sampled data prep 0
+benthos_fixed_locs_obs_0 = (
+    benthos_fixed_locs_obs.assign(
+        fYear=lambda df: df["Year"].astype("category"),
+        Reef=lambda df: df["Reef"].astype("category"),
+        Site=lambda df: (df["Reef"].astype("str") + "_" +
+                         df["Site"]).astype("category"),  # Interaction of Reef and Site
+        Transect=lambda df: (df["Site"].astype("str") + "_" +
+                             df["Transect"]).astype("category"),  # Interaction of Site and Transect
+        cover=lambda df: df["HCC"] / 100  # Calculate cover
+    )
+)
+## ----end
 
-# ## ---- python newdata 0
-# newdata_0 = pd.MultiIndex.from_product(
-#     [benthos_fixed_locs_obs_0["fYear"].unique()],
-#     names=["fYear"]
-# ).to_frame(index=False)
-# ## ----end
+## ---- python newdata 0
+newdata_0 = pd.MultiIndex.from_product(
+    [benthos_fixed_locs_obs_0["fYear"].unique()],
+    names=["fYear"]
+).to_frame(index=False)
+## ----end
 
 # ## ---- python newdata2 0
 # # Step 1: Expand unique combinations of fYear and Transect
@@ -397,6 +454,55 @@ plt.savefig(f"{paths['fig_path']}Python_sampled_reefs_2_plot.png", dpi=72, bbox_
 #                               how="left", validate="many_to_many")
 
 # ## ----end
+
+
+## Replace a reef
+
+## ---- python sampled data prep 1
+benthos_fixed_locs_obs_1 = (
+    benthos_fixed_locs_obs_1.assign(
+        fYear=lambda df: df["Year"].astype("category"),
+        Reef=lambda df: df["Reef"].astype("category"),
+        Site=lambda df: (df["Reef"].astype("str") + "_" +
+                         df["Site"]).astype("category"),  # Interaction of Reef and Site
+        Transect=lambda df: (df["Site"].astype("str") + "_" +
+                             df["Transect"]).astype("category"),  # Interaction of Site and Transect
+        cover=lambda df: df["HCC"] / 100  # Calculate cover
+    )
+)
+## ----end
+
+## ---- python newdata 1
+newdata_1 = pd.MultiIndex.from_product(
+    [benthos_fixed_locs_obs_1["fYear"].unique()],
+    names=["fYear"]
+).to_frame(index=False)
+## ----end
+
+## Replace a reef V2
+
+## ---- python sampled data prep 2
+benthos_fixed_locs_obs_2 = (
+    benthos_fixed_locs_obs_2.assign(
+        fYear=lambda df: df["Year"].astype("category"),
+        Reef=lambda df: df["Reef"].astype("category"),
+        Site=lambda df: (df["Reef"].astype("str") + "_" +
+                         df["Site"]).astype("category"),  # Interaction of Reef and Site
+        Transect=lambda df: (df["Site"].astype("str") + "_" +
+                             df["Transect"]).astype("category"),  # Interaction of Site and Transect
+        cover=lambda df: df["HCC"] / 100  # Calculate cover
+    )
+)
+## ----end
+
+## ---- python newdata 2
+newdata_2 = pd.MultiIndex.from_product(
+    [benthos_fixed_locs_obs_2["fYear"].unique()],
+    names=["fYear"]
+).to_frame(index=False)
+## ----end
+
+
 
 # # with pm.Model() as test_model:
 # #     # Priors

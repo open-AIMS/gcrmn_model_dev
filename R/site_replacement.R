@@ -117,11 +117,21 @@ site_replacement <- function() {
     ## All sampled reefs ----------------------------------------------
     tar_target(read_sampled_reefs_data_, {
       data_path <- site_replacement_global_parameters_$data_path
+      benthos_reefs_sf <- read_all_reefs_data_
       ## ---- read sampled reefs data
       benthos_fixed_locs_obs <- readRDS(file = paste0(
         data_path,
         "synthetic/benthos_fixed_locs_obs.rds"
       ))
+      benthos_fixed_locs_obs <- benthos_fixed_locs_obs |>
+        left_join(
+          benthos_reefs_sf |>
+            st_drop_geometry() |>
+            dplyr::select(Year, Reef, CYC, DHW, OTHER) |>
+            group_by(Year, Reef) |>
+            summarise(across(c(CYC, DHW, OTHER), mean)),
+          by = c("Year", "Reef")
+        )
       ## ----end
       benthos_fixed_locs_obs
     }),
@@ -197,6 +207,7 @@ site_replacement <- function() {
     ## Replace a reef -------------------------------------------------
     tar_target(read_sampled_reefs_data_1_, {
       data_path <- site_replacement_global_parameters_$data_path
+      benthos_reefs_sf <- read_all_reefs_data_
       ## ---- read sampled reefs data 1
       benthos_fixed_locs_obs_1 <- readRDS(
         file = paste0(
@@ -204,6 +215,15 @@ site_replacement <- function() {
           "synthetic/benthos_fixed_locs_obs_1.rds"
         )
       )
+      benthos_fixed_locs_obs_1 <- benthos_fixed_locs_obs_1 |>
+        left_join(
+          benthos_reefs_sf |>
+            st_drop_geometry() |>
+            dplyr::select(Year, Reef, CYC, DHW, OTHER) |>
+            group_by(Year, Reef) |>
+            summarise(across(c(CYC, DHW, OTHER), mean)),
+          by = c("Year", "Reef")
+        )
       ## ----end
       benthos_fixed_locs_obs_1 
     }),
@@ -233,6 +253,7 @@ site_replacement <- function() {
     ## Replace a reef (V2) --------------------------------------------
     tar_target(read_sampled_reefs_data_2_, {
       data_path <- site_replacement_global_parameters_$data_path
+      benthos_reefs_sf <- read_all_reefs_data_
       ## ---- read sampled reefs data 2
       benthos_fixed_locs_obs_2 <- readRDS(
         file = paste0(
@@ -240,6 +261,15 @@ site_replacement <- function() {
           "synthetic/benthos_fixed_locs_obs_2.rds"
         )
       )
+      benthos_fixed_locs_obs_2 <- benthos_fixed_locs_obs_2|>
+        left_join(
+          benthos_reefs_sf |>
+            st_drop_geometry() |>
+            dplyr::select(Year, Reef, CYC, DHW, OTHER) |>
+            group_by(Year, Reef) |>
+            summarise(across(c(CYC, DHW, OTHER), mean)),
+          by = c("Year", "Reef")
+        )
       ## ----end
       benthos_fixed_locs_obs_2 
     }),
@@ -264,62 +294,58 @@ site_replacement <- function() {
         width = 8, height = 6, dpi = 72
       )
       ## ----end
-    })
+    }),
     
     ## Data preparations ==============================================
     ## All sampled reefs ----------------------------------------------
-    ## tar_target(site_replacements_data_prep_0_, {
-    ##   benthos_fixed_locs_obs_0 <- read_sampled_reefs_data_
-    ##   data_path <- site_replacement_global_parameters_$data_path
-    ##   ## ---- sampled data prep 0
-    ##   benthos_fixed_locs_obs_0 <- benthos_fixed_locs_obs_0 |>
-    ##     mutate(
-    ##       fYear = as.factor(Year),
-    ##       Reef = as.factor(Reef),
-    ##       Site = interaction(Reef, Site),
-    ##       Transect = interaction(Site, Transect),
-    ##       cover = HCC/100
-    ##     )
-    ## write_csv(
-    ##   benthos_fixed_locs_obs_0,
-    ##   paste0(data_path, "synthetic/benthos_fixed_locs_obs_0.csv")
-    ## )
-    ##   ## ----end
-    ##   benthos_fixed_locs_obs_0 
-    ## }),
-    ## tar_target(site_replacements_newdata_0_, {
-    ##   benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
-    ##   ## ---- newdata 0
-    ##   newdata_0 <-
-    ##     benthos_fixed_locs_obs_0 |>
-    ##     tidyr::expand(fYear)
-    ##   ## ----end
-    ##   newdata_0
-    ## }),
-    ## ## Replace a reef -------------------------------------------------
-    ## tar_target(site_replacements_data_prep_1_, {
-    ##   benthos_fixed_locs_obs_1 <- read_sampled_reefs_data_1_
-    ##   ## ---- sampled data prep 1
-    ##   benthos_fixed_locs_obs_1 <- benthos_fixed_locs_obs_1 |>
-    ##     mutate(
-    ##       fYear = as.factor(Year),
-    ##       Reef = as.factor(Reef),
-    ##       Site = interaction(Reef, Site),
-    ##       Transect = interaction(Site, Transect),
-    ##       cover = HCC/100
-    ##     )
-    ##   ## ----end
-    ##   benthos_fixed_locs_obs_1 
-    ## }),
-    ## tar_target(site_replacements_newdata_1_, {
-    ##   benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
-    ##   ## ---- newdata 1
-    ##   newdata_1 <-
-    ##     benthos_fixed_locs_obs_1 |>
-    ##     tidyr::expand(fYear)
-    ##   ## ----end
-    ##   newdata_1
-    ## }),
+    tar_target(site_replacements_data_prep_0_, {
+      benthos_fixed_locs_obs <- read_sampled_reefs_data_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- sampled data prep 0
+      benthos_fixed_locs_obs_0 <- benthos_fixed_locs_obs |>
+        mutate(
+          fYear = as.factor(Year),
+          Reef = as.factor(Reef),
+          Site = interaction(Reef, Site),
+          Transect = interaction(Site, Transect),
+          cover = HCC/100
+        )
+      ## ----end
+      benthos_fixed_locs_obs_0 
+    }),
+    tar_target(site_replacements_newdata_0_, {
+      benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
+      ## ---- newdata 0
+      newdata_0 <-
+        benthos_fixed_locs_obs_0 |>
+        tidyr::expand(fYear)
+      ## ----end
+      newdata_0
+    }),
+    ## Replace a reef -------------------------------------------------
+    tar_target(site_replacements_data_prep_1_, {
+      benthos_fixed_locs_obs_1 <- read_sampled_reefs_data_1_
+      ## ---- sampled data prep 1
+      benthos_fixed_locs_obs_1 <- benthos_fixed_locs_obs_1 |>
+        mutate(
+          fYear = as.factor(Year),
+          Reef = as.factor(Reef),
+          Site = interaction(Reef, Site),
+          Transect = interaction(Site, Transect),
+          cover = HCC/100
+        )
+      ## ----end
+      benthos_fixed_locs_obs_1 
+    }),
+    tar_target(site_replacements_newdata_1_, {
+      benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
+      ## ---- newdata 1
+      newdata_1 <-
+        benthos_fixed_locs_obs_1 |>
+        tidyr::expand(fYear)
+      ## ----end
+      newdata_1
+    }),
     ## tar_target(site_replacements_newdata2_1_, {
     ##   benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
     ##   ## ---- newdata 2
@@ -335,30 +361,30 @@ site_replacement <- function() {
     ##   ## ----end
     ##   newdata2_1
     ## }),
-    ## ## Replace a reef (V2) --------------------------------------------
-    ## tar_target(site_replacements_data_prep_2_, {
-    ##   benthos_fixed_locs_obs_2 <- read_sampled_reefs_data_2_
-    ##   ## ---- sampled data prep 2
-    ##   benthos_fixed_locs_obs_2 <- benthos_fixed_locs_obs_2 |>
-    ##     mutate(
-    ##       fYear = as.factor(Year),
-    ##       Reef = as.factor(Reef),
-    ##       Site = interaction(Reef, Site),
-    ##       Transect = interaction(Site, Transect),
-    ##       cover = HCC/100
-    ##     )
-    ##   ## ----end
-    ##   benthos_fixed_locs_obs_2 
-    ## }),
-    ## tar_target(site_replacements_newdata_2_, {
-    ##   benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
-    ##   ## ---- newdata 2
-    ##   newdata_2 <-
-    ##     benthos_fixed_locs_obs_2 |>
-    ##     tidyr::expand(fYear)
-    ##   ## ----end
-    ##   newdata_2
-    ## }),
+    ## Replace a reef (V2) --------------------------------------------
+    tar_target(site_replacements_data_prep_2_, {
+      benthos_fixed_locs_obs_2 <- read_sampled_reefs_data_2_
+      ## ---- sampled data prep 2
+      benthos_fixed_locs_obs_2 <- benthos_fixed_locs_obs_2 |>
+        mutate(
+          fYear = as.factor(Year),
+          Reef = as.factor(Reef),
+          Site = interaction(Reef, Site),
+          Transect = interaction(Site, Transect),
+          cover = HCC/100
+        )
+      ## ----end
+      benthos_fixed_locs_obs_2 
+    }),
+    tar_target(site_replacements_newdata_2_, {
+      benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
+      ## ---- newdata 2
+      newdata_2 <-
+        benthos_fixed_locs_obs_2 |>
+        tidyr::expand(fYear)
+      ## ----end
+      newdata_2
+    }),
     ## tar_target(site_replacements_newdata2_2_, {
     ##   benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
     ##   ## ---- newdata 2
@@ -374,53 +400,53 @@ site_replacement <- function() {
     ##   ## ----end
     ##   newdata2_2
     ## }),
-    ## ## Models =========================================================
+    ## Models =========================================================
 
-    ## ## All sampled reefs ----------------------------------------------
-    ## ## glmmTMB --------------------------------------------------------
-    ## tar_target(mod_glmmTMB_0_, {
-    ##   benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
-    ##   data_path <- site_replacement_global_parameters_$data_path
-    ##   ## ---- glmmTMB_0
-    ##   mod_glmmTMB_0 <- glmmTMB(cover ~ fYear + (1 | Site) + (1 | Transect),
-    ##     data = benthos_fixed_locs_obs_0,
-    ##     family = "beta_family"
-    ##   )
-    ##   saveRDS(mod_glmmTMB_0,
-    ##     file = paste0(data_path, "synthetic/mod_glmmTMB_0.rds")
-    ##   ) 
-    ##   ## ----end
-    ##   mod_glmmTMB_0
-    ## }),
-    ## tar_target(dharma_mod_glmmTMB_0, {
-    ##   mod_glmmTMB_0 <- mod_glmmTMB_0_
-    ##   data_path <- site_replacement_global_parameters_$data_path
-    ##   ## ---- glmmTMB_0_dharma
-    ##   glmmTMB_0_dharma <- mod_glmmTMB_0 |> 
-    ##     simulateResiduals(n = 1000)
-    ##   saveRDS(glmmTMB_0_dharma,
-    ##     file = paste0(data_path, "synthetic/glmmTMB_0_dharma.rds")
-    ##   ) 
-    ##   ## ----end
-    ##   glmmTMB_0_dharma
-    ## }),
-    ## tar_target(emmeans_mod_glmmTMB_0, {
-    ##   mod_glmmTMB_0 <- mod_glmmTMB_0_
-    ##   newdata_0 <- site_replacements_newdata_0_
-    ##   data_path <- site_replacement_global_parameters_$data_path
-    ##   ## ---- glmmTMB_0_emmeans
-    ##   glmmTMB_0_sum <- 
-    ##     mod_glmmTMB_0 |> emmeans(~fYear, at = newdata_0, type = "response") |>
-    ##     as.data.frame() |> 
-    ##     rename(median = response, lower = asymp.LCL, upper = asymp.UCL) |>
-    ##     mutate(Year = as.numeric(as.character(fYear))) |>
-    ##     mutate(type = "glmmTMB")
-    ##   saveRDS(glmmTMB_0_sum,
-    ##     file = paste0(data_path, "synthetic/glmmTMB_0_sum.rds")
-    ##   ) 
-    ##   ## ----end
-    ##   glmmTMB_0_sum 
-    ## }),
+    ## All sampled reefs ----------------------------------------------
+    ## glmmTMB --------------------------------------------------------
+    tar_target(mod_glmmTMB_0_, {
+      benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- glmmTMB_0
+      mod_glmmTMB_0 <- glmmTMB(cover ~ fYear + (1 | Site) + (1 | Transect),
+        data = benthos_fixed_locs_obs_0,
+        family = "beta_family"
+      )
+      saveRDS(mod_glmmTMB_0,
+        file = paste0(data_path, "synthetic/mod_glmmTMB_0.rds")
+      ) 
+      ## ----end
+      mod_glmmTMB_0
+    }),
+    tar_target(dharma_mod_glmmTMB_0, {
+      mod_glmmTMB_0 <- mod_glmmTMB_0_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- glmmTMB_0_dharma
+      glmmTMB_0_dharma <- mod_glmmTMB_0 |> 
+        simulateResiduals(n = 1000)
+      saveRDS(glmmTMB_0_dharma,
+        file = paste0(data_path, "synthetic/glmmTMB_0_dharma.rds")
+      ) 
+      ## ----end
+      glmmTMB_0_dharma
+    }),
+    tar_target(emmeans_mod_glmmTMB_0, {
+      mod_glmmTMB_0 <- mod_glmmTMB_0_
+      newdata_0 <- site_replacements_newdata_0_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- glmmTMB_0_emmeans
+      glmmTMB_0_sum <- 
+        mod_glmmTMB_0 |> emmeans(~fYear, at = newdata_0, type = "response") |>
+        as.data.frame() |> 
+        rename(median = response, lower = asymp.LCL, upper = asymp.UCL) |>
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        mutate(type = "glmmTMB")
+      saveRDS(glmmTMB_0_sum,
+        file = paste0(data_path, "synthetic/glmmTMB_0_sum.rds")
+      ) 
+      ## ----end
+      glmmTMB_0_sum 
+    })
     
     ## ## brms -----------------------------------------------------------
     ## tar_target(mod_brms_0_, {
