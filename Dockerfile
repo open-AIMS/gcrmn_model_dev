@@ -197,5 +197,10 @@ RUN pip3 install --break-system-packages seaborn
 
 RUN apt-get clean
 
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
+  pak::pkg_install(c('gridGraphics')); \
+"
+
 RUN mkdir /home/Project
 WORKDIR /home/Project
