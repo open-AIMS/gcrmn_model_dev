@@ -712,6 +712,8 @@ mod_glmmTMB_0 |> summary()
 #| dependson: "brms_0"
 ```
 
+![](../output/figures/R_pdp_mod_brms_0.png){width=500px}
+
 ##### Sampling diagnostics
 
 :::::: {.panel-tabset}
@@ -730,6 +732,8 @@ mod_glmmTMB_0 |> summary()
 #| dependson: "brms_0"
 ```
 
+![](../output/figures/R_brms_trace_0.png){width=500px}
+
 ###### Autocorrelation plots
 
 ```{r}
@@ -743,6 +747,8 @@ mod_glmmTMB_0 |> summary()
 #| cache: true
 #| dependson: "brms_0"
 ```
+
+![](../output/figures/R_brms_ac_0.png){width=500px}
 
 ###### Rhat
 
@@ -758,6 +764,8 @@ mod_glmmTMB_0 |> summary()
 #| dependson: "brms_0"
 ```
 
+![](../output/figures/R_brms_rhat_0.png){width=500px}
+
 ###### Effective sample size
 
 ```{r}
@@ -771,6 +779,9 @@ mod_glmmTMB_0 |> summary()
 #| cache: true
 #| dependson: "brms_0"
 ```
+
+![](../output/figures/R_brms_ess_0.png){width=500px}
+
 ::::::
 
 ##### Model validation
@@ -786,6 +797,8 @@ mod_glmmTMB_0 |> summary()
 #| cache: true
 #| dependson: "brms_0"
 ```
+
+![](../output/figures/R_brms_ppc_0.png){width=500px}
 
 :::::
 

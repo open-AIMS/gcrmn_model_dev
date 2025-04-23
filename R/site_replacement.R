@@ -552,6 +552,7 @@ site_replacement <- function() {
     tar_target(emmeans_mod_brms_0_plot_, {
       benthos_reefs_temporal_summary <- read_all_temporal_summary_
       all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- brms_0_emmeans plot
       brms_0_sum <- readRDS(
@@ -579,6 +580,7 @@ site_replacement <- function() {
       ## ----end
     }),
     tar_target(brms_trace_0_, {
+      data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- brms_trace_0
       mod_brms_0 <- readRDS(
@@ -598,6 +600,7 @@ site_replacement <- function() {
       ## ----end
     }),
     tar_target(brms_ac_0_, {
+      data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- brms_ac_0
       mod_brms_0 <- readRDS(
@@ -617,6 +620,7 @@ site_replacement <- function() {
       ## ----end
     }),
     tar_target(brms_rhat_0_, {
+      data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- brms_rhat_0
       mod_brms_0 <- readRDS(
@@ -633,6 +637,7 @@ site_replacement <- function() {
       ## ----end
     }),
     tar_target(brms_ess_0_, {
+      data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- brms_ess_0
       mod_brms_0 <- readRDS(
@@ -649,6 +654,7 @@ site_replacement <- function() {
       ## ----end
     }),
     tar_target(brms_ppc_0_, {
+      data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- brms_ppc_0
       mod_brms_0 <- readRDS(
