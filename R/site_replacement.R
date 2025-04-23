@@ -554,6 +554,7 @@ site_replacement <- function() {
       all_sampled_sum <- sampled_simple_raw_means_
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      brms_0_sum <- mod_brms_0_
       ## ---- brms_0_emmeans plot
       brms_0_sum <- readRDS(
         file = paste0(data_path, "synthetic/brms_0_sum.rds")
@@ -582,6 +583,7 @@ site_replacement <- function() {
     tar_target(brms_trace_0_, {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      brms_0_sum <- mod_brms_0_
       ## ---- brms_trace_0
       mod_brms_0 <- readRDS(
         file = paste0(data_path, "synthetic/mod_brms_0.rds")
@@ -602,6 +604,7 @@ site_replacement <- function() {
     tar_target(brms_ac_0_, {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      brms_0_sum <- mod_brms_0_
       ## ---- brms_ac_0
       mod_brms_0 <- readRDS(
         file = paste0(data_path, "synthetic/mod_brms_0.rds")
@@ -622,6 +625,7 @@ site_replacement <- function() {
     tar_target(brms_rhat_0_, {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      brms_0_sum <- mod_brms_0_
       ## ---- brms_rhat_0
       mod_brms_0 <- readRDS(
         file = paste0(data_path, "synthetic/mod_brms_0.rds")
@@ -639,6 +643,7 @@ site_replacement <- function() {
     tar_target(brms_ess_0_, {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      brms_0_sum <- mod_brms_0_
       ## ---- brms_ess_0
       mod_brms_0 <- readRDS(
         file = paste0(data_path, "synthetic/mod_brms_0.rds")
@@ -656,6 +661,7 @@ site_replacement <- function() {
     tar_target(brms_ppc_0_, {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      brms_0_sum <- mod_brms_0_
       ## ---- brms_ppc_0
       mod_brms_0 <- readRDS(
         file = paste0(data_path, "synthetic/mod_brms_0.rds")
