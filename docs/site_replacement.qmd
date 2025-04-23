@@ -838,6 +838,35 @@ mod_brms_0 |> summary()
 #| dependson: "read sampled reefs data"
 ```
 
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: stan_0_pdp
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_0_pdp plot
+#| results: markup
+#| echo: true
+#| eval: false
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_pdp_mod_stan_0.png){width=500px}
+
+:::: 
+
 ::::
 
 :::

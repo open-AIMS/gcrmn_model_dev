@@ -721,32 +721,62 @@ site_replacement <- function() {
       ) 
       ## ----end
       mod_stan_0
-    })
-    ## tar_target(pdp_mod_stan_0, {
-    ##   mod_stan_0 <- mod_stan_0_
-    ##   newdata_0 <- site_replacements_newdata_0_
-    ##   data_path <- site_replacement_global_parameters_$data_path
-    ##   ## ---- stan_0_pdp
-    ##   stan_0_sum <-
-    ##     mod_stan_0$draws(variables = "cellmeans") |>
-    ##     posterior::as_draws_df() |>
-    ##     posterior::summarise_draws(
-    ##       median,
-    ##       HDInterval::hdi,
-    ##       ~ HDInterval::hdi(., credMass = c(0.9)),
-    ##       rhat,
-    ##       ess_bulk,
-    ##       ess_tail
-    ##     ) |>
-    ##     rename(lower_90 = V4, upper_90 = V5) |>
-    ##     bind_cols(newdata_0) |>
-    ##     mutate(Year = as.numeric(as.character(fYear)))
-    ##   saveRDS(stan_0_sum,
-    ##     file = paste0(data_path, "synthetic/stan_0_sum.rds")
-    ##   ) 
-    ##   ## ----end
-    ##   stan_0_sum 
-    ## }),    
+    }),
+    tar_target(pdp_mod_stan_0_, {
+      mod_stan_0 <- mod_stan_0_
+      newdata_0 <- site_replacements_newdata_0_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- stan_0_pdp
+      stan_0_sum <-
+        mod_stan_0$draws(variables = "cellmeans") |>
+        posterior::as_draws_df() |>
+        posterior::summarise_draws(
+          median,
+          HDInterval::hdi,
+          ~ HDInterval::hdi(., credMass = c(0.9)),
+          rhat,
+          ess_bulk,
+          ess_tail
+        ) |>
+        rename(lower_90 = V4, upper_90 = V5) |>
+        bind_cols(newdata_0) |>
+        mutate(Year = as.numeric(as.character(fYear)))
+      saveRDS(stan_0_sum,
+        file = paste0(data_path, "synthetic/stan_0_sum.rds")
+      ) 
+      ## ----end
+      stan_0_sum 
+    }),    
+    tar_target(pdp_mod_stan_0_plot_, {
+      stan_0_sum <- pdp_mod_stan_0_
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- stan_0_pdp plot
+      stan_0_sum <- readRDS(
+        file = paste0(data_path, "synthetic/stan_0_sum.rds")
+      )
+      g <- stan_0_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "stan")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_stan_0.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    })    
     
     ## ## gbm
     ## tar_target(mod_gbm_0_, {
