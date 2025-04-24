@@ -932,12 +932,14 @@ site_replacement <- function() {
         file = paste0(data_path, "synthetic/gbm_0_sum.rds")
       ) 
       ## ----end
+      gbm_0_sum
     }),
     tar_target(pdp_gbm_0_plot_, {
       benthos_reefs_temporal_summary <- read_all_temporal_summary_
       all_sampled_sum <- sampled_simple_raw_means_
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      gdm_0_sum <- pdp_gbm_0_
       ## ---- gbm_pdp_0
       gbm_0_sum <- readRDS(
         file = paste0(data_path, "synthetic/gbm_0_sum.rds")
