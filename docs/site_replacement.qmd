@@ -80,6 +80,16 @@ knitr::read_chunk("../python/site_replacement.py")
 ::: {.panel-tabset}
 
 ### R
+
+```{r}
+#| label: cwd
+#| eval: true
+#| warning: false
+#| message: false
+#| cache: false
+getwd()
+```
+
 Load the necessary R libraries
 
 ```{r}
@@ -106,7 +116,7 @@ Load any helper functions
 ```{r}
 #| label: site replacement functions
 #| results: hide
-#| eval: true
+#| eval: false
 #| echo: true
 #| cache: false
 ```
@@ -875,9 +885,236 @@ mod_brms_0 |> summary()
 
 ![](../output/figures/R_pdp_mod_stan_0.png){width=500px}
 
-:::: 
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: stan_trace_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_trace_0.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: stan_ac_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_ac_0.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: stan_rhat_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_rhat_0.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: stan_ess_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_ess_0.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: stan_ppc_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_ppc_0.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: stan_0_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+mod_stan_0 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_stan_0.rds")
+)
+mod_stan_0$print(
+  variables = c("phi", "beta", "sd_1", "sd_2", "sd_3"),
+  max_rows = 20
+)
+mod_stan_0$print(
+  variables = "cellmeans",
+  max_rows = 20
+)
+```
+
+:::::
+
+#### GBM
+
+```{r}
+#| label: gbm_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: gbm_pdp_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_gbm_0_plot_
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_0.png){width=500px}
+
+:::::
+
+#### GBM + covariates
+
+```{r}
+#| label: gbm_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: gbm_pdp_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_0b plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_0b.png){width=500px}
+
+##### Partial dependency plot + cover
+
+```{r}
+#| label: gbm_pdp_0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_0c plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_0c.png){width=500px}
+
+:::::
 
 ::::
 
 :::
  
+
+
