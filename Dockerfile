@@ -202,5 +202,10 @@ RUN R -e "options(repos = \
   pak::pkg_install(c('gridGraphics')); \
 "
 
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
+  pak::pkg_install(c('gbm-developers/gbm')); \
+"
+
 RUN mkdir /home/Project
 WORKDIR /home/Project
