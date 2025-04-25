@@ -84,6 +84,7 @@ knitr::read_chunk("../python/site_replacement.py")
 ```{r}
 #| label: cwd
 #| eval: true
+#| echo: false
 #| warning: false
 #| message: false
 #| cache: false
@@ -1087,7 +1088,7 @@ mod_stan_0$print(
 
 ![](../output/figures/R_pdp_mod_gbm_0b.png){width=500px}
 
-##### Partial dependency plot + cover
+##### Partial dependency plot (full domain)
 
 ```{r}
 #| label: gbm_pdp_0c
@@ -1112,9 +1113,106 @@ mod_stan_0$print(
 
 :::::
 
+#### dbarts
+
+```{r}
+#| label: dbarts_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_0_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_0.png){width=500px}
+
+:::::
+
+#### dbarts + covariates
+
+```{r}
+#| label: dbarts_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_0b_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_0b.png){width=500px}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_0c_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_0c.png){width=500px}
+
+:::::
+
 ::::
 
 :::
  
-
-

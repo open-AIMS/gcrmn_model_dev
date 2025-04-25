@@ -1,0 +1,94 @@
+meta:
+  extract_upstream: false
+
+tasks:
+  - source: site_replacement.site_replacement_global_parameters_
+    product: cache/site_replacement_global_parameters_.pkl
+    name: site_replacement_global_parameters_
+
+  - source: site_replacement.read_all_reefs_data_
+    product: cache/read_all_reefs_data_.pkl
+    upstream: [site_replacement_global_parameters_]
+
+  - source: site_replacement.read_all_reefs_data_show_
+    product: cache/read_all_reefs_data_show_.pkl
+    upstream: [read_all_reefs_data_]
+
+  - source: site_replacement.read_all_temporal_summary_
+    product: cache/read_all_temporal_summary_.pkl
+    upstream: [read_all_reefs_data_]
+
+  - source: site_replacement.read_all_temporal_summary_plot_
+    product: cache/read_all_temporal_summary_plot_.png
+    upstream: [read_all_temporal_summary_, site_replacement_global_parameters_]
+
+    ## All sampled reefs --------------------------------------------------
+  - source: site_replacement.read_sampled_reefs_data_
+    product: cache/read_sampled_reefs_data_.pkl
+    upstream: [site_replacement_global_parameters_]
+
+  - source: site_replacement.read_sampled_reefs_data_show_
+    product: cache/read_sampled_reefs_data_show_.pkl
+    upstream: [read_sampled_reefs_data_]
+
+  - source: site_replacement.sampled_simple_raw_means_ 
+    product: cache/sampled_simple_raw_means_.pkl
+    upstream: [read_sampled_reefs_data_]
+
+  - source: site_replacement.sampled_simple_raw_means_plot_
+    product: cache/sampled_simple_raw_means_plot_.png
+    upstream: [site_replacement_global_parameters_, sampled_simple_raw_means_]
+
+    ## Replace a reef --------------------------------------------------
+  - source: site_replacement.read_sampled_reefs_data_1_
+    product: cache/read_sampled_reefs_data_1_
+    upstream: [site_replacement_global_parameters_]
+
+  - source: site_replacement.read_sampled_reefs_data_1_show_
+    product: cache/read_sampled_reefs_data_1_show_.pkl
+    upstream: [read_sampled_reefs_data_1_]
+
+  - source: site_replacement.sampled_reefs_data_1_plot_
+    product: cache/sampled_reefs_data_1_plot_.png
+    upstream: [site_replacement_global_parameters_, read_sampled_reefs_data_1_]
+
+    ## Replace a reef (V2) ---------------------------------------------
+  - source: site_replacement.read_sampled_reefs_data_2_
+    product: cache/read_sampled_reefs_data_2_
+    upstream: [site_replacement_global_parameters_]
+
+  - source: site_replacement.read_sampled_reefs_data_2_show_
+    product: cache/read_sampled_reefs_data_2_show_.pkl
+    upstream: [read_sampled_reefs_data_2_]
+
+  - source: site_replacement.sampled_reefs_data_2_plot_
+    product: cache/sampled_reefs_data_2_plot_.png
+    upstream: [site_replacement_global_parameters_, read_sampled_reefs_data_2_]
+
+    ## Data transformations
+    ## All sampled reefs ------------------------------------------------
+  - source: site_replacement.sampled_reefs_data_prep_0_
+    product: cache/sampled_reefs_data_prep_0_.pkl
+    upstream: [site_replacement_global_parameters_, read_sampled_reefs_data_]
+
+  - source: site_replacement.newdata_0_
+    product: cache/newdata_0_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_data_prep_0_]
+
+    ## Replace a reef --------------------------------------------------
+  - source: site_replacement.sampled_reefs_data_prep_1_
+    product: cache/sampled_reefs_data_prep_1_.pkl
+    upstream: [site_replacement_global_parameters_, read_sampled_reefs_data_1_]
+
+  - source: site_replacement.newdata_1_
+    product: cache/newdata_1_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_data_prep_1_]
+
+    ## Replace a reef (V2) ---------------------------------------------
+  - source: site_replacement.sampled_reefs_data_prep_2_
+    product: cache/sampled_reefs_data_prep_2_.pkl
+    upstream: [site_replacement_global_parameters_, read_sampled_reefs_data_2_]
+
+  - source: site_replacement.newdata_2_
+    product: cache/newdata_2_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_data_prep_2_]

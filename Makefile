@@ -44,9 +44,12 @@ R_container:
 	docker run --rm -v "$(shell pwd)":/home/Project gcrmn_dev $(MAKE) run_R
 
 # Rule to run Python scripts
-run_python: $(PYTHON_SCRIPTS)
-	@echo "Running Python scripts..."
-	python3 $^
+# run_python: $(PYTHON_SCRIPTS)
+# 	@echo "Running Python scripts..."
+# 	python3 $^
+run_python:
+	@echo "Running python ploomber pipeline..."
+	cd python && ploomber build
 
 # Rule to run the R targets pipeline
 run_R:

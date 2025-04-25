@@ -207,5 +207,7 @@ RUN R -e "options(repos = \
   pak::pkg_install(c('gbm-developers/gbm')); \
 "
 
+RUN pip3 install --break-system-packages ploomber
+
 RUN mkdir /home/Project
 WORKDIR /home/Project
