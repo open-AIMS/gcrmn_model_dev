@@ -33,14 +33,12 @@ def site_replacement_global_parameters_(product):
     # Assign a variable to the global namespace
     data_path = "../data/"
     output_path = "../output/"
-
     # Create a dictionary of paths
     paths = {
         "data_path": data_path,
         "synthetic_path": f"{data_path}synthetic/",
         "fig_path": f"{output_path}figures/"
     }
-    
     # Ensure the directories exist
     for path in paths.values():
         if not os.path.exists(path):
