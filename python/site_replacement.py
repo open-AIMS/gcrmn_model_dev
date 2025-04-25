@@ -275,7 +275,7 @@ def read_sampled_reefs_data_1_(product, upstream):
 
 def read_sampled_reefs_data_1_show_(product, upstream):
     benthos_fixed_locs_obs_1 = pickle.load(open(upstream["read_sampled_reefs_data_1_"], "rb"))
-    ## ---- python read sampled reefs data show
+    ## ---- python read sampled reefs data 1 show
     pd.set_option("display.max_columns", None)  # Show all columns
     benthos_fixed_locs_obs_1
     pd.reset_option("display.max_columns")
@@ -327,7 +327,7 @@ def sampled_reefs_data_1_plot_(product, upstream):
 
 def read_sampled_reefs_data_2_(product, upstream):
     paths = pickle.load(open(upstream["site_replacement_global_parameters_"], "rb"))
-    ## ---- python read sampled reefs data 1
+    ## ---- python read sampled reefs data 2
     benthos_fixed_locs_obs_2 = pd.read_csv(f"{paths['data_path']}synthetic/benthos_fixed_locs_obs_2.csv")
     benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
     # Group and summarize the benthos_reefs_sf DataFrame
@@ -352,7 +352,7 @@ def read_sampled_reefs_data_2_(product, upstream):
 
 def read_sampled_reefs_data_2_show_(product, upstream):
     benthos_fixed_locs_obs_2 = pickle.load(open(upstream["read_sampled_reefs_data_2_"], "rb"))
-    ## ---- python read sampled reefs data show
+    ## ---- python read sampled reefs data 2 show
     pd.set_option("display.max_columns", None)  # Show all columns
     benthos_fixed_locs_obs_2
     pd.reset_option("display.max_columns")
@@ -362,7 +362,7 @@ def read_sampled_reefs_data_2_show_(product, upstream):
 def sampled_reefs_data_2_plot_(product, upstream):
     benthos_fixed_locs_obs_2 = pickle.load(open(upstream["read_sampled_reefs_data_2_"], "rb"))
     paths = pickle.load(open(upstream["site_replacement_global_parameters_"], "rb"))
-    ## ---- python sampled reefs data 1 plot
+    ## ---- python sampled reefs data 2 plot
     # Create the plot
     g = sns.FacetGrid(
         data=benthos_fixed_locs_obs_2,

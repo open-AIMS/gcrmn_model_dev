@@ -71,6 +71,26 @@ assignInNamespace(".sep.label",
 )
 knitr::read_chunk("../R/site_replacement.R")
 knitr::read_chunk("../python/site_replacement.py")
+## remove the indentation from all python chunks that start
+## with indentation
+codes <- knitr::knit_code$get()
+process_chunks <- function(codes) {
+  nms <- names(codes)
+  wch <- which(startsWith(names(codes), "python"))
+  codes1 <- lapply(1:length(codes), function(i) {
+    if (i %in% wch) {
+      x <- gsub("^ {4}", "", codes[[i]])
+    } else {
+      x <- codes[[i]]
+    }
+    x
+  })
+  names(codes1) <- nms
+  codes1
+}
+knitr::knit_code$set(
+  process_chunks(codes)
+)
 ```
 
 ## Purpose
@@ -1215,4 +1235,5 @@ mod_stan_0$print(
 ::::
 
 :::
+ 
  
