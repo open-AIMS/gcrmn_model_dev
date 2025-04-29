@@ -1857,7 +1857,736 @@ site_replacement <- function() {
         width = 10, height = 8, dpi = 72
       )
       ## ----end
+    }),
+
+    ## gbm ------------------------------------------------------------
+    tar_target(mod_gbm_1_, {
+      benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- gbm_1
+      mod_gbm_1 <- gbm(cover ~ fYear,
+        data =  benthos_fixed_locs_obs_1,
+        distribution = "gaussian",
+        n.trees = 10000,
+        interaction.depth = 5,
+        shrinkage = 0.001,
+        bag.fraction = 0.5,
+        cv.folds = 5,
+        verbose = TRUE
+      )
+      saveRDS(mod_gbm_1,
+        file = paste0(data_path, "synthetic/mod_gbm_1.rds")
+      ) 
+      ## ----end
+      ## ---- gbm_post_1
+      n.trees <- gbm.perf(mod_gbm_1, method = "cv")
+      ## ----end
+      list(mod_gbm_1 = mod_gbm_1, n.trees = n.trees)
+    }),
+    tar_target(pdp_gbm_1_, {
+      mod_gbm_1 <- mod_gbm_1_$mod_gbm_1
+      n.trees <- mod_gbm_1_$n.trees
+      newdata_1 <- site_replacements_newdata_1_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- gbm_pdp_1
+      gbm_1_sum <- newdata_1 |>
+        mutate(median = predict(mod_gbm_1, newdata_1, n.trees = n.trees, type = "response")) |> 
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        mutate(type = "gbm")
+      saveRDS(gbm_1_sum,
+        file = paste0(data_path, "synthetic/gbm_1_sum.rds")
+      ) 
+      ## ----end
+      gbm_1_sum
+    }),
+    tar_target(pdp_gbm_1_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      gdm_1_sum <- pdp_gbm_1_
+      ## ---- gbm_pdp_1
+      gbm_1_sum <- readRDS(
+        file = paste0(data_path, "synthetic/gbm_1_sum.rds")
+      )
+      g <-
+        gbm_1_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_gbm_1.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    
+    ## gbm + covartiates ----------------------------------------------
+    tar_target(mod_gbm_1b_, {
+      benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- gbm_1b
+      mod_gbm_1b <- gbm(cover ~ fYear + Latitude + Longitude + CYC + DHW + OTHER,
+        data =  benthos_fixed_locs_obs_1,
+        distribution = "gaussian",
+        var.monotone = c(0, 0, 0, -1, -1, -1),
+        n.trees = 10000,
+        interaction.depth = 5,
+        shrinkage = 0.001,
+        bag.fraction = 0.5,
+        cv.folds = 5,
+        verbose = TRUE
+      )
+      saveRDS(mod_gbm_1b,
+        file = paste0(data_path, "synthetic/mod_gbm_1b.rds")
+      )
+      ## ----end
+      ## ---- gbm_post_1b
+      n.trees <- gbm.perf(mod_gbm_1b, method = "cv")
+      ## ----end
+      list(mod_gbm_1b = mod_gbm_1b, n.trees = n.trees)
+    }),
+    tar_target(pdp_gbm_1b_, {
+      benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
+      mod_gbm_1b <- mod_gbm_1b_$mod_gbm_1b
+      n.trees <- mod_gbm_1b_$n.trees
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- gbm_pdp_1b
+      newdata_1b <- benthos_fixed_locs_obs_1
+      gbm_1b_sum <- newdata_1b |>
+        mutate(median = predict(mod_gbm_1b, newdata_1b, n.trees = n.trees, type = "response")) |>
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        ## group_by(Year, Site, Transect) |>
+        ## summarise(median = median(median)) |>
+        ## group_by(Year, Site, .add = FALSE) |>
+        ## summarise(median = median(median)) |>
+        group_by(Year, .add = FALSE) |> 
+        summarise(median = median(median)) |> 
+        mutate(type = "gbm")
+      saveRDS(gbm_1b_sum,
+        file = paste0(data_path, "synthetic/gbm_1b_sum.rds")
+      ) 
+      ## ----end
+      gbm_1b_sum
+    }),
+    tar_target(pdp_gbm_1b_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      gbm_1b_sum <- pdp_gbm_1b_
+      ## ---- gbm_pdp_1b plot
+      gbm_1b_sum <- readRDS(
+        file = paste0(data_path, "synthetic/gbm_1b_sum.rds")
+      )
+      g <-
+        gbm_1b_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_gbm_1b.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(pdp_gbm_1c_, {
+      benthos_reefs_sf <- read_all_reefs_data_
+      mod_gbm_1b <- mod_gbm_1b_$mod_gbm_1b
+      n.trees <- mod_gbm_1b_$n.trees
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- gbm_pdp_1c
+      newdata_1c <- benthos_reefs_sf |>
+        mutate(
+          Latitude = st_coordinates(geometry)[,2],
+          Longitude = st_coordinates(geometry)[,1],
+          fYear = as.factor(Year),
+          )
+      gbm_1c_sum <- newdata_1c |>
+        mutate(median = predict(mod_gbm_1b, newdata_1c, n.trees = n.trees, type = "response")) |>
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        ## group_by(Year, Site, Transect) |>
+        ## summarise(median = median(median)) |>
+        ## group_by(Year, Site, .add = FALSE) |>
+        ## summarise(median = median(median)) |>
+        group_by(Year, .add = FALSE) |> 
+        summarise(median = median(median)) |> 
+        mutate(type = "gbm")
+      saveRDS(gbm_1c_sum,
+        file = paste0(data_path, "synthetic/gbm_1c_sum.rds")
+      ) 
+      ## ----end
+      gbm_1c_sum
+    }),
+    tar_target(pdp_gbm_1c_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      gbm_1c_sum <- pdp_gbm_1c_
+      ## ---- gbm_pdp_1c plot
+      gbm_1c_sum <- readRDS(
+        file = paste0(data_path, "synthetic/gbm_1c_sum.rds")
+      )
+      g <-
+        gbm_1c_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_gbm_1c.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+
+    ## dbarts --------------------------------------------------------
+    tar_target(mod_dbarts_1_, {
+      benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
+      data_path <- site_replacement_global_parameters_$data_path
+      newdata_1 <- site_replacements_newdata_1_
+      ## ---- dbarts_1
+      print(head(benthos_fixed_locs_obs_1))
+      mod_dbarts_1 <- bart2(log(cover) ~ fYear,
+        data =   benthos_fixed_locs_obs_1,
+        keepTrees = TRUE
+      )
+      saveRDS(mod_dbarts_1,
+        file = paste0(data_path, "synthetic/mod_dbarts_1.rds")
+      ) 
+      ## ----end
+      ## Unfortunately, the next part must be in the same tar_target
+      ## due to the way dbarts stores pointers - they cannot be stored
+      ## ---- dbarts_pred_1
+      preds <- predict(mod_dbarts_1, newdata_1, type = "ev") |>
+        exp() |> 
+        summarise_draws(median, HDInterval::hdi)
+      saveRDS(preds,
+        file = paste0(data_path, "synthetic/mod_dbarts_1_preds.rds")
+      ) 
+      ## ----end
+      list(
+        mod_dbarts_1 = mod_dbarts_1,
+        preds = preds
+      )
+    }),
+    tar_target(dbarts_pdp_1, {
+      data_path <- site_replacement_global_parameters_$data_path
+      newdata_1 <- site_replacements_newdata_1_
+      preds <- mod_dbarts_1_$preds
+      ## ---- dbarts_pdp_1
+      dbarts_1_sum <- newdata_1 |>
+        bind_cols(preds) |> 
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        mutate(type = "dbarts")
+      saveRDS(dbarts_1_sum,
+        file = paste0(data_path, "synthetic/dbarts_1_sum.rds")
+      ) 
+      # ----end
+      dbarts_1_sum 
+    }),
+    tar_target(pdp_dbarts_1_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      dbarts_1_sum <- dbarts_pdp_1
+      ## ---- dbarts_pdp_1 plot
+      dbarts_1_sum <- readRDS(
+        file = paste0(data_path, "synthetic/dbarts_1_sum.rds")
+      )
+      g <- 
+        dbarts_1_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_dbarts_1.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    
+    ## dbarts + covariates ---------------------------------------------
+    tar_target(mod_dbarts_1b_, {
+      benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
+      benthos_reefs_sf <- read_all_reefs_data_
+      data_path <- site_replacement_global_parameters_$data_path
+      newdata_1 <- site_replacements_newdata_1_
+      ## ---- dbarts_1b
+      mod_dbarts_1b <- bart2(log(cover) ~ fYear + Latitude + Longitude + CYC + DHW + OTHER,
+        data =   benthos_fixed_locs_obs_1,
+        keepTrees = TRUE
+      )
+      saveRDS(mod_dbarts_1b,
+        file = paste0(data_path, "synthetic/mod_dbarts_1b.rds")
+      ) 
+      ## ----end
+      ## Unfortunately, the next part must be in the same tar_target
+      ## due to the way dbarts stores pointers - they cannot be stored
+      ## ---- dbarts_pred_1b
+      newdata_1b <- benthos_fixed_locs_obs_1
+      preds <- predict(mod_dbarts_1b, newdata_1b, type = "ev") |>
+        exp()
+      saveRDS(preds,
+        file = paste0(data_path, "synthetic/mod_dbarts_1b_preds.rds")
+      ) 
+      ## ----end
+      ## ---- dbarts_pred_1c
+      newdata_1c <- benthos_reefs_sf |>
+        mutate(
+          Latitude = st_coordinates(geometry)[, 2],
+          Longitude = st_coordinates(geometry)[, 1],
+          fYear = as.factor(Year),
+        ) |>
+        st_drop_geometry() |>
+        group_by(Year, fYear, Reef) |>
+        summarise(across(c(Latitude, Longitude, CYC, DHW, OTHER), mean))
+      preds_1c <- predict(mod_dbarts_1b, newdata_1c, type = "ev") |>
+        exp()
+      saveRDS(preds_1c,
+        file = paste0(data_path, "synthetic/mod_dbarts_1c_preds.rds")
+      ) 
+      ## ----end
+      list(
+        mod_dbarts_1b = mod_dbarts_1b,
+        preds = preds,
+        preds_1c = preds_1c
+      )
+    }),
+    tar_target(pdp_dbarts_1b_, {
+      preds <- mod_dbarts_1b_$preds
+      data_path <- site_replacement_global_parameters_$data_path
+      benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
+      ## ---- dbarts_pdp_1
+      dbarts_1b_sum <- preds |> 
+        t() |>
+        as_tibble(.name_repair = ~ paste0("V", seq_along(.))) |>
+        bind_cols(benthos_fixed_locs_obs_1) |>
+        pivot_longer(
+          cols = matches("^V[0-9]*"),
+          names_to = ".draw", values_to = "fit"
+        ) |>
+        group_by(Year, .draw) |>
+        summarise(fit = mean(fit)) |>
+        ## dplyr::select(Year, fit, .draw) |> 
+        group_by(Year, .add = FALSE) |> 
+        summarise_draws(median, HDInterval::hdi)
+      saveRDS(dbarts_1b_sum,
+        file = paste0(data_path, "synthetic/dbarts_1b_sum.rds")
+      ) 
+      ## ----end
+      dbarts_1b_sum
+    }),
+    tar_target(pdp_dbarts_1b_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      dbarts_1b_sum <- pdp_dbarts_1b_
+      ## ---- dbarts_pdp_1 plot
+      dbarts_1b_sum <- readRDS(
+        file = paste0(data_path, "synthetic/dbarts_1b_sum.rds")
+      )
+      g <- 
+        dbarts_1b_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_dbarts_1b.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(pdp_dbarts_1c_, {
+      preds_1c <- mod_dbarts_1b_$preds_1c
+      benthos_reefs_sf <- read_all_reefs_data_ |>
+        mutate(
+          Latitude = st_coordinates(geometry)[, 2],
+          Longitude = st_coordinates(geometry)[, 1],
+          fYear = as.factor(Year),
+        ) |>
+        st_drop_geometry() |>
+        group_by(Year, fYear, Reef) |>
+        summarise(across(c(Latitude, Longitude, CYC, DHW, OTHER), mean))
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- gbm_pdp_1c
+      dbarts_1c_sum <- preds_1c |> 
+        t() |>
+        as_tibble(.name_repair = ~ paste0("V", seq_along(.))) |>
+        bind_cols(benthos_reefs_sf) |>
+        pivot_longer(
+          cols = matches("^V[0-9]*"),
+          names_to = ".draw", values_to = "fit"
+        ) |>
+        group_by(Year, .draw) |>
+        summarise(fit = mean(fit)) |>
+        ## dplyr::select(Year, fit, .draw) |> 
+        group_by(Year, .add = FALSE) |> 
+        summarise_draws(median, HDInterval::hdi)
+      saveRDS(dbarts_1c_sum,
+        file = paste0(data_path, "synthetic/dbarts_1c_sum.rds")
+      ) 
+      ## ----end
+      dbarts_1c_sum
+    }),
+    tar_target(pdp_dbarts_1c_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      dbarts_1c_sum <- pdp_dbarts_1c_
+      ## ---- dbarts_pdp_1 plot
+      dbarts_1c_sum <- readRDS(
+        file = paste0(data_path, "synthetic/dbarts_1c_sum.rds")
+      )
+      g <- 
+        dbarts_1c_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_dbarts_1c.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    
+    ## Replace a reef (V2) --------------------------------------------
+    ## glmmTMB --------------------------------------------------------
+    tar_target(mod_glmmTMB_2_, {
+      benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- glmmTMB_2
+      mod_glmmTMB_2 <- glmmTMB(cover ~ fYear + (1 | Site) + (1 | Transect),
+        data = benthos_fixed_locs_obs_2,
+        family = "beta_family"
+      )
+      saveRDS(mod_glmmTMB_2,
+        file = paste0(data_path, "synthetic/mod_glmmTMB_2.rds")
+      ) 
+      ## ----end
+      mod_glmmTMB_2
+    }),
+    tar_target(dharma_mod_glmmTMB_2_, {
+      mod_glmmTMB_2 <- mod_glmmTMB_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- glmmTMB_2_dharma
+      glmmTMB_2_dharma <- mod_glmmTMB_2 |> 
+        simulateResiduals(n = 1000)
+      saveRDS(glmmTMB_2_dharma,
+        file = paste0(data_path, "synthetic/glmmTMB_2_dharma.rds")
+      ) 
+      ## ----end
+      glmmTMB_2_dharma
+    }),
+    tar_target(dharma_mod_glmmTMB_2_plot_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      glmmTMB_2_dharma <- dharma_mod_glmmTMB_2_$glmmTMB_2_dharma
+      ## ---- glmmTMB_2_dharma plot
+      glmmTMB_2_dharma <- readRDS(
+        file = paste0(data_path, "synthetic/glmmTMB_2_dharma.rds")
+      )
+      g <- wrap_elements(~testUniformity(glmmTMB_2_dharma)) +
+        wrap_elements(~plotResiduals(glmmTMB_2_dharma)) +
+        wrap_elements(~testDispersion(glmmTMB_2_dharma))
+      ggsave(
+        filename = paste0(
+          fig_path, "R_dharma_mod_glmmTMB_2.png"
+        ),
+        g,
+        width = 10, height = 4, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(emmeans_mod_glmmTMB_2, {
+      mod_glmmTMB_2 <- mod_glmmTMB_2_
+      newdata_2 <- site_replacements_newdata_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- glmmTMB_2_emmeans
+      glmmTMB_2_sum <- 
+        mod_glmmTMB_2 |> emmeans(~fYear, at = newdata_2, type = "response") |>
+        as.data.frame() |> 
+        rename(median = response, lower = asymp.LCL, upper = asymp.UCL) |>
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        mutate(type = "glmmTMB")
+      saveRDS(glmmTMB_2_sum,
+        file = paste0(data_path, "synthetic/glmmTMB_2_sum.rds")
+      ) 
+      ## ----end
+      glmmTMB_2_sum 
+    }),
+    tar_target(emmeans_mod_glmmTMB_2_plot_, {
+      glmmTMB_2_sum <- emmeans_mod_glmmTMB_2
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- glmmTMB_2_emmeans plot
+      g <- glmmTMB_2_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "glmmTMB")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_glmmTMB_2.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    
+    ## brms -----------------------------------------------------------
+    tar_target(mod_brms_2_, {
+      benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- brms_pre_2
+      benthos_fixed_locs_obs_2 |>
+        group_by(fYear) |>
+        summarise(mean_abundance = qlogis(mean(cover)),
+          median_abundance = qlogis(median(cover)),
+          sd_abundance = sd(qlogis(cover)) ,
+          mad_abundance = mad(qlogis(cover)) 
+        ) 
+      priors <- c(
+        prior(normal(0, 0.5), class = "b"),
+        prior(normal(-1.5, 0.5), class = "Intercept"),
+        prior(student_t(3, 0, 0.5), class = "sd")
+      )
+      mod_form <- bf(cover ~ fYear + (1 | Site) + (1 | Transect),
+        family = "Beta"
+      )
+      ## ----end
+      ## ---- brms_2
+      mod_brms_2 <- brm(mod_form,
+        data = benthos_fixed_locs_obs_2,
+        iter = 5000,
+        warmup = 1000,
+        chains = 3,
+        cores = 3,
+        prior = priors,
+        thin =  5,
+        control = list(adapt_delta = 0.99),
+        backend = "cmdstanr"
+      )
+      saveRDS(mod_brms_2,
+        file = paste0(data_path, "synthetic/mod_brms_2.rds")
+      ) 
+      ## ----end
+      mod_brms_2
+    }),
+    tar_target(emmeans_mod_brms_2_, {
+      mod_brms_2 <- mod_brms_2_
+      newdata_2 <- site_replacements_newdata_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- brms_2_emmeans
+      brms_2_sum <- 
+        mod_brms_2 |> emmeans(~fYear, at = newdata_2, type = "response") |>
+        as.data.frame() |> 
+        rename(median = response, lower = lower.HPD, upper = upper.HPD) |>
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        mutate(type = "brms")
+      saveRDS(brms_2_sum,
+        file = paste0(data_path, "synthetic/brms_2_sum.rds")
+      ) 
+      ## ----end
+      brms_2_sum 
+    }),
+    tar_target(emmeans_mod_brms_2_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      brms_2_sum <- emmeans_mod_brms_2_
+      ## ---- brms_2_emmeans plot
+      brms_2_sum <- readRDS(
+        file = paste0(data_path, "synthetic/brms_2_sum.rds")
+      )
+      g <- 
+        brms_2_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "brms")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_brms_2.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(brms_trace_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_brms_2 <- mod_brms_2_
+      ## ---- brms_trace_2
+      mod_brms_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_brms_2.rds")
+      )
+      vars <- mod_brms_2 |>
+        brms::variables() |>
+        str_subset("^b.*")
+      g <- mod_brms_2$fit |> stan_trace(pars = vars)
+      ggsave(
+        filename = paste0(
+          fig_path, "R_brms_trace_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(brms_ac_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_brms_2 <- mod_brms_2_
+      ## ---- brms_ac_2
+      mod_brms_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_brms_2.rds")
+      )
+      vars <- mod_brms_2 |>
+        brms::variables() |>
+        str_subset("^b.*")
+      g <- mod_brms_2$fit |> stan_ac(pars = vars)
+      ggsave(
+        filename = paste0(
+          fig_path, "R_brms_ac_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(brms_rhat_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_brms_2 <- mod_brms_2_
+      ## ---- brms_rhat_2
+      mod_brms_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_brms_2.rds")
+      )
+      g <- mod_brms_2$fit |> stan_rhat()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_brms_rhat_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(brms_ess_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_brms_2 <- mod_brms_2_
+      ## ---- brms_ess_2
+      mod_brms_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_brms_2.rds")
+      )
+      g <- mod_brms_2$fit |> stan_ess()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_brms_ess_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(brms_ppc_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_brms_2 <- mod_brms_2_
+      ## ---- brms_ppc_2
+      mod_brms_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_brms_2.rds")
+      )
+      g <- mod_brms_2 |> pp_check( type='dens_overlay', ndraws=100)
+      ggsave(
+        filename = paste0(
+          fig_path, "R_brms_ppc_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
     })
+
 
     ## tar_target(mod_stan_1_, {
     ##   benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_

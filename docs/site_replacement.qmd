@@ -1628,8 +1628,464 @@ mod_stan_1$print(
 
 :::::
 
+
+#### GBM
+
+```{r}
+#| label: gbm_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: gbm_pdp_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_gbm_1_plot_
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_1.png){width=500px}
+
+:::::
+
+#### GBM + covariates
+
+```{r}
+#| label: gbm_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: gbm_pdp_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_1b plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_1b.png){width=500px}
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: gbm_pdp_1c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_1c plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_1c.png){width=500px}
+
+:::::
+
+#### dbarts
+
+```{r}
+#| label: dbarts_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_1_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_1.png){width=500px}
+
+:::::
+
+#### dbarts + covariates
+
+```{r}
+#| label: dbarts_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_1b_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_1b.png){width=500px}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_1c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_1c_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_1c.png){width=500px}
+
+:::::
+
+::::
+
+### Replace a reef (V2)
+
+:::: {.panel-tabset}
+
+#### glmmTMB
+
+```{r}
+#| label: glmmTMB_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: glmmTMB_2_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_2_emmeans plot
+#| eval: false
+#| results: markup
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_2"
+```
+
+![](../output/figures/R_pdp_mod_glmmTMB_2.png){width=500px}
+
+##### Model Validation
+
+```{r}
+#| label: glmmTMB_2_dharma
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_2_dharma plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 4
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_2"
+```
+
+![](../output/figures/R_dharma_mod_glmmTMB_2.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: glmmTMB_2_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_2"
+mod_glmmTMB_2 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_glmmTMB_2.rds")
+)
+mod_glmmTMB_2 |> summary()
+```
+
+:::::
+
+#### brms
+
+```{r}
+#| label: brms_pre_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: brms_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+##### Partial dependency plot
+
+```{r}
+#| label: brms_2_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: brms_2_emmeans plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_pdp_mod_brms_2.png){width=500px}
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: brms_trace_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_trace_2.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: brms_ac_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_ac_2.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: brms_rhat_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_rhat_2.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: brms_ess_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_ess_2.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: brms_ppc_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_ppc_2.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: brms_2_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+mod_brms_2 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_brms_2.rds")
+)
+mod_brms_2 |> summary()
+```
+
+:::::
+
 ::::
 
 :::
+ 
  
  
