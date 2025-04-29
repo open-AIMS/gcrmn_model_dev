@@ -2585,8 +2585,222 @@ site_replacement <- function() {
         width = 10, height = 8, dpi = 72
       )
       ## ----end
-    })
+    }),
 
+    ## stan -----------------------------------------------------------
+    tar_target(mod_stan_2_, {
+      source("model_functions.R")
+      benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      site_extra_functions_
+      ## ---- stan_pre_2
+      benthos_fixed_locs_obs_2 <-
+        benthos_fixed_locs_obs_2 |>
+        mutate(
+          cYear = fYear,
+          grid_id = factor(Reef),
+          cSite = factor(interaction(Reef, Site)),
+          cReplicate = ifelse(is.na(Transect),
+            interaction(Site, Year),
+            interaction(cSite, Transect)),
+          Cover = cover,
+          area = 1,
+          sum = 1
+        )
+      saveRDS(benthos_fixed_locs_obs_2,
+        file = paste0(data_path, "synthetic/saveRDS(benthos_fixed_locs_obs_2_forstan.rds")
+      ) 
+      stan_data <- prepare_data_for_stan(benthos_fixed_locs_obs_2, yrs = NULL)
+      model_stan <- cmdstanr::cmdstan_model(stan_file = "model1.stan")
+      ## model_stan <- cmdstanr::cmdstan_model(stan_file = "mod1a.stan")
+      ## model_stan <- cmdstanr::cmdstan_model(stan_file = "mod2a.stan")
+      ## ----end
+      ## ---- stan_2
+      mod_stan_2 <- model_stan$sample(
+        data = stan_data,
+        seed = 123,
+        iter_sampling = 5000,
+        iter_warmup = 1000,
+        thin = 5,
+        chains = 3,
+        parallel_chains = 3,
+        adapt_delta = 0.99,
+        output_dir = paste0(data_path, "synthetic/"),
+      )
+      saveRDS(mod_stan_2,
+        file = paste0(data_path, "synthetic/mod_stan_2.rds")
+      ) 
+      ## ----end
+      mod_stan_2
+    }),
+    tar_target(pdp_mod_stan_2_, {
+      mod_stan_2 <- mod_stan_2_
+      newdata_2 <- site_replacements_newdata_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- stan_2_pdp
+      stan_2_sum <-
+        mod_stan_2$draws(variables = "cellmeans") |>
+        posterior::as_draws_df() |>
+        posterior::summarise_draws(
+          median,
+          HDInterval::hdi,
+          ~ HDInterval::hdi(., credMass = c(0.9)),
+          rhat,
+          ess_bulk,
+          ess_tail
+        ) |>
+        rename(lower_90 = V4, upper_90 = V5) |>
+        bind_cols(newdata_2) |>
+        mutate(Year = as.numeric(as.character(fYear)))
+      saveRDS(stan_2_sum,
+        file = paste0(data_path, "synthetic/stan_2_sum.rds")
+      ) 
+      ## ----end
+      stan_2_sum 
+    }),    
+    tar_target(pdp_mod_stan_2_plot_, {
+      stan_2_sum <- pdp_mod_stan_2_
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- stan_2_pdp plot
+      stan_2_sum <- readRDS(
+        file = paste0(data_path, "synthetic/stan_2_sum.rds")
+      )
+      g <- stan_2_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "stan")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_stan_2.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_trace_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_stan_2 <- mod_stan_2_
+      ## ---- stan_trace_2
+      mod_stan_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_2.rds")
+      )
+      color_scheme_set("viridis")
+      g <-
+        mod_stan_2$draws(variables = c("beta", "phi", "sd_2", "sd_2", "sd_3")) |>
+        mcmc_trace() +
+        theme_minimal()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_trace_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_ac_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_stan_2 <- mod_stan_2_
+      ## ---- stan_ac_2
+      mod_stan_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_2.rds")
+      )
+      color_scheme_set("viridis")
+      g <-
+        mod_stan_2$draws(variables = c("beta", "phi", "sd_2", "sd_2", "sd_3")) |>
+        mcmc_acf() +
+        theme_minimal()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_ac_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_rhat_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_stan_2 <- mod_stan_2_
+      ## ---- stan_rhat_2
+      mod_stan_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_2.rds")
+      )
+      color_scheme_set("viridis")
+      g <-
+        mod_stan_2 |> bayesplot::rhat() |> 
+        mcmc_rhat_hist() +
+        theme_minimal()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_rhat_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_ess_2_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_stan_2 <- mod_stan_2_
+      ## ---- stan_ess_2
+      mod_stan_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_2.rds")
+      )
+      color_scheme_set("viridis")
+      g <-
+        mod_stan_2 |> bayesplot::neff_ratio() |> 
+        mcmc_neff_hist() +
+        theme_minimal()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_ess_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_ppc_2_, {
+      benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_stan_2 <- mod_stan_2_
+      ## ---- stan_ppc_2
+      mod_stan_2 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_2.rds")
+      )
+      g <- 
+        bayesplot::pp_check(
+          benthos_fixed_locs_obs_2$cover,
+          mod_stan_2$draws("ypred", format = "matrix")[1:100, ],
+          ppc_dens_overlay
+        ) +
+        theme_classic()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_ppc_2.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    })
 
     ## tar_target(mod_stan_1_, {
     ##   benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_

@@ -2083,6 +2083,165 @@ mod_brms_2 |> summary()
 
 :::::
 
+#### stan
+
+```{r}
+#| label: stan_pre_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: stan_2_pdp
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_2_pdp plot
+#| results: markup
+#| echo: true
+#| eval: false
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_pdp_mod_stan_2.png){width=500px}
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: stan_trace_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_trace_2.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: stan_ac_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_ac_2.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: stan_rhat_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_rhat_2.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: stan_ess_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_ess_2.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: stan_ppc_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_ppc_2.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: stan_2_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+mod_stan_2 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_stan_2.rds")
+)
+mod_stan_2$print(
+  variables = c("phi", "beta", "sd_2", "sd_2", "sd_3"),
+  max_rows = 20
+)
+mod_stan_2$print(
+  variables = "cellmeans",
+  max_rows = 20
+)
+```
+
+:::::
+
+
 ::::
 
 :::
