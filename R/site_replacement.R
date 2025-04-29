@@ -1377,6 +1377,7 @@ site_replacement <- function() {
     tar_target(dharma_mod_glmmTMB_1_plot_, {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      glmmTMB_1_dharma <- dharma_mod_glmmTMB_1_
       ## ---- glmmTMB_1_dharma plot
       glmmTMB_1_dharma <- readRDS(
         file = paste0(data_path, "synthetic/glmmTMB_1_dharma.rds")
