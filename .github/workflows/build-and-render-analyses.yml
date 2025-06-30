@@ -73,6 +73,7 @@ jobs:
             any::posterior
             any::remotes
             any::targets
+            any::tarchetypes
             any::tidybayes
             any::graph
             any::Rgraphviz
