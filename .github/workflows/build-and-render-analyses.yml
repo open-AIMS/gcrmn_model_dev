@@ -45,6 +45,11 @@ jobs:
           cat("\noptions(repos=c(stan='https://mc-stan.org/r-packages/',CRAN ='https://cloud.r-project.org'))\n", file = "~/.Rprofile", append = TRUE)
         shell: Rscript {0}
         
+      - name: Install INLA
+        run: |
+          Rscript -e "install.packages('INLA',repos=c(getOption('repos'),INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)"
+
+          Rscript -e "remotes::install_github('jmgirard/standist')"
       ## Install R packages
       - name: install R packages
         uses: r-lib/actions/setup-r-dependencies@v2
@@ -69,14 +74,10 @@ jobs:
             any::posterior
             any::remotes
             any::targets
+            any::tidybayes
             stan-dev/cmdstanr
             open-AIMS/synthos
-
-      - name: Install other R packages
-        run: |
-          Rscript -e "install.packages('tidybayes')"
-
-          Rscript -e "remotes::install_github('jmgirard/standist')"
+            jmgirard/standist
 
       - name: Install CmdStan
         shell: Rscript {0}
