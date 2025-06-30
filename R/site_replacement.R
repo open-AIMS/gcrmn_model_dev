@@ -1,7 +1,7 @@
  
 source("model_functions.R")
 ## source("helper_functions.R")
-site_replacement <- function() {
+site_replacement <- function(synthetic_data_output) {
   targets <- list(
     # Target: Load raw data
     tar_target(
@@ -1044,6 +1044,33 @@ site_replacement <- function() {
       )
       ## ----end
     }),
+    tar_target(infl_gbm_0b_, {
+      mod_gbm_0b <- mod_gbm_0b_$mod_gbm_0b
+      n.trees <- mod_gbm_0b_$n.trees
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- gbm_infl_0b
+      ## gbm_0b_infl <- gbm::relative.influence(mod_gbm_0b, n.trees = n.trees, scale = TRUE, sort = TRUE)
+      infl <- summary(mod_gbm_0b, n.trees =  n.trees, plot = FALSE)
+      g <-
+        infl |>
+        as.data.frame() |>
+        arrange(rel.inf) |>
+        mutate(var = factor(var, levels = unique(var))) |>
+        ggplot(aes(y = var, x = rel.inf)) +
+        geom_bar(stat = "identity") +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_gbm_0b.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
     tar_target(pdp_gbm_0c_, {
       benthos_reefs_sf <- read_all_reefs_data_
       mod_gbm_0b <- mod_gbm_0b_$mod_gbm_0b
@@ -1096,6 +1123,33 @@ site_replacement <- function() {
       ggsave(
         filename = paste0(
           fig_path, "R_pdp_mod_gbm_0c.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_gbm_0c_, {
+      mod_gbm_0b <- mod_gbm_0b_$mod_gbm_0b
+      n.trees <- mod_gbm_0b_$n.trees
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- gbm_infl_0c
+      ## gbm_0b_infl <- gbm::relative.influence(mod_gbm_0b, n.trees = n.trees, scale = TRUE, sort = TRUE)
+      infl <- summary(mod_gbm_0b, n.trees =  n.trees, plot = FALSE)
+      g <-
+        infl |>
+        as.data.frame() |>
+        arrange(rel.inf) |>
+        mutate(var = factor(var, levels = unique(var))) |>
+        ggplot(aes(y = var, x = rel.inf)) +
+        geom_bar(stat = "identity") +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_gbm_0c.png"
         ),
         g,
         width = 8, height = 6, dpi = 72
@@ -1347,6 +1401,30 @@ site_replacement <- function() {
     }),
     
     ## Replace a reef (V1) --------------------------------------------
+    ## simple ---------------------------------------------------------
+    tar_target(mod_simple_1_, {
+      benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- simple_1
+      mod_simple_1 <- benthos_fixed_locs_obs_1 |>
+        group_by(Year, Site) |>
+        summarise(
+          Mean = mean(cover),
+          Median = median(cover)
+        ) |>
+        ungroup() |>
+        group_by(Year) |> 
+        summarise(
+          Mean = mean(Mean),
+          Median = median(Median)
+        ) 
+      saveRDS(mod_simple_1,
+        file = paste0(data_path, "synthetic/mod_simple_1.rds")
+      ) 
+      ## ----end
+      mod_simple_1
+    }),
+
     ## glmmTMB --------------------------------------------------------
     tar_target(mod_glmmTMB_1_, {
       benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
@@ -1416,15 +1494,27 @@ site_replacement <- function() {
       benthos_reefs_temporal_summary <- read_all_temporal_summary_
       all_sampled_sum <- sampled_simple_raw_means_
       fig_path <- site_replacement_global_parameters_$fig_path
+      mod_simple_1 <- mod_simple_1_
       ## ---- glmmTMB_1_emmeans plot
-      g <- glmmTMB_1_sum |>
+      g1 <- glmmTMB_1_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "glmmTMB")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        ## geom_line(data = all_sampled_sum,
+        ##   aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      g2 <- glmmTMB_1_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
         geom_line(aes(x = Year, y = median, color = "glmmTMB")) +
         geom_line(data = benthos_reefs_temporal_summary,
-          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+          aes(x = Year, y = Mean, colour = "true mean"), linetype = "dashed") +
         geom_line(data = benthos_reefs_temporal_summary,
-          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+          aes(x = Year, y = Median, colour = "true median"), linetype = "dashed") +
         geom_line(data = all_sampled_sum,
           aes(x = Year, y = response, colour = type), linetype = "dashed") +
         theme_bw()
@@ -1432,33 +1522,11 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_glmmTMB_1.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
-    ## tar_target(mod_simple_1_, {
-    ##   benthos_fixed_locs_obs_1 <- site_replacements_data_prep_1_
-    ##   data_path <- site_replacement_global_parameters_$data_path
-    ##   ## ---- simple_1
-    ##   mod_simple_1 <- benthos_fixed_locs_obs_1 |>
-    ##     group_by(Year, Site) |>
-    ##     summarise(
-    ##       Mean = mean(cover),
-    ##       Median = median(cover)
-    ##     ) |>
-    ##     ungroup() |>
-    ##     group_by(Year) |> 
-    ##     summarise(
-    ##       Mean = mean(Mean),
-    ##       Median = median(Median)
-    ##     ) 
-    ##   saveRDS(mod_simple_1,
-    ##     file = paste0(data_path, "synthetic/mod_simple_1.rds")
-    ##   ) 
-    ##   ## ----end
-    ##   mod_simple_1
-    ## }),
 
     ## brms -----------------------------------------------------------
     tar_target(mod_brms_1_, {
@@ -1522,11 +1590,22 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       brms_1_sum <- emmeans_mod_brms_1_
+      mod_simple_1 <- mod_simple_1_
       ## ---- brms_1_emmeans plot
       brms_1_sum <- readRDS(
         file = paste0(data_path, "synthetic/brms_1_sum.rds")
       )
-      g <- 
+      g1 <- 
+        brms_1_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "brms")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
         brms_1_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
@@ -1542,8 +1621,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_brms_1.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -1721,11 +1800,21 @@ site_replacement <- function() {
       all_sampled_sum <- sampled_simple_raw_means_
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      mod_simple_1 <- mod_simple_1_
       ## ---- stan_1_pdp plot
       stan_1_sum <- readRDS(
         file = paste0(data_path, "synthetic/stan_1_sum.rds")
       )
-      g <- stan_1_sum |>
+      g1 <- stan_1_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "stan")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- stan_1_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
         geom_line(aes(x = Year, y = median, color = "stan")) +
@@ -1740,8 +1829,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_stan_1.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -1905,11 +1994,21 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       gdm_1_sum <- pdp_gbm_1_
+      mod_simple_1 <- mod_simple_1_
       ## ---- gbm_pdp_1
       gbm_1_sum <- readRDS(
         file = paste0(data_path, "synthetic/gbm_1_sum.rds")
       )
-      g <-
+      g1 <-
+        gbm_1_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
         gbm_1_sum |>
         ggplot() +
         geom_line(aes(x = Year, y = median, color = "gbm")) +
@@ -1924,8 +2023,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_gbm_1.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -1985,11 +2084,21 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       gbm_1b_sum <- pdp_gbm_1b_
+      mod_simple_1 <- mod_simple_1_
       ## ---- gbm_pdp_1b plot
       gbm_1b_sum <- readRDS(
         file = paste0(data_path, "synthetic/gbm_1b_sum.rds")
       )
-      g <-
+      g1 <-
+        gbm_1b_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
         gbm_1b_sum |>
         ggplot() +
         geom_line(aes(x = Year, y = median, color = "gbm")) +
@@ -2003,6 +2112,33 @@ site_replacement <- function() {
       ggsave(
         filename = paste0(
           fig_path, "R_pdp_mod_gbm_1b.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_gbm_1b_, {
+      mod_gbm_1b <- mod_gbm_1b_$mod_gbm_1b
+      n.trees <- mod_gbm_1b_$n.trees
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- gbm_infl_1b
+      ## gbm_1b_infl <- gbm::relative.influence(mod_gbm_1b, n.trees = n.trees, scale = TRUE, sort = TRUE)
+      infl <- summary(mod_gbm_1b, n.trees =  n.trees, plot = FALSE)
+      g <-
+        infl |>
+        as.data.frame() |>
+        arrange(rel.inf) |>
+        mutate(var = factor(var, levels = unique(var))) |>
+        ggplot(aes(y = var, x = rel.inf)) +
+        geom_bar(stat = "identity") +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_gbm_1b.png"
         ),
         g,
         width = 8, height = 6, dpi = 72
@@ -2043,11 +2179,21 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       gbm_1c_sum <- pdp_gbm_1c_
+      mod_simple_1 <- mod_simple_1_
       ## ---- gbm_pdp_1c plot
       gbm_1c_sum <- readRDS(
         file = paste0(data_path, "synthetic/gbm_1c_sum.rds")
       )
-      g <-
+      g1 <-
+        gbm_1c_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
         gbm_1c_sum |>
         ggplot() +
         geom_line(aes(x = Year, y = median, color = "gbm")) +
@@ -2061,6 +2207,33 @@ site_replacement <- function() {
       ggsave(
         filename = paste0(
           fig_path, "R_pdp_mod_gbm_1c.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_gbm_1c_, {
+      mod_gbm_1b <- mod_gbm_1b_$mod_gbm_1b
+      n.trees <- mod_gbm_1b_$n.trees
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- gbm_infl_1c
+      ## gbm_1b_infl <- gbm::relative.influence(mod_gbm_1b, n.trees = n.trees, scale = TRUE, sort = TRUE)
+      infl <- summary(mod_gbm_1b, n.trees =  n.trees, plot = FALSE)
+      g <-
+        infl |>
+        as.data.frame() |>
+        arrange(rel.inf) |>
+        mutate(var = factor(var, levels = unique(var))) |>
+        ggplot(aes(y = var, x = rel.inf)) +
+        geom_bar(stat = "identity") +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_gbm_1c.png"
         ),
         g,
         width = 8, height = 6, dpi = 72
@@ -2119,11 +2292,22 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       dbarts_1_sum <- dbarts_pdp_1
+      mod_simple_1 <- mod_simple_1_
       ## ---- dbarts_pdp_1 plot
       dbarts_1_sum <- readRDS(
         file = paste0(data_path, "synthetic/dbarts_1_sum.rds")
       )
-      g <- 
+      g1 <- 
+        dbarts_1_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
         dbarts_1_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
@@ -2139,8 +2323,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_dbarts_1.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -2222,11 +2406,22 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       dbarts_1b_sum <- pdp_dbarts_1b_
+      mod_simple_1 <- mod_simple_1_
       ## ---- dbarts_pdp_1 plot
       dbarts_1b_sum <- readRDS(
         file = paste0(data_path, "synthetic/dbarts_1b_sum.rds")
       )
-      g <- 
+      g1 <- 
+        dbarts_1b_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
         dbarts_1b_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
@@ -2242,11 +2437,56 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_dbarts_1b.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
+    tar_target(infl_dbarts_1b_plot_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_dbarts_1b <- mod_dbarts_1b_$mod_dbarts_1b
+      ## ---- dbarts_infl_1 plot
+      rel_inf <- apply(mod_dbarts_1b$varcount, c(2, 3), sum) |>
+        as.data.frame() |>
+        mutate(.draw = 1:n()) |>
+        pivot_longer(
+          cols = -.draw,
+          names_to = "var",
+          values_to = "count"
+        ) |>
+        mutate(variable = str_remove(var, "\\.[0-9]*")) |>
+        group_by(.draw, variable) |>
+        summarise(count = sum(count)) |>
+        mutate(rel_inf = count / sum(count)) |>
+        ungroup() |>
+        dplyr::select(-count) |>
+        group_by(variable) |>
+        summarise(
+          mean = mean(rel_inf),
+          median = median(rel_inf),
+          lower = quantile(rel_inf, 0.025),
+          upper = quantile(rel_inf, 0.975)
+        ) |>
+        arrange(median) |>
+        mutate(variable = factor(variable, levels = unique(variable)))
+      g <-
+        rel_inf |>
+        ggplot(aes(y = variable, x = median)) +
+        geom_pointrange(aes(xmin = lower, xmax = upper)) +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_dbarts_1b.png"
+        ),
+        g,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    
     tar_target(pdp_dbarts_1c_, {
       preds_1c <- mod_dbarts_1b_$preds_1c
       benthos_reefs_sf <- read_all_reefs_data_ |>
@@ -2285,11 +2525,22 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       dbarts_1c_sum <- pdp_dbarts_1c_
+      mod_simple_1 <- mod_simple_1_
       ## ---- dbarts_pdp_1 plot
       dbarts_1c_sum <- readRDS(
         file = paste0(data_path, "synthetic/dbarts_1c_sum.rds")
       )
-      g <- 
+      g1 <- 
+        dbarts_1c_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_1,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
         dbarts_1c_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
@@ -2305,13 +2556,36 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_dbarts_1c.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
     
     ## Replace a reef (V2) --------------------------------------------
+    ## simple ---------------------------------------------------------
+    tar_target(mod_simple_2_, {
+      benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- simple_2
+      mod_simple_2 <- benthos_fixed_locs_obs_2 |>
+        group_by(Year, Site) |>
+        summarise(
+          Mean = mean(cover),
+          Median = median(cover)
+        ) |>
+        ungroup() |>
+        group_by(Year) |> 
+        summarise(
+          Mean = mean(Mean),
+          Median = median(Median)
+        ) 
+      saveRDS(mod_simple_2,
+        file = paste0(data_path, "synthetic/mod_simple_2.rds")
+      ) 
+      ## ----end
+      mod_simple_2
+    }),
     ## glmmTMB --------------------------------------------------------
     tar_target(mod_glmmTMB_2_, {
       benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
@@ -2381,8 +2655,18 @@ site_replacement <- function() {
       benthos_reefs_temporal_summary <- read_all_temporal_summary_
       all_sampled_sum <- sampled_simple_raw_means_
       fig_path <- site_replacement_global_parameters_$fig_path
+      mod_simple_2 <- mod_simple_2_
       ## ---- glmmTMB_2_emmeans plot
-      g <- glmmTMB_2_sum |>
+      g1 <- glmmTMB_2_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "glmmTMB")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- glmmTMB_2_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
         geom_line(aes(x = Year, y = median, color = "glmmTMB")) +
@@ -2397,8 +2681,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_glmmTMB_2.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -2465,11 +2749,22 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       brms_2_sum <- emmeans_mod_brms_2_
+      mod_simple_2 <- mod_simple_2_
       ## ---- brms_2_emmeans plot
       brms_2_sum <- readRDS(
         file = paste0(data_path, "synthetic/brms_2_sum.rds")
       )
-      g <- 
+      g1 <- 
+        brms_2_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "brms")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
         brms_2_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
@@ -2485,8 +2780,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_brms_2.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -2664,11 +2959,21 @@ site_replacement <- function() {
       all_sampled_sum <- sampled_simple_raw_means_
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
+      mod_simple_2 <- mod_simple_2_
       ## ---- stan_2_pdp plot
       stan_2_sum <- readRDS(
         file = paste0(data_path, "synthetic/stan_2_sum.rds")
       )
-      g <- stan_2_sum |>
+      g1 <- stan_2_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "stan")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- stan_2_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
         geom_line(aes(x = Year, y = median, color = "stan")) +
@@ -2683,8 +2988,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_stan_2.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -2848,11 +3153,21 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       gdm_2_sum <- pdp_gbm_2_
+      mod_simple_2 <- mod_simple_2_
       ## ---- gbm_pdp_2
       gbm_2_sum <- readRDS(
         file = paste0(data_path, "synthetic/gbm_2_sum.rds")
       )
-      g <-
+      g1 <-
+        gbm_2_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
         gbm_2_sum |>
         ggplot() +
         geom_line(aes(x = Year, y = median, color = "gbm")) +
@@ -2867,8 +3182,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_gbm_2.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -2928,11 +3243,21 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       gbm_2b_sum <- pdp_gbm_2b_
+      mod_simple_2 <- mod_simple_2_
       ## ---- gbm_pdp_2b plot
       gbm_2b_sum <- readRDS(
         file = paste0(data_path, "synthetic/gbm_2b_sum.rds")
       )
-      g <-
+      g1 <-
+        gbm_2b_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
         gbm_2b_sum |>
         ggplot() +
         geom_line(aes(x = Year, y = median, color = "gbm")) +
@@ -2946,6 +3271,33 @@ site_replacement <- function() {
       ggsave(
         filename = paste0(
           fig_path, "R_pdp_mod_gbm_2b.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_gbm_2b_, {
+      mod_gbm_2b <- mod_gbm_2b_$mod_gbm_2b
+      n.trees <- mod_gbm_2b_$n.trees
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- gbm_infl_2b
+      ## gbm_2b_infl <- gbm::relative.influence(mod_gbm_2b, n.trees = n.trees, scale = TRUE, sort = TRUE)
+      infl <- summary(mod_gbm_2b, n.trees =  n.trees, plot = FALSE)
+      g <-
+        infl |>
+        as.data.frame() |>
+        arrange(rel.inf) |>
+        mutate(var = factor(var, levels = unique(var))) |>
+        ggplot(aes(y = var, x = rel.inf)) +
+        geom_bar(stat = "identity") +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_gbm_2b.png"
         ),
         g,
         width = 8, height = 6, dpi = 72
@@ -2986,11 +3338,21 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       gbm_2c_sum <- pdp_gbm_2c_
+      mod_simple_2 <- mod_simple_2_
       ## ---- gbm_pdp_2c plot
       gbm_2c_sum <- readRDS(
         file = paste0(data_path, "synthetic/gbm_2c_sum.rds")
       )
-      g <-
+      g1 <-
+        gbm_2c_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
         gbm_2c_sum |>
         ggplot() +
         geom_line(aes(x = Year, y = median, color = "gbm")) +
@@ -3005,10 +3367,36 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_gbm_2c.png"
         ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_gbm_2c_, {
+      mod_gbm_2b <- mod_gbm_2b_$mod_gbm_2b
+      n.trees <- mod_gbm_2b_$n.trees
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      ## ---- gbm_infl_2c
+      ## gbm_2c_infl <- gbm::relative.influence(mod_gbm_2c, n.trees = n.trees, scale = TRUE, sort = TRUE)
+      infl <- summary(mod_gbm_2b, n.trees =  n.trees, plot = FALSE)
+      g <-
+        infl |>
+        as.data.frame() |>
+        arrange(rel.inf) |>
+        mutate(var = factor(var, levels = unique(var))) |>
+        ggplot(aes(y = var, x = rel.inf)) +
+        geom_bar(stat = "identity") +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_gbm_2c.png"
+        ),
         g,
         width = 8, height = 6, dpi = 72
       )
-      ## ----end
     }),
 
     ## dbarts --------------------------------------------------------
@@ -3062,11 +3450,22 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       dbarts_2_sum <- dbarts_pdp_2
+      mod_simple_2 <- mod_simple_2_
       ## ---- dbarts_pdp_2 plot
       dbarts_2_sum <- readRDS(
         file = paste0(data_path, "synthetic/dbarts_2_sum.rds")
       )
-      g <- 
+      g1 <- 
+        dbarts_2_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
         dbarts_2_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
@@ -3082,8 +3481,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_dbarts_2.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -3139,7 +3538,7 @@ site_replacement <- function() {
       preds <- mod_dbarts_2b_$preds
       data_path <- site_replacement_global_parameters_$data_path
       benthos_fixed_locs_obs_2 <- site_replacements_data_prep_2_
-      ## ---- dbarts_pdp_2
+      ## ---- dbarts_pdp_2c
       dbarts_2b_sum <- preds |> 
         t() |>
         as_tibble(.name_repair = ~ paste0("V", seq_along(.))) |>
@@ -3165,11 +3564,22 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       dbarts_2b_sum <- pdp_dbarts_2b_
-      ## ---- dbarts_pdp_2 plot
+      mod_simple_2 <- mod_simple_2_
+      ## ---- dbarts_pdp_2c plot
       dbarts_2b_sum <- readRDS(
         file = paste0(data_path, "synthetic/dbarts_2b_sum.rds")
       )
-      g <- 
+      g1 <- 
+        dbarts_2b_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
         dbarts_2b_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
@@ -3185,8 +3595,8 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_dbarts_2b.png"
         ),
-        g,
-        width = 8, height = 6, dpi = 72
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     }),
@@ -3228,11 +3638,22 @@ site_replacement <- function() {
       data_path <- site_replacement_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       dbarts_2c_sum <- pdp_dbarts_2c_
+      mod_simple_2 <- mod_simple_2_
       ## ---- dbarts_pdp_2 plot
       dbarts_2c_sum <- readRDS(
         file = paste0(data_path, "synthetic/dbarts_2c_sum.rds")
       )
-      g <- 
+      g1 <- 
+        dbarts_2c_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_2,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
         dbarts_2c_sum |>
         ggplot() +
         geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
@@ -3248,8 +3669,52 @@ site_replacement <- function() {
         filename = paste0(
           fig_path, "R_pdp_mod_dbarts_2c.png"
         ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_dbarts_2b_plot_, {
+      data_path <- site_replacement_global_parameters_$data_path
+      fig_path <- site_replacement_global_parameters_$fig_path
+      mod_dbarts_2b <- mod_dbarts_2b_$mod_dbarts_2b
+      ## ---- dbarts_infl_1 plot
+      rel_inf <- apply(mod_dbarts_2b$varcount, c(2, 3), sum) |>
+        as.data.frame() |>
+        mutate(.draw = 1:n()) |>
+        pivot_longer(
+          cols = -.draw,
+          names_to = "var",
+          values_to = "count"
+        ) |>
+        mutate(variable = str_remove(var, "\\.[0-9]*")) |>
+        group_by(.draw, variable) |>
+        summarise(count = sum(count)) |>
+        mutate(rel_inf = count / sum(count)) |>
+        ungroup() |>
+        dplyr::select(-count) |>
+        group_by(variable) |>
+        summarise(
+          mean = mean(rel_inf),
+          median = median(rel_inf),
+          lower = quantile(rel_inf, 0.025),
+          upper = quantile(rel_inf, 0.975)
+        ) |>
+        arrange(median) |>
+        mutate(variable = factor(variable, levels = unique(variable)))
+      g <-
+        rel_inf |>
+        ggplot(aes(y = variable, x = median)) +
+        geom_pointrange(aes(xmin = lower, xmax = upper)) +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_dbarts_2b.png"
+        ),
         g,
-        width = 8, height = 6, dpi = 72
+        width = 12, height = 6, dpi = 72
       )
       ## ----end
     })
