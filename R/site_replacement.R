@@ -1,8 +1,10 @@
  
 source("model_functions.R")
 ## source("helper_functions.R")
-site_replacement <- function(synthetic_data_output) {
+site_replacement <- function() {
   targets <- list(
+    tar_target(site_replacement_link,
+      lnk <- synthetic_covariates_),
     # Target: Load raw data
     tar_target(
       site_replacement_libraries_,
