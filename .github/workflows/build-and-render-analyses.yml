@@ -69,6 +69,8 @@ jobs:
             any::posterior
             any::remotes
             stan-dev/cmdstanr
+            stan-dev/targets
+            open-AIMS/synthos
 
       - name: Install other R packages
         run: |
