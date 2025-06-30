@@ -77,6 +77,7 @@ jobs:
             any::tidybayes
             any::graph
             any::Rgraphviz
+            any::emmeans
             stan-dev/cmdstanr
             jmgirard/standist
 
