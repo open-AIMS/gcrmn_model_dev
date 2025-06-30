@@ -68,8 +68,8 @@ jobs:
             any::dbarts
             any::posterior
             any::remotes
+            any::targets
             stan-dev/cmdstanr
-            stan-dev/targets
             open-AIMS/synthos
 
       - name: Install other R packages
