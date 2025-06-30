@@ -61,6 +61,7 @@ site_replacement <- function() {
     ## Full reef-level spatio-temporal data ---------------------------
     tar_target(read_all_reefs_data_, {
       data_path <- site_replacement_global_parameters_$data_path
+      tmp <- synthetic_landscape_benthos_reefs_response_scale_
       ## ---- read all reefs data
       benthos_reefs_sf <- readRDS(file = paste0(
         data_path,
