@@ -95,3 +95,11 @@ jobs:
           #cat(lines, file = "~/.Renviron", append = TRUE)
           cmdstanr:::get_cmdstan_flags("STANCFLAGS")
           cmdstanr::cmdstanr_example()
+
+
+      # render tutorials
+      - name: Make tutorials
+        run: |
+          #mkdir ~/tmp
+          #echo "library(quarto); quarto_render(\"tut/index.qmd\")" | R --no-save --no-restore;
+          make -i run_R
