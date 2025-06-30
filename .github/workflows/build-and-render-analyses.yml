@@ -67,6 +67,7 @@ jobs:
             any::gbm
             any::dbarts
             any::posterior
+            any::remotes
 
       - name: Install other R packages
         run: |
