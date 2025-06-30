@@ -68,6 +68,7 @@ jobs:
             any::dbarts
             any::posterior
             any::remotes
+            stan-dev/cmdstanr
 
       - name: Install other R packages
         run: |
