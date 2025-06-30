@@ -61,3 +61,35 @@ jobs:
             any::brms
             any::knitr
             any::simstudy
+            any::HDInterval
+            any::rstan
+            any::bayesplot
+            any::gbm
+            any::dbarts
+            any::posterior
+
+      - name: Install other R packages
+        run: |
+          Rscript -e "install.packages('tidybayes')"
+
+          Rscript -e "remotes::install_github('jmgirard/standist')"
+
+      - name: Install CmdStan
+        shell: Rscript {0}
+        run: |
+          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+          cmdstanr::install_cmdstan(cores = parallel::detectCores())
+          #install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
+          #cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+          #cmdstanr::install_cmdstan(cores = 2)
+          #version <- "2.35.0"
+          #url <- sprintf("https://github.com/stan-dev/cmdstan/releases/download/v%s/cmdstan-%s.tar.gz", version, version)
+          #cmdstanr::install_cmdstan(cores = 2, release_url = url)        
+          #cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+          #cmdstanr::install_cmdstan(cores = 2)
+          #cmdstan <- file.path(Sys.getenv("RUNNER_TEMP"), "cmdstan")
+          #file.rename(cmdstanr::cmdstan_path(), cmdstan)
+          #lines <- paste0("\nCMDSTAN=", cmdstan, "\n")
+          #cat(lines, file = "~/.Renviron", append = TRUE)
+          cmdstanr:::get_cmdstan_flags("STANCFLAGS")
+          cmdstanr::cmdstanr_example()
