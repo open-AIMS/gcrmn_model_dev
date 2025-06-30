@@ -35,6 +35,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev make
 
+      # install graphviz
+      - name: Install Graphviz
+        run: sudo apt-get install graphviz
+
       # install R
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -45,11 +49,6 @@ jobs:
           cat("\noptions(repos=c(stan='https://mc-stan.org/r-packages/',CRAN ='https://cloud.r-project.org'))\n", file = "~/.Rprofile", append = TRUE)
         shell: Rscript {0}
         
-      - name: Install INLA
-        run: |
-          Rscript -e "install.packages('INLA',repos=c(getOption('repos'),INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)"
-
-          Rscript -e "remotes::install_github('jmgirard/standist')"
       ## Install R packages
       - name: install R packages
         uses: r-lib/actions/setup-r-dependencies@v2
@@ -75,9 +74,24 @@ jobs:
             any::remotes
             any::targets
             any::tidybayes
+            any::graph
+            any::Rgraphviz
             stan-dev/cmdstanr
-            open-AIMS/synthos
             jmgirard/standist
+
+      - name: Install INLA
+        run: |
+          Rscript -e "install.packages('INLA',repos=c(getOption('repos'),INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)"
+
+          Rscript -e "remotes::install_github('jmgirard/standist')"
+
+      ## Install more R packages
+      - name: install more R packages
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          cache-version: 2
+          packages: |
+            open-AIMS/synthos
 
       - name: Install CmdStan
         shell: Rscript {0}
