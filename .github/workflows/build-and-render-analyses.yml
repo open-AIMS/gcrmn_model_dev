@@ -52,6 +52,7 @@ jobs:
       ## Install R packages
       - name: install R packages
         uses: r-lib/actions/setup-r-dependencies@v2
+        needs: true
         with:
           cache-version: 2
           packages: |
