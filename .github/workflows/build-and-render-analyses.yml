@@ -100,7 +100,7 @@ jobs:
 
       # Step 2: Download the artifact (if it exists)
       - name: Download _targets artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: _targets
           path: _targets
@@ -113,7 +113,7 @@ jobs:
 
       # Step 4: Upload the _targets folder as an artifact
       - name: Upload _targets artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: _targets
           path: _targets
