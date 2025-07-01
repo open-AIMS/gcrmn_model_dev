@@ -259,6 +259,7 @@ site_replacement <- function() {
     tar_target(read_sampled_reefs_data_2_, {
       data_path <- site_replacement_global_parameters_$data_path
       benthos_reefs_sf <- read_all_reefs_data_
+      benthos_fixed_locs_obs_2 <- synthetic_replace_reefs_2_
       ## ---- read sampled reefs data 2
       benthos_fixed_locs_obs_2 <- readRDS(
         file = paste0(
