@@ -92,9 +92,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cmdstan
-        key: cmdstan-${{ runner.os }}-${{ hashFiles('**/DESCRIPTION') }}-v1
-        restore-keys: |
-          cmdstan-${{ runner.os }}-
+          key: cmdstan-${{ runner.os }}-${{ hashFiles('**/DESCRIPTION') }}-v1
+          restore-keys: |
+            cmdstan-${{ runner.os }}-
       
       - name: Install CmdStan
         shell: Rscript {0}
