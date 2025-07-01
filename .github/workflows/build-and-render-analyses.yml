@@ -85,17 +85,28 @@ jobs:
       - name: Install INLA
         run: |
           Rscript -e "install.packages('INLA',repos=c(getOption('repos'),INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)"
-
           Rscript -e "remotes::install_github('jmgirard/standist')"
           Rscript -e "remotes::install_github('open-AIMS/synthos')"
 
+      - name: Cache CmdStan installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.cmdstan
+        key: cmdstan-${{ runner.os }}-${{ hashFiles('**/DESCRIPTION') }}-v1
+        restore-keys: |
+          cmdstan-${{ runner.os }}-
+      
       - name: Install CmdStan
         shell: Rscript {0}
         run: |
-          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
-          cmdstanr::install_cmdstan(cores = parallel::detectCores())
-          cmdstanr:::get_cmdstan_flags("STANCFLAGS")
-          cmdstanr::cmdstanr_example()
+          if (!cmdstanr::cmdstan_version(FALSE)) {
+            cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+            cmdstanr::install_cmdstan(cores = parallel::detectCores())
+            cmdstanr:::get_cmdstan_flags("STANCFLAGS")
+            cmdstanr::cmdstanr_example()
+          } else {
+            message("CmdStan already installed at: ", cmdstanr::cmdstan_path())
+          }
 
       - name: Cache targets and output
         uses: actions/cache@v4
