@@ -101,7 +101,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            _targets
+            R/_targets
             output/figures
           key: targets-cache-${{ hashFiles('**/*.RData', '**/*.rds') }}
           restore-keys: |
