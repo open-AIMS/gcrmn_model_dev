@@ -98,7 +98,23 @@ jobs:
           cmdstanr::cmdstanr_example()
 
 
-      # render tutorials
-      - name: Make tutorials
+      # Step 2: Download the artifact (if it exists)
+      - name: Download _targets artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: _targets
+          path: _targets
+        continue-on-error: true  # Continue even if the artifact doesn't exist
+
+      # Run R
+      - name: Run R
         run: |
           make -i run_R
+
+      # Step 4: Upload the _targets folder as an artifact
+      - name: Upload _targets artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: _targets
+          path: _targets
+
