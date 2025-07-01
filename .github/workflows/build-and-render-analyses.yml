@@ -97,14 +97,23 @@ jobs:
           cmdstanr:::get_cmdstan_flags("STANCFLAGS")
           cmdstanr::cmdstanr_example()
 
+      - name: Cache targets and output
+        uses: actions/cache@v4
+        with:
+          path: |
+            _targets
+            output/figures
+          key: targets-cache-${{ hashFiles('**/*.RData', '**/*.rds') }}
+          restore-keys: |
+            targets-cache-
 
       # Step 2: Download the artifact (if it exists)
-      - name: Download _targets artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: _targets
-          path: R/_targets
-        continue-on-error: true  # Continue even if the artifact doesn't exist
+      #- name: Download _targets artifact
+      #  uses: actions/download-artifact@v4
+      #  with:
+      #    name: _targets
+      #    path: R/_targets
+      #  continue-on-error: true  # Continue even if the artifact doesn't exist
 
       # Run R
       - name: Run R
@@ -112,9 +121,9 @@ jobs:
           make -i run_R
 
       # Step 4: Upload the _targets folder as an artifact
-      - name: Upload _targets artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: _targets
-          path: R/_targets
+      #- name: Upload _targets artifact
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: _targets
+      #    path: R/_targets
 
