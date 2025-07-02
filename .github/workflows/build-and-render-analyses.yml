@@ -103,7 +103,8 @@ jobs:
           if (!requireNamespace("cmdstanr", quietly = TRUE)) {
             remotes::install_github("stan-dev/cmdstanr")
           }
-          if (!cmdstanr::cmdstan_version(FALSE)) {
+          #if (!cmdstanr::cmdstan_version(FALSE)) {
+          if (requireNamespace("cmdstanr", quietly = TRUE)) {
             cmdstanr::check_cmdstan_toolchain(fix = TRUE)
             cmdstanr::install_cmdstan(cores = parallel::detectCores())
             cmdstanr:::get_cmdstan_flags("STANCFLAGS")
