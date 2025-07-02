@@ -1069,8 +1069,331 @@ missing_years <- function() {
         width = 8, height = 6, dpi = 72
       )
       ## ----end
+    }),
+    
+    ## dbarts --------------------------------------------------------
+    tar_target(mod_dbarts_3_, {
+      benthos_fixed_locs_obs_3 <- missing_years_data_prep_3_
+      data_path <- missing_years_global_parameters_$data_path
+      newdata_3 <- missing_years_newdata_3_
+      ## ---- dbarts_3
+      print(head(benthos_fixed_locs_obs_3))
+      mod_dbarts_3 <- bart2(log(cover) ~ fYear,
+        data =   benthos_fixed_locs_obs_3,
+        keepTrees = TRUE
+      )
+      saveRDS(mod_dbarts_3,
+        file = paste0(data_path, "synthetic/mod_dbarts_3.rds")
+      ) 
+      ## ----end
+      ## Unfortunately, the next part must be in the same tar_target
+      ## due to the way dbarts stores pointers - they cannot be stored
+      ## ---- dbarts_pred_3
+      preds <- predict(mod_dbarts_3, newdata_3, type = "ev") |>
+        exp() |> 
+        summarise_draws(median, HDInterval::hdi)
+      saveRDS(preds,
+        file = paste0(data_path, "synthetic/mod_dbarts_3_preds.rds")
+      ) 
+      ## ----end
+      list(
+        mod_dbarts_3 = mod_dbarts_3,
+        preds = preds
+      )
+    }),
+    tar_target(dbarts_pdp_3, {
+      data_path <- missing_years_global_parameters_$data_path
+      newdata_3 <- missing_years_newdata_3_
+      preds <- mod_dbarts_3_$preds
+      ## ---- dbarts_pdp_3
+      dbarts_3_sum <- newdata_3 |>
+        bind_cols(preds) |> 
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        mutate(type = "dbarts")
+      saveRDS(dbarts_3_sum,
+        file = paste0(data_path, "synthetic/dbarts_3_sum.rds")
+      ) 
+      # ----end
+      dbarts_3_sum 
+    }),
+    tar_target(pdp_dbarts_3_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      dbarts_3_sum <- dbarts_pdp_3
+      mod_simple_3 <- mod_simple_3_
+      ## ---- dbarts_pdp_3 plot
+      dbarts_3_sum <- readRDS(
+        file = paste0(data_path, "synthetic/dbarts_3_sum.rds")
+      )
+      g1 <- 
+        dbarts_3_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
+        dbarts_3_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_dbarts_3.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    
+    ## dbarts + covariates ---------------------------------------------
+    tar_target(mod_dbarts_3b_, {
+      benthos_fixed_locs_obs_3 <- missing_years_data_prep_3_
+      benthos_reefs_sf <- read_all_reefs_data_
+      data_path <- missing_years_global_parameters_$data_path
+      newdata_3 <- missing_years_newdata_3_
+      ## ---- dbarts_3b
+      mod_dbarts_3b <- bart2(log(cover) ~ fYear + Latitude + Longitude + CYC + DHW + OTHER,
+        data =   benthos_fixed_locs_obs_3,
+        keepTrees = TRUE
+      )
+      saveRDS(mod_dbarts_3b,
+        file = paste0(data_path, "synthetic/mod_dbarts_3b.rds")
+      ) 
+      ## ----end
+      ## Unfortunately, the next part must be in the same tar_target
+      ## due to the way dbarts stores pointers - they cannot be stored
+      ## ---- dbarts_pred_3b
+      newdata_3b <- benthos_fixed_locs_obs_3
+      preds <- predict(mod_dbarts_3b, newdata_3b, type = "ev") |>
+        exp()
+      saveRDS(preds,
+        file = paste0(data_path, "synthetic/mod_dbarts_3b_preds.rds")
+      ) 
+      ## ----end
+      ## ---- dbarts_pred_3c
+      newdata_3c <- benthos_reefs_sf |>
+        mutate(
+          Latitude = st_coordinates(geometry)[, 2],
+          Longitude = st_coordinates(geometry)[, 1],
+          fYear = as.factor(Year),
+        ) |>
+        st_drop_geometry() |>
+        group_by(Year, fYear, Reef) |>
+        summarise(across(c(Latitude, Longitude, CYC, DHW, OTHER), mean))
+      preds_3c <- predict(mod_dbarts_3b, newdata_3c, type = "ev") |>
+        exp()
+      saveRDS(preds_3c,
+        file = paste0(data_path, "synthetic/mod_dbarts_3c_preds.rds")
+      ) 
+      ## ----end
+      list(
+        mod_dbarts_3b = mod_dbarts_3b,
+        preds = preds,
+        preds_3c = preds_3c
+      )
+    }),
+    tar_target(pdp_dbarts_3b_, {
+      preds <- mod_dbarts_3b_$preds
+      data_path <- missing_years_global_parameters_$data_path
+      benthos_fixed_locs_obs_3 <- missing_years_data_prep_3_
+      ## ---- dbarts_pdp_3
+      dbarts_3b_sum <- preds |> 
+        t() |>
+        as_tibble(.name_repair = ~ paste0("V", seq_along(.))) |>
+        bind_cols(benthos_fixed_locs_obs_3) |>
+        pivot_longer(
+          cols = matches("^V[0-9]*"),
+          names_to = ".draw", values_to = "fit"
+        ) |>
+        group_by(Year, .draw) |>
+        summarise(fit = mean(fit)) |>
+        ## dplyr::select(Year, fit, .draw) |> 
+        group_by(Year, .add = FALSE) |> 
+        summarise_draws(median, HDInterval::hdi)
+      saveRDS(dbarts_3b_sum,
+        file = paste0(data_path, "synthetic/dbarts_3b_sum.rds")
+      ) 
+      ## ----end
+      dbarts_3b_sum
+    }),
+    tar_target(pdp_dbarts_3b_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      dbarts_3b_sum <- pdp_dbarts_3b_
+      mod_simple_3 <- mod_simple_3_
+      ## ---- dbarts_pdp_3 plot
+      dbarts_3b_sum <- readRDS(
+        file = paste0(data_path, "synthetic/dbarts_3b_sum.rds")
+      )
+      g1 <- 
+        dbarts_3b_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
+        dbarts_3b_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_dbarts_3b.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_dbarts_3b_plot_, {
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      mod_dbarts_3b <- mod_dbarts_3b_$mod_dbarts_3b
+      ## ---- dbarts_infl_3 plot
+      rel_inf <- apply(mod_dbarts_3b$varcount, c(2, 3), sum) |>
+        as.data.frame() |>
+        mutate(.draw = 1:n()) |>
+        pivot_longer(
+          cols = -.draw,
+          names_to = "var",
+          values_to = "count"
+        ) |>
+        mutate(variable = str_remove(var, "\\.[0-9]*")) |>
+        group_by(.draw, variable) |>
+        summarise(count = sum(count)) |>
+        mutate(rel_inf = count / sum(count)) |>
+        ungroup() |>
+        dplyr::select(-count) |>
+        group_by(variable) |>
+        summarise(
+          mean = mean(rel_inf),
+          median = median(rel_inf),
+          lower = quantile(rel_inf, 0.025),
+          upper = quantile(rel_inf, 0.975)
+        ) |>
+        arrange(median) |>
+        mutate(variable = factor(variable, levels = unique(variable)))
+      g <-
+        rel_inf |>
+        ggplot(aes(y = variable, x = median)) +
+        geom_pointrange(aes(xmin = lower, xmax = upper)) +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_dbarts_3b.png"
+        ),
+        g,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    
+    tar_target(pdp_dbarts_3c_, {
+      preds_3c <- mod_dbarts_3b_$preds_3c
+      benthos_reefs_sf <- read_all_reefs_data_ |>
+        mutate(
+          Latitude = st_coordinates(geometry)[, 2],
+          Longitude = st_coordinates(geometry)[, 1],
+          fYear = as.factor(Year),
+        ) |>
+        st_drop_geometry() |>
+        group_by(Year, fYear, Reef) |>
+        summarise(across(c(Latitude, Longitude, CYC, DHW, OTHER), mean))
+      data_path <- missing_years_global_parameters_$data_path
+      ## ---- gbm_pdp_3c
+      dbarts_3c_sum <- preds_3c |> 
+        t() |>
+        as_tibble(.name_repair = ~ paste0("V", seq_along(.))) |>
+        bind_cols(benthos_reefs_sf) |>
+        pivot_longer(
+          cols = matches("^V[0-9]*"),
+          names_to = ".draw", values_to = "fit"
+        ) |>
+        group_by(Year, .draw) |>
+        summarise(fit = mean(fit)) |>
+        ## dplyr::select(Year, fit, .draw) |> 
+        group_by(Year, .add = FALSE) |> 
+        summarise_draws(median, HDInterval::hdi)
+      saveRDS(dbarts_3c_sum,
+        file = paste0(data_path, "synthetic/dbarts_3c_sum.rds")
+      ) 
+      ## ----end
+      dbarts_3c_sum
+    }),
+    tar_target(pdp_dbarts_3c_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      dbarts_3c_sum <- pdp_dbarts_3c_
+      mod_simple_3 <- mod_simple_3_
+      ## ---- dbarts_pdp_3 plot
+      dbarts_3c_sum <- readRDS(
+        file = paste0(data_path, "synthetic/dbarts_3c_sum.rds")
+      )
+      g1 <- 
+        dbarts_3c_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- 
+        dbarts_3c_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "dbarts")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_dbarts_3c.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
     })
+    
 
+    
 
     
   )
