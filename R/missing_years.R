@@ -598,6 +598,477 @@ missing_years <- function() {
       ) 
       ## ----end
       mod_stan_3
+    }),
+    tar_target(pdp_mod_stan_3_, {
+      mod_stan_3 <- mod_stan_3_
+      newdata_3 <- missing_years_newdata_3_
+      data_path <- missing_years_global_parameters_$data_path
+      ## ---- stan_3_pdp
+      stan_3_sum <-
+        mod_stan_3$draws(variables = "cellmeans") |>
+        posterior::as_draws_df() |>
+        posterior::summarise_draws(
+          median,
+          HDInterval::hdi,
+          ~ HDInterval::hdi(., credMass = c(0.9)),
+          rhat,
+          ess_bulk,
+          ess_tail
+        ) |>
+        rename(lower_90 = V4, upper_90 = V5) |>
+        bind_cols(newdata_3) |>
+        mutate(Year = as.numeric(as.character(fYear)))
+      saveRDS(stan_3_sum,
+        file = paste0(data_path, "synthetic/stan_3_sum.rds")
+      ) 
+      ## ----end
+      stan_3_sum 
+    }),    
+    tar_target(pdp_mod_stan_3_plot_, {
+      stan_3_sum <- pdp_mod_stan_3_
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      mod_simple_3 <- mod_simple_3_
+      ## ---- stan_3_pdp plot
+      stan_3_sum <- readRDS(
+        file = paste0(data_path, "synthetic/stan_3_sum.rds")
+      )
+      g1 <- stan_3_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "stan")) +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <- stan_3_sum |>
+        ggplot() +
+        geom_ribbon(aes(x = Year, ymin = lower, ymax = upper), alpha = 0.2) +
+        geom_line(aes(x = Year, y = median, color = "stan")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_stan_3.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_trace_3_, {
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      mod_stan_3 <- mod_stan_3_
+      ## ---- stan_trace_3
+      mod_stan_3 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_3.rds")
+      )
+      color_scheme_set("viridis")
+      g <-
+        mod_stan_3$draws(variables = c("beta", "phi", "sd_1", "sd_2", "sd_3")) |>
+        mcmc_trace() +
+        theme_minimal()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_trace_3.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_ac_3_, {
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      mod_stan_3 <- mod_stan_3_
+      ## ---- stan_ac_3
+      mod_stan_3 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_3.rds")
+      )
+      color_scheme_set("viridis")
+      g <-
+        mod_stan_3$draws(variables = c("beta", "phi", "sd_1", "sd_2", "sd_3")) |>
+        mcmc_acf() +
+        theme_minimal()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_ac_3.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_rhat_3_, {
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      mod_stan_3 <- mod_stan_3_
+      ## ---- stan_rhat_3
+      mod_stan_3 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_3.rds")
+      )
+      color_scheme_set("viridis")
+      g <-
+        mod_stan_3 |> bayesplot::rhat() |> 
+        mcmc_rhat_hist() +
+        theme_minimal()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_rhat_3.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_ess_3_, {
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      mod_stan_3 <- mod_stan_3_
+      ## ---- stan_ess_3
+      mod_stan_3 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_3.rds")
+      )
+      color_scheme_set("viridis")
+      g <-
+        mod_stan_3 |> bayesplot::neff_ratio() |> 
+        mcmc_neff_hist() +
+        theme_minimal()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_ess_3.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(stan_ppc_3_, {
+      benthos_fixed_locs_obs_3 <- missing_years_data_prep_3_
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      mod_stan_3 <- mod_stan_3_
+      ## ---- stan_ppc_3
+      mod_stan_3 <- readRDS(
+        file = paste0(data_path, "synthetic/mod_stan_3.rds")
+      )
+      g <- 
+        bayesplot::pp_check(
+          benthos_fixed_locs_obs_3$cover,
+          mod_stan_3$draws("ypred", format = "matrix")[1:100, ],
+          ppc_dens_overlay
+        ) +
+        theme_classic()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_stan_ppc_3.png"
+        ),
+        g,
+        width = 10, height = 8, dpi = 72
+      )
+      ## ----end
+    }),
+    
+    ## gbm ------------------------------------------------------------
+    tar_target(mod_gbm_3_, {
+      benthos_fixed_locs_obs_3 <- missing_years_data_prep_3_
+      data_path <- missing_years_global_parameters_$data_path
+      ## ---- gbm_3
+      mod_gbm_3 <- gbm(cover ~ fYear,
+        data =  benthos_fixed_locs_obs_3,
+        distribution = "gaussian",
+        n.trees = 10000,
+        interaction.depth = 5,
+        shrinkage = 0.001,
+        bag.fraction = 0.5,
+        cv.folds = 5,
+        verbose = TRUE
+      )
+      saveRDS(mod_gbm_3,
+        file = paste0(data_path, "synthetic/mod_gbm_3.rds")
+      ) 
+      ## ----end
+      ## ---- gbm_post_3
+      n.trees <- gbm.perf(mod_gbm_3, method = "cv")
+      ## ----end
+      list(mod_gbm_3 = mod_gbm_3, n.trees = n.trees)
+    }),
+    tar_target(pdp_gbm_3_, {
+      mod_gbm_3 <- mod_gbm_3_$mod_gbm_3
+      n.trees <- mod_gbm_3_$n.trees
+      newdata_3 <- missing_years_newdata_3_
+      data_path <- missing_years_global_parameters_$data_path
+      ## ---- gbm_pdp_3
+      gbm_3_sum <- newdata_3 |>
+        mutate(median = predict(mod_gbm_3, newdata_3, n.trees = n.trees, type = "response")) |> 
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        mutate(type = "gbm")
+      saveRDS(gbm_3_sum,
+        file = paste0(data_path, "synthetic/gbm_3_sum.rds")
+      ) 
+      ## ----end
+      gbm_3_sum
+    }),
+    tar_target(pdp_gbm_3_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      gdm_3_sum <- pdp_gbm_3_
+      mod_simple_3 <- mod_simple_3_
+      ## ---- gbm_pdp_3
+      gbm_3_sum <- readRDS(
+        file = paste0(data_path, "synthetic/gbm_3_sum.rds")
+      )
+      g1 <-
+        gbm_3_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
+        gbm_3_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_gbm_3.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    
+    ## gbm + covartiates ----------------------------------------------
+    tar_target(mod_gbm_3b_, {
+      benthos_fixed_locs_obs_3 <- missing_years_data_prep_3_
+      data_path <- missing_years_global_parameters_$data_path
+      ## ---- gbm_3b
+      mod_gbm_3b <- gbm(cover ~ fYear + Latitude + Longitude + CYC + DHW + OTHER,
+        data =  benthos_fixed_locs_obs_3,
+        distribution = "gaussian",
+        var.monotone = c(0, 0, 0, -1, -1, -1),
+        n.trees = 10000,
+        interaction.depth = 5,
+        shrinkage = 0.001,
+        bag.fraction = 0.5,
+        cv.folds = 5,
+        verbose = TRUE
+      )
+      saveRDS(mod_gbm_3b,
+        file = paste0(data_path, "synthetic/mod_gbm_3b.rds")
+      )
+      ## ----end
+      ## ---- gbm_post_3b
+      n.trees <- gbm.perf(mod_gbm_3b, method = "cv")
+      ## ----end
+      list(mod_gbm_3b = mod_gbm_3b, n.trees = n.trees)
+    }),
+    tar_target(pdp_gbm_3b_, {
+      benthos_fixed_locs_obs_3 <- missing_years_data_prep_3_
+      mod_gbm_3b <- mod_gbm_3b_$mod_gbm_3b
+      n.trees <- mod_gbm_3b_$n.trees
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      ## ---- gbm_pdp_3b
+      newdata_3b <- benthos_fixed_locs_obs_3
+      gbm_3b_sum <- newdata_3b |>
+        mutate(median = predict(mod_gbm_3b, newdata_3b, n.trees = n.trees, type = "response")) |>
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        ## group_by(Year, Site, Transect) |>
+        ## summarise(median = median(median)) |>
+        ## group_by(Year, Site, .add = FALSE) |>
+        ## summarise(median = median(median)) |>
+        group_by(Year, .add = FALSE) |> 
+        summarise(median = median(median)) |> 
+        mutate(type = "gbm")
+      saveRDS(gbm_3b_sum,
+        file = paste0(data_path, "synthetic/gbm_3b_sum.rds")
+      ) 
+      ## ----end
+      gbm_3b_sum
+    }),
+    tar_target(pdp_gbm_3b_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      gbm_3b_sum <- pdp_gbm_3b_
+      mod_simple_3 <- mod_simple_3_
+      ## ---- gbm_pdp_3b plot
+      gbm_3b_sum <- readRDS(
+        file = paste0(data_path, "synthetic/gbm_3b_sum.rds")
+      )
+      g1 <-
+        gbm_3b_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
+        gbm_3b_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_gbm_3b.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_gbm_3b_, {
+      mod_gbm_3b <- mod_gbm_3b_$mod_gbm_3b
+      n.trees <- mod_gbm_3b_$n.trees
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      ## ---- gbm_infl_3b
+      ## gbm_3b_infl <- gbm::relative.influence(mod_gbm_3b, n.trees = n.trees, scale = TRUE, sort = TRUE)
+      infl <- summary(mod_gbm_3b, n.trees =  n.trees, plot = FALSE)
+      g <-
+        infl |>
+        as.data.frame() |>
+        arrange(rel.inf) |>
+        mutate(var = factor(var, levels = unique(var))) |>
+        ggplot(aes(y = var, x = rel.inf)) +
+        geom_bar(stat = "identity") +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_gbm_3b.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(pdp_gbm_3c_, {
+      benthos_reefs_sf <- read_all_reefs_data_
+      mod_gbm_3b <- mod_gbm_3b_$mod_gbm_3b
+      n.trees <- mod_gbm_3b_$n.trees
+      data_path <- missing_years_global_parameters_$data_path
+      ## ---- gbm_pdp_3c
+      newdata_3c <- benthos_reefs_sf |>
+        mutate(
+          Latitude = st_coordinates(geometry)[,2],
+          Longitude = st_coordinates(geometry)[,1],
+          fYear = as.factor(Year),
+          )
+      gbm_3c_sum <- newdata_3c |>
+        mutate(median = predict(mod_gbm_3b, newdata_3c, n.trees = n.trees, type = "response")) |>
+        mutate(Year = as.numeric(as.character(fYear))) |>
+        ## group_by(Year, Site, Transect) |>
+        ## summarise(median = median(median)) |>
+        ## group_by(Year, Site, .add = FALSE) |>
+        ## summarise(median = median(median)) |>
+        group_by(Year, .add = FALSE) |> 
+        summarise(median = median(median)) |> 
+        mutate(type = "gbm")
+      saveRDS(gbm_3c_sum,
+        file = paste0(data_path, "synthetic/gbm_3c_sum.rds")
+      ) 
+      ## ----end
+      gbm_3c_sum
+    }),
+    tar_target(pdp_gbm_3c_plot_, {
+      benthos_reefs_temporal_summary <- read_all_temporal_summary_
+      all_sampled_sum <- sampled_simple_raw_means_
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      gbm_3c_sum <- pdp_gbm_3c_
+      mod_simple_3 <- mod_simple_3_
+      ## ---- gbm_pdp_3c plot
+      gbm_3c_sum <- readRDS(
+        file = paste0(data_path, "synthetic/gbm_3c_sum.rds")
+      )
+      g1 <-
+        gbm_3c_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Mean, colour = "simple data mean"), linetype = "dashed") +
+        geom_line(data = mod_simple_3,
+          aes(x = Year, y = Median, colour = "simple data median"), linetype = "dashed") +
+        theme_bw()
+      g2 <-
+        gbm_3c_sum |>
+        ggplot() +
+        geom_line(aes(x = Year, y = median, color = "gbm")) +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Mean, colour = "all mean"), linetype = "dashed") +
+        geom_line(data = benthos_reefs_temporal_summary,
+          aes(x = Year, y = Median, colour = "all median"), linetype = "dashed") +
+        geom_line(data = all_sampled_sum,
+          aes(x = Year, y = response, colour = type), linetype = "dashed") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_pdp_mod_gbm_3c.png"
+        ),
+        g1 + g2,
+        width = 12, height = 6, dpi = 72
+      )
+      ## ----end
+    }),
+    tar_target(infl_gbm_3c_, {
+      mod_gbm_3b <- mod_gbm_3b_$mod_gbm_3b
+      n.trees <- mod_gbm_3b_$n.trees
+      data_path <- missing_years_global_parameters_$data_path
+      fig_path <- missing_years_global_parameters_$fig_path
+      ## ---- gbm_infl_3c
+      ## gbm_3b_infl <- gbm::relative.influence(mod_gbm_3b, n.trees = n.trees, scale = TRUE, sort = TRUE)
+      infl <- summary(mod_gbm_3b, n.trees =  n.trees, plot = FALSE)
+      g <-
+        infl |>
+        as.data.frame() |>
+        arrange(rel.inf) |>
+        mutate(var = factor(var, levels = unique(var))) |>
+        ggplot(aes(y = var, x = rel.inf)) +
+        geom_bar(stat = "identity") +
+        scale_y_discrete("") +
+        scale_x_continuous("Relative influence") +
+        theme_bw()
+      ggsave(
+        filename = paste0(
+          fig_path, "R_infl_mod_gbm_3c.png"
+        ),
+        g,
+        width = 8, height = 6, dpi = 72
+      )
+      ## ----end
     })
 
 
