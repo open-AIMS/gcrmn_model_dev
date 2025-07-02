@@ -54,6 +54,7 @@ jobs:
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           cache-version: 2
+          needs: true
           packages: |
             any::rmarkdown
             any::quarto
@@ -85,26 +86,50 @@ jobs:
       - name: Install INLA
         run: |
           Rscript -e "install.packages('INLA',repos=c(getOption('repos'),INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)"
-
           Rscript -e "remotes::install_github('jmgirard/standist')"
           Rscript -e "remotes::install_github('open-AIMS/synthos')"
 
+      - name: Cache CmdStan installation
+        uses: actions/cache@v4
+        with:
+          path: ~/.cmdstan
+          key: cmdstan-${{ runner.os }}-${{ hashFiles('**/DESCRIPTION') }}-v1
+          restore-keys: |
+            cmdstan-${{ runner.os }}-
+      
       - name: Install CmdStan
         shell: Rscript {0}
         run: |
-          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
-          cmdstanr::install_cmdstan(cores = parallel::detectCores())
-          cmdstanr:::get_cmdstan_flags("STANCFLAGS")
-          cmdstanr::cmdstanr_example()
+          if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+            remotes::install_github("stan-dev/cmdstanr")
+          }
+          #if (!cmdstanr::cmdstan_version(FALSE)) {
+          if (requireNamespace("cmdstanr", quietly = TRUE)) {
+            cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+            cmdstanr::install_cmdstan(cores = parallel::detectCores())
+            cmdstanr:::get_cmdstan_flags("STANCFLAGS")
+            cmdstanr::cmdstanr_example()
+          } else {
+            message("CmdStan already installed at: ", cmdstanr::cmdstan_path())
+          }
 
+      - name: Cache targets and output
+        uses: actions/cache@v4
+        with:
+          path: |
+            R/_targets
+            output/figures
+          key: targets-cache-${{ hashFiles('**/*.RData', '**/*.rds') }}
+          restore-keys: |
+            targets-cache-
 
       # Step 2: Download the artifact (if it exists)
-      - name: Download _targets artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: _targets
-          path: R/_targets
-        continue-on-error: true  # Continue even if the artifact doesn't exist
+      #- name: Download _targets artifact
+      #  uses: actions/download-artifact@v4
+      #  with:
+      #    name: _targets
+      #    path: R/_targets
+      #  continue-on-error: true  # Continue even if the artifact doesn't exist
 
       # Run R
       - name: Run R
@@ -112,9 +137,9 @@ jobs:
           make -i run_R
 
       # Step 4: Upload the _targets folder as an artifact
-      - name: Upload _targets artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: _targets
-          path: R/_targets
+      #- name: Upload _targets artifact
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: _targets
+      #    path: R/_targets
 
