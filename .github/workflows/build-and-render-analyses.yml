@@ -101,7 +101,7 @@ jobs:
         shell: Rscript {0}
         run: |
           if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-            remotes::install_github("stan-dev/cmdstanr"))
+            remotes::install_github("stan-dev/cmdstanr")
           }
           if (!cmdstanr::cmdstan_version(FALSE)) {
             cmdstanr::check_cmdstan_toolchain(fix = TRUE)
