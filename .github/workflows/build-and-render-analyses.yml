@@ -118,6 +118,7 @@ jobs:
         with:
           path: |
             R/_targets
+            data
             output/figures
           key: targets-cache-${{ hashFiles('**/*.RData', '**/*.rds') }}
           restore-keys: |
