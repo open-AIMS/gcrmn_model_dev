@@ -21,6 +21,7 @@ format:
     fig-align: "center"
     fig-width: 4
     fig-height: 4
+    out-width: 500px
     fig-dpi: 72
     tbl-cap-location: top
     ## Code
@@ -94,6 +95,56 @@ knitr::knit_code$set(
 ```
 
 ## Purpose
+
+The purpose of this page is to contrast a few different approaches to
+modelling broad scale spatio-temporal that are suitable for both very
+large and small sample data sets in the context of the upcoming GCRMN
+report. More specifically, we have identified the following modelling
+challenges for which analyses of simulated data will hopefully provide
+model choice guidance:
+
+- **Site replacements**: when monitored sites are removed from a
+  design and replaced with alternative sites. Of particular concern is
+  the situation in which a poor site is discontinued (perhaps it
+  becomes so degraded it no longer functions as a coral reef) and is
+  replaced by a relatively good new site (with the argument that there
+  is no value in establishing a new poor site that might similarly
+  disappear in the near future). Unfortunately, this shifts the bias
+  and has the potential to confound the timeseries.
+
+- **Unsampled years**: when the timeseries are punctuated with missing
+  years. Ideally, it is important that the analyses are able to
+  estimate trends across the full timeseries. Hence estimates are
+  necessary, even when data are unavailable.
+
+- **Use of covariates**: whilst other covariates (such as sea surface
+  temperature and cyclones could be used to inform trends at locations
+  and times for which observed data are lacking, they also have the
+  potential to induce new biases. For example, if models are "trained"
+  with wave energy (or wind) data in which no major storms occurred
+  and coral cover grew, it is possible that the model could "learn"
+  that coral cover is positively correlated with wave energy. When
+  predicting to a different area that did experience substantial
+  stores (that might be expected to have a negative impact on coral
+  cover), such a model might erroneously predict substantial increases
+  in coral cover.
+  
+  There are also additional complications of using covariates that are
+  likely to represent acute impacts. Whilst, coral cover can decline
+  rapidly in response to a disturbance, it typically takes time to
+  recover (if at all) to its pre-disturbance state. As a result, the
+  state of coral at any specific time is the result of an accumulation
+  of conditions over the past and not just the most recent conditions.
+  To account for this in a modelling perspective, is likely to require
+  either:
+  
+  - Inclusion of the previous years cover estimate in a model (which
+    effectively means the model is parameterised on changes in cover).
+    This is obviously infeasible for the first year of a monitoring
+    program or a program without fixed sites and also becomes a
+    proportionally bigger issue with shorter the time series.
+  - Inclusion of multiple lagged versions of each of the covariates
+    that are likely to represent causal disturbances.
 
 ## Preparations
 
@@ -171,6 +222,9 @@ Load any helper functions
 
 #### 1. Full reef level spatio-temporal benthic data
 
+These data represent the synthesized "truth" and are thereby useful to
+compare to the various modelled outcomes.
+
 ```{r}
 #| label: read all reefs data
 #| results: markup
@@ -214,6 +268,11 @@ benthos_reefs_sf
 ![](../output/figures/R_all_temporal_summary_plot.png){width=500px}
 
 #### 2. All sampled reefs
+
+These data represent a simulated sampling design in which 25 fixed
+(though randomly selected from among all the defined reefs in the
+synthetic spatial domain) reefs are monitored over a continuous 12
+year period.
 
 ```{r}
 #| label: read sampled reefs data
@@ -260,6 +319,12 @@ benthos_fixed_locs_obs
 
 #### 3. Replace a reef
 
+These data represent the fixed 25 sites, yet the site with the lowest
+coral cover is discontinued after 9 years and the highest performing
+reef is only introduced after 9 years. In this way, these data are
+intended to mimic the scenario in which a poor reef is replaced by a
+relatively good reef.
+
 ```{r}
 #| label: read sampled reefs data 1
 #| results: markup
@@ -294,6 +359,10 @@ benthos_fixed_locs_obs_1
 ![](../output/figures/R_sampled_reefs_1_plot.png){width=500px}
 
 #### 4. Replace a reef (V2)
+
+These data represent a more extreme version of the above reef
+replacement situation in that there are only a total of five reefs and
+thus the replacement represents a higher fraction of reefs.
 
 ```{r}
 #| label: read sampled reefs data 2
@@ -335,6 +404,9 @@ benthos_fixed_locs_obs_2
 :::: {.panel-tabset}
 
 #### 1. Full reef level spatio-temporal benthic data
+
+These data represent the synthesized "truth" and are thereby useful to
+compare to the various modelled outcomes.
 
 ```{python}
 #| label: python read all reefs data
@@ -378,6 +450,11 @@ benthos_fixed_locs_obs_2
 
 #### 2. All sampled reefs
 
+These data represent a simulated sampling design in which 25 fixed
+(though randomly selected from among all the defined reefs in the
+synthetic spatial domain) reefs are monitored over a continuous 12
+year period.
+
 ```{python}
 #| label: python read sampled reefs data
 #| results: markup
@@ -418,6 +495,12 @@ benthos_fixed_locs_obs_2
 
 #### 3. Replace a reef
 
+These data represent the fixed 25 sites, yet the site with the lowest
+coral cover is discontinued after 9 years and the highest performing
+reef is only introduced after 9 years. In this way, these data are
+intended to mimic the scenario in which a poor reef is replaced by a
+relatively good reef.
+
 ```{python}
 #| label: python read sampled reefs data 1
 #| results: markup
@@ -449,6 +532,10 @@ benthos_fixed_locs_obs_2
 ![](../output/figures/Python_sampled_reefs_1_plot.png){width=500px}
 
 #### 4. Replace a reef (V2)
+
+These data represent a more extreme version of the above reef
+replacement situation in that there are only a total of five reefs and
+thus the replacement represents a higher fraction of reefs.
 
 ```{python}
 #| label: python read sampled reefs data 2
@@ -486,6 +573,17 @@ benthos_fixed_locs_obs_2
  
 
 ## Data preparations
+
+Perform the following data preparation steps:
+
+- specifically declare any categorical variables (as factors in R,
+  categories in python)
+- ensure that all levels of hierarchical (varying) effects have unique
+  IDs
+- express cover as a proportion out of 1 as is necessary for modelling
+  against a beta distribution
+- create a prediction grid containing all years in the monitoring
+  range
 
 ::: {.panel-tabset}
 
@@ -610,15 +708,78 @@ benthos_fixed_locs_obs_2
 
 ## Modelled trends
 
-| Dataset            | Description         | Legend label(s)       |
-|--------------------|---------------------|-----------------------|
-| `benthos_reefs_sf` | All reef-level data | all mean / all median |
-|                    |                     |                       |
+The following table lists datasets that are used in the comparison
+figures along with their respective legend entries.
+
+::: {.callout-note collapse=true}
+### view table
+| Dataset                          | Description                                                                       | Legend label(s)                       |
+|----------------------------------|-----------------------------------------------------------------------------------|---------------------------------------|
+| `benthos_reefs_sf`               | All reef-level data                                                               |                                       |
+| `benthos_reefs_temporal_summary` | All global-level data                                                             | all mean / all median                 |
+| `all_sampled_sum`                | Simple stats of all sampled data (25 sites)                                       | all_sampled_mean / all_sampled_median |
+|                                  |                                                                                   |                                       |
+| `benthos_fixed_locs_obs_0`       | All sampled data (25 sites)                                                       |                                       |
+| `mod_glmmTMB_0`                  | glmmTMB model of all sampled data (25 sites)                                      |                                       |
+| `glmmTMB_0_sum`                  | Estimated marginal means from all sampled data (25 sites)                         | glmmTMB                               |
+| `mod_brms_0`                     | brms model of all sampled data (25 sites)                                         |                                       |
+| `brms_0_sum`                     | Estimated marginal means from all sampled data (25 sites)                         | brms                                  |
+| `mod_stan_0`                     | stan model of all sampled data (25 sites)                                         |                                       |
+| `stan_0_sum`                     | Estimated marginal means from all sampled data (25 sites)                         | stan                                  |
+| `mod_gbm_0`                      | gbm model of all sampled data (25 sites)                                          |                                       |
+| `gbm_0_sum`                      | Estimated predictions from all sampled data (25 sites)                            | gbm                                   |
+| `mod_gbm_0b`                     | gbm model with covariates of all sampled data (25 sites)                          |                                       |
+| `gbm_0b_sum`                     | Estimated predictions with covariates from all sampled data (25 sites)            | gbm                                   |
+| `gbm_0c_sum`                     | Estimated predictions with covariates from all sampled data (all sites)           | gbm                                   |
+| `mod_dbarts_0`                   | bart model with covariates of all sampled ata (25 sites)                          |                                       |
+| `dbarts_0_sum`                   | Estimated predictions from all sampled data (25 sites)                            | dbarts                                |
+| `mod_dbarts_0b`                  | bart model with covariates of all sampled ata (25 sites)                          |                                       |
+| `dbarts_0b_sum`                  | Estimated predictions with covariates from all sampled data (25 sites)            | dbarts                                |
+| `dbarts_0c_sum`                  | Estimated predictions with covariates from all data (all sites)                   | dbarts                                |
+|                                  |                                                                                   |                                       |
+| `benthos_fixed_locs_obs_1`       | Replaced sampled data (25 sites)                                                  |                                       |
+| `mod_glmmTMB_1`                  | glmmTMB model of replaced sampled data (25 sites)                                 |                                       |
+| `glmmTMB_1_sum`                  | Estimated marginal means from replaced sampled data (25 sites)                    | glmmTMB                               |
+| `mod_brms_1`                     | brms model of replaced sampled data (25 sites)                                    |                                       |
+| `brms_1_sum`                     | Estimated marginal means from replaced sampled data (25 sites)                    | brms                                  |
+| `mod_stan_1`                     | stan model of replaced sampled data (25 sites)                                    |                                       |
+| `stan_1_sum`                     | Estimated marginal means from replaced sampled data (25 sites)                    | stan                                  |
+| `mod_gbm_1`                      | gbm model of replaced sampled data (25 sites)                                     |                                       |
+| `gbm_1_sum`                      | Estimated predictions from replaced sampled data (25 sites)                       | gbm                                   |
+| `mod_gbm_1b`                     | gbm model with covariates of replaced sampled data (25 sites)                     |                                       |
+| `gbm_1b_sum`                     | Estimated predictions with covariates from replaced sampled data (25 sites)       | gbm                                   |
+| `gbm_1c_sum`                     | Estimated predictions with covariates from replaced sampled data (replaced sites) | gbm                                   |
+| `mod_dbarts_1`                   | bart model with covariates of replaced sampled ata (25 sites)                     |                                       |
+| `dbarts_1_sum`                   | Estimated predictions from replaced sampled data (25 sites)                       | dbarts                                |
+| `mod_dbarts_1b`                  | bart model with covariates of replaced sampled ata (25 sites)                     |                                       |
+| `dbarts_1b_sum`                  | Estimated predictions with covariates from replaced sampled data (25 sites)       | dbarts                                |
+| `dbarts_1c_sum`                  | Estimated predictions with covariates from replaced data (all sites)              | dbarts                                |
+|                                  |                                                                                   |                                       |
+| `benthos_fixed_locs_obs_2`       | Replaced sampled data (5 sites)                                                   |                                       |
+| `mod_glmmTMB_2`                  | glmmTMB model of replaced sampled data (5 sites)                                  |                                       |
+| `glmmTMB_2_sum`                  | Estimated marginal means from replaced sampled data (5 sites)                     | glmmTMB                               |
+| `mod_brms_2`                     | brms model of replaced sampled data (5 sites)                                     |                                       |
+| `brms_2_sum`                     | Estimated marginal means from replaced sampled data (5 sites)                     | brms                                  |
+| `mod_stan_2`                     | stan model of replaced sampled data (5 sites)                                     |                                       |
+| `stan_2_sum`                     | Estimated marginal means from replaced sampled data (5 sites)                     | stan                                  |
+| `mod_gbm_2`                      | gbm model of replaced sampled data (5 sites)                                      |                                       |
+| `gbm_2_sum`                      | Estimated predictions from replaced sampled data (5 sites)                        | gbm                                   |
+| `mod_gbm_2b`                     | gbm model with covariates of replaced sampled data (5 sites)                      |                                       |
+| `gbm_2b_sum`                     | Estimated predictions with covariates from replaced sampled data (5 sites)        | gbm                                   |
+| `gbm_2c_sum`                     | Estimated predictions with covariates from replaced sampled data (replaced sites) | gbm                                   |
+| `mod_dbarts_2`                   | bart model with covariates of replaced sampled ata (5 sites)                      |                                       |
+| `dbarts_2_sum`                   | Estimated predictions from replaced sampled data (5 sites)                        | dbarts                                |
+| `mod_dbarts_2b`                  | bart model with covariates of replaced sampled ata (5 sites)                      |                                       |
+| `dbarts_2b_sum`                  | Estimated predictions with covariates from replaced sampled data (5 sites)        | dbarts                                |
+| `dbarts_2c_sum`                  | Estimated predictions with covariates from replaced data (all sites)              | dbarts                                |
+
 
 | Model  | Description                       |
 |--------|-----------------------------------|
 | Simple | Simple hierarchical means/medians |
 |        |                                   |
+
+:::
 
 ::: {.panel-tabset}
 
@@ -663,7 +824,12 @@ benthos_fixed_locs_obs_2
 #| dependson: "glmmTMB_0"
 ```
 
-![](../output/figures/R_pdp_mod_glmmTMB_0.png){width=500px}
+![](../output/figures/R_pdp_mod_glmmTMB_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- glmmTMB modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
 
 ##### Model Validation
 
@@ -753,7 +919,12 @@ mod_glmmTMB_0 |> summary()
 #| dependson: "brms_0"
 ```
 
-![](../output/figures/R_pdp_mod_brms_0.png){width=500px}
+![](../output/figures/R_pdp_mod_brms_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- brms modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
 
 ##### Sampling diagnostics
 
@@ -904,7 +1075,12 @@ mod_brms_0 |> summary()
 #| dependson: "stan_0"
 ```
 
-![](../output/figures/R_pdp_mod_stan_0.png){width=500px}
+![](../output/figures/R_pdp_mod_stan_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- stan modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
 
 ##### Sampling diagnostics
 
@@ -1059,7 +1235,13 @@ mod_stan_0$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_0.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- gbm modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
 
 :::::
 
@@ -1085,7 +1267,7 @@ mod_stan_0$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot
+##### Partial dependency plot (sample data only)
 
 ```{r}
 #| label: gbm_pdp_0b
@@ -1106,7 +1288,16 @@ mod_stan_0$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_0b.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_0b.png){width=700px}
+![](../output/figures/R_infl_mod_gbm_0b.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- gbm modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
+
 
 ##### Partial dependency plot (full domain)
 
@@ -1129,7 +1320,15 @@ mod_stan_0$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_0c.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_0c.png){width=700px}
+![](../output/figures/R_infl_mod_gbm_0c.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- gbm modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
 
 :::::
 
@@ -1167,7 +1366,13 @@ mod_stan_0$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_0.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- gbm modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
 
 :::::
 
@@ -1184,7 +1389,7 @@ mod_stan_0$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot
+##### Partial dependency plot (sample data only)
 
 ```{r}
 #| label: dbarts_pdp_0b
@@ -1205,9 +1410,14 @@ mod_stan_0$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_0b.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_0b.png){width=700px}
 
-##### Partial dependency plot
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- dbarts modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+
+##### Partial dependency plot (full domain)
 
 ```{r}
 #| label: dbarts_pdp_0c
@@ -1228,7 +1438,12 @@ mod_stan_0$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_0c.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_0c.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- dbarts modelled estimates are slightly elevated above the 25 site same
+  data, yet still biased lower than the "truth"
 
 :::::
 
@@ -1268,14 +1483,22 @@ mod_stan_0$print(
 #| eval: false
 #| results: markup
 #| echo: true
-#| fig-width: 8
+#| fig-width: 12
 #| fig-height: 6
 #| code-fold: true
 #| cache: true
 #| dependson: "glmmTMB_1"
 ```
 
-![](../output/figures/R_pdp_mod_glmmTMB_1.png){width=500px}
+![](../output/figures/R_pdp_mod_glmmTMB_1.png){width=900px}
+
+- left figure compares glmmTMB modelled estimates to the sample data
+- right figure compares glmmTMB modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and khaki dashed lines) are lower than the true
+  global average (blue and purple) - right side figure
+- glmmTMB modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
 
 ##### Model Validation
 
@@ -1358,14 +1581,22 @@ mod_glmmTMB_1 |> summary()
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
+#| fig-width: 12
 #| fig-height: 6
 #| code-fold: true
 #| cache: true
 #| dependson: "brms_1"
 ```
 
-![](../output/figures/R_pdp_mod_brms_1.png){width=500px}
+![](../output/figures/R_pdp_mod_brms_1.png){width=900px}
+
+- left figure compares brms modelled estimates to the sample data
+- right figure compares brms modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- brms modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
 
 ##### Sampling diagnostics
 
@@ -1509,14 +1740,22 @@ mod_brms_1 |> summary()
 #| results: markup
 #| echo: true
 #| eval: false
-#| fig-width: 8
+#| fig-width: 12
 #| fig-height: 6
 #| code-fold: true
 #| cache: true
 #| dependson: "stan_1"
 ```
 
-![](../output/figures/R_pdp_mod_stan_1.png){width=500px}
+![](../output/figures/R_pdp_mod_stan_1.png){width=900px}
+
+- left figure compares stan modelled estimates to the sample data
+- right figure compares stan modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- stan modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
 
 ##### Sampling diagnostics
 
@@ -1672,7 +1911,16 @@ mod_stan_1$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_1.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_1.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
 
 :::::
 
@@ -1698,7 +1946,7 @@ mod_stan_1$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot
+##### Partial dependency plot (sample data only)
 
 ```{r}
 #| label: gbm_pdp_1b
@@ -1719,7 +1967,18 @@ mod_stan_1$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_1b.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_1b.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_1b.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
 
 ##### Partial dependency plot (full domain)
 
@@ -1742,7 +2001,20 @@ mod_stan_1$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_1c.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_1c.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_1c.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time (though note that this is
+  because this partial is the result of the same model, just predicted
+  onto the full data grid)
 
 :::::
 
@@ -1780,7 +2052,15 @@ mod_stan_1$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_1.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_1.png){width=900px}
+
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are slightly lower than the 25 site,
+  replacement data, and thus biased lower than the "truth"
 
 :::::
 
@@ -1797,7 +2077,7 @@ mod_stan_1$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot
+##### Partial dependency plot (sample data only)
 
 ```{r}
 #| label: dbarts_pdp_1b
@@ -1818,9 +2098,19 @@ mod_stan_1$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_1b.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_1b.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_1b.png){width=900px}
 
-##### Partial dependency plot
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- relative influences mainly space/time 
+
+##### Partial dependency plot (full domain)
 
 ```{r}
 #| label: dbarts_pdp_1c
@@ -1841,8 +2131,19 @@ mod_stan_1$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_1c.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_1c.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_1b.png){width=900px}
 
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are slightly higher than the 25 site,
+  replacement data, yet biased lower than the "truth"
+- relative influences mainly space/time (though note that this is
+  because this partial is the result of the same model, just predicted
+  onto the full data grid)
 :::::
 
 ::::
@@ -1888,7 +2189,16 @@ mod_stan_1$print(
 #| dependson: "glmmTMB_2"
 ```
 
-![](../output/figures/R_pdp_mod_glmmTMB_2.png){width=500px}
+![](../output/figures/R_pdp_mod_glmmTMB_2.png){width=900px}
+
+- left figure compares glmmTMB modelled estimates to the sample data
+- right figure compares glmmTMB modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- glmmTMB modelled estimates are slightly higher than the 5 site,
+  replacement data, yet biased lower than the "truth"
+- the uncertainty is relatively high
 
 ##### Model Validation
 
@@ -1978,7 +2288,16 @@ mod_glmmTMB_2 |> summary()
 #| dependson: "brms_2"
 ```
 
-![](../output/figures/R_pdp_mod_brms_2.png){width=500px}
+![](../output/figures/R_pdp_mod_brms_2.png){width=900px}
+
+- left figure compares brms modelled estimates to the sample data
+- right figure compares brms modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- brms modelled estimates are slightly higher than the 5 site,
+  replacement data, yet biased lower than the "truth"
+- the uncertainty is relatively high
 
 ##### Sampling diagnostics
 
@@ -2129,7 +2448,16 @@ mod_brms_2 |> summary()
 #| dependson: "stan_2"
 ```
 
-![](../output/figures/R_pdp_mod_stan_2.png){width=500px}
+![](../output/figures/R_pdp_mod_stan_2.png){width=900px}
+
+- left figure compares brms modelled estimates to the sample data
+- right figure compares brms modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- brms modelled estimates are slightly higher than the 5 site,
+  replacement data, yet biased lower than the "truth"
+- the uncertainty is relatively high, but not as high as brms or glmmTMB
 
 ##### Sampling diagnostics
 
@@ -2284,7 +2612,19 @@ mod_stan_2$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_2.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_2.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates deviate substantially from the full 25 site
+  dataset, particularly after year 9
+- gbm modelled estimates are consistent with the observed 5 site
+  replacement data - e.g. adversely impacted by the replacement of a
+  poor reef with a good reef.
+- gbm derived predictions lack uncertainty estimates
 
 :::::
 
@@ -2310,7 +2650,7 @@ mod_stan_2$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot
+##### Partial dependency plot (sample data only)
 
 ```{r}
 #| label: gbm_pdp_2b
@@ -2331,7 +2671,21 @@ mod_stan_2$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_2b.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_2b.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_2b.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates deviate substantially from the full 25 site
+  dataset, particularly after year 9
+- gbm modelled estimates are consistent with the observed 5 site
+  replacement data - e.g. adversely impacted by the replacement of a
+  poor reef with a good reef.
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
 
 ##### Partial dependency plot (full domain)
 
@@ -2354,7 +2708,21 @@ mod_stan_2$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_2c.png){width=500px}
+![](../output/figures/R_pdp_mod_gbm_2c.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_2c.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are more consistent with the full 25 site
+  dataset, e.g., they are less impacted by the replacement of a poor
+  reef with a good reef.
+- gbm modelled estimates deviate from the observed 5 site
+  replacement data after year 9.
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
 
 :::::
 
@@ -2392,7 +2760,7 @@ mod_stan_2$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_2.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_2.png){width=900px}
 
 :::::
 
@@ -2409,7 +2777,7 @@ mod_stan_2$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot
+##### Partial dependency plot (sample data only)
 
 ```{r}
 #| label: dbarts_pdp_2b
@@ -2430,9 +2798,10 @@ mod_stan_2$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_2b.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_2b.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_2b.png){width=900px}
 
-##### Partial dependency plot
+##### Partial dependency plot (full domain)
 
 ```{r}
 #| label: dbarts_pdp_2c
@@ -2453,7 +2822,8 @@ mod_stan_2$print(
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_2c.png){width=500px}
+![](../output/figures/R_pdp_mod_dbarts_2c.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_2b.png){width=900px}
 
 :::::
 
@@ -2461,6 +2831,5 @@ mod_stan_2$print(
 ::::
 
 :::
- 
  
  
