@@ -2,6 +2,7 @@ prepare_data_for_stan <- function(data, yrs) {
   data <- data |> st_drop_geometry()
   if (length(unique(data$cYear)) > 1) {
     X <- model.matrix(~ -1 + cYear, data = data |> droplevels())
+    ## X <- model.matrix(~ -1 + cYear, data = data)
   } else {
     X <- model.matrix(~ 1, data = data)
   }
@@ -32,6 +33,16 @@ prepare_data_for_stan <- function(data, yrs) {
   ## Xmat <- model.matrix(~ factor(all_years))
   Xmat <- model.matrix(~ -1 + factor(all_years))
 
+  year_conversions <- data |>
+    mutate(
+      iYear = as.numeric(factor(Year)),
+      all_years = as.numeric(factor(Year, levels = all_years))
+    ) |>
+    select(iYear, all_years) |>
+    distinct() |>
+    arrange(iYear) |>
+    pull(all_years)
+
   ## Get weights
   grid_wts <- data |>
     group_by(grid_id) |>
@@ -43,6 +54,7 @@ prepare_data_for_stan <- function(data, yrs) {
     Y = data$Cover,
     K = ncol(X),
     X = X,
+    P = ncol(Xmat),
     Xmat = Xmat,
     Z_1_1 = rep(0, N),
     Z_2_1 = rep(0, N),
@@ -73,7 +85,8 @@ prepare_data_for_stan <- function(data, yrs) {
     n_after_years = length(after_years),
     after_years = after_years,
     n_data_years = length(data_years),
-    data_years = data_years
+    data_years = data_years,
+    year_conversions = year_conversions
   )
   stan_data
 }
