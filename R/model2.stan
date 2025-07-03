@@ -103,6 +103,6 @@ model {
   target += std_normal_lpdf(z_3[1]);
 }
 generated quantities {
-  //array [N] real ypred = beta_rng(mu * phi + 1.0e-9, (1 - mu) * phi + 1.0e-9);
+  array [N] real ypred = beta_rng(mu * phi + 1.0e-9, (1 - mu) * phi + 1.0e-9);
   //vector[K] cellmeans = inv_logit(Xmat * beta);
 }
