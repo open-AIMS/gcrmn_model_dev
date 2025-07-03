@@ -1832,6 +1832,7 @@ missing_years <- function() {
       data_path <- missing_years_global_parameters_$data_path
       fig_path <- missing_years_global_parameters_$fig_path
       mod_simple_4 <- mod_simple_4_
+      newdata_4 <- missing_years_newdata_4_
       ## ---- stan_4_pdp plot
       stan_4_sum <- readRDS(
         file = paste0(data_path, "synthetic/stan_4_sum.rds")
