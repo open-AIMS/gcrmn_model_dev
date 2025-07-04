@@ -1,0 +1,2835 @@
+---
+title: "Comparing model types - site replacement"
+author: "Murray Logan"
+date: today
+date-format: "DD/MM/YYYY"
+format:
+  html:
+    ## Format
+    theme: [default, resources/style.scss]
+    css: resources/style.css
+    html-math-method: mathjax
+    ## Table of contents
+    toc: true
+    toc-float: true
+    ## Numbering
+    number-sections: true
+    number-depth: 3
+    ## Layout
+    page-layout: full
+    fig-caption-location: "bottom"
+    fig-align: "center"
+    fig-width: 4
+    fig-height: 4
+    out-width: 500px
+    fig-dpi: 72
+    tbl-cap-location: top
+    ## Code
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+    code-line-numbers: true
+    code-block-border-left: "#ccc"
+    code-copy: true
+    highlight-style: atom-one
+    ## Execution
+    execute:
+      echo: true
+      #cache: true
+    ## Rendering
+    embed-resources: true
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+## execute: 
+##   cache: true
+jupyter: python3
+output_dir: "docs"
+documentclass: article
+fontsize: 12pt
+mainfont: Arial
+mathfont: LiberationMono
+monofont: DejaVu Sans Mono
+classoption: a4paper
+bibliography: resources/references.bib
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+knitr::opts_chunk$set(
+    cache.lazy = FALSE,
+    tidy = "styler"
+)
+## allow indented chunks
+assignInNamespace(".sep.label",
+  "^\\ *(#|--)+\\s*(@knitr|----+)(.*?)-*\\s*$",
+    ns = "knitr"
+)
+knitr::read_chunk("../R/site_replacement.R")
+knitr::read_chunk("../python/site_replacement.py")
+## remove the indentation from all python chunks that start
+## with indentation
+codes <- knitr::knit_code$get()
+process_chunks <- function(codes) {
+  nms <- names(codes)
+  wch <- which(startsWith(names(codes), "python"))
+  codes1 <- lapply(1:length(codes), function(i) {
+    if (i %in% wch) {
+      x <- gsub("^ {4}", "", codes[[i]])
+    } else {
+      x <- codes[[i]]
+    }
+    x
+  })
+  names(codes1) <- nms
+  codes1
+}
+knitr::knit_code$set(
+  process_chunks(codes)
+)
+```
+
+## Purpose
+
+The purpose of this page is to contrast a few different approaches to
+modelling broad scale spatio-temporal that are suitable for both very
+large and small sample data sets in the context of the upcoming GCRMN
+report. More specifically, we have identified the following modelling
+challenges for which analyses of simulated data will hopefully provide
+model choice guidance:
+
+- **Site replacements**: when monitored sites are removed from a
+  design and replaced with alternative sites. Of particular concern is
+  the situation in which a poor site is discontinued (perhaps it
+  becomes so degraded it no longer functions as a coral reef) and is
+  replaced by a relatively good new site (with the argument that there
+  is no value in establishing a new poor site that might similarly
+  disappear in the near future). Unfortunately, this shifts the bias
+  and has the potential to confound the timeseries.
+
+- **Unsampled years**: when the timeseries are punctuated with missing
+  years. Ideally, it is important that the analyses are able to
+  estimate trends across the full timeseries. Hence estimates are
+  necessary, even when data are unavailable.
+
+- **Use of covariates**: whilst other covariates (such as sea surface
+  temperature and cyclones could be used to inform trends at locations
+  and times for which observed data are lacking, they also have the
+  potential to induce new biases. For example, if models are "trained"
+  with wave energy (or wind) data in which no major storms occurred
+  and coral cover grew, it is possible that the model could "learn"
+  that coral cover is positively correlated with wave energy. When
+  predicting to a different area that did experience substantial
+  stores (that might be expected to have a negative impact on coral
+  cover), such a model might erroneously predict substantial increases
+  in coral cover.
+  
+  There are also additional complications of using covariates that are
+  likely to represent acute impacts. Whilst, coral cover can decline
+  rapidly in response to a disturbance, it typically takes time to
+  recover (if at all) to its pre-disturbance state. As a result, the
+  state of coral at any specific time is the result of an accumulation
+  of conditions over the past and not just the most recent conditions.
+  To account for this in a modelling perspective, is likely to require
+  either:
+  
+  - Inclusion of the previous years cover estimate in a model (which
+    effectively means the model is parameterised on changes in cover).
+    This is obviously infeasible for the first year of a monitoring
+    program or a program without fixed sites and also becomes a
+    proportionally bigger issue with shorter the time series.
+  - Inclusion of multiple lagged versions of each of the covariates
+    that are likely to represent causal disturbances.
+
+## Preparations
+
+::: {.panel-tabset}
+
+### R
+
+```{r}
+#| label: cwd
+#| eval: true
+#| echo: false
+#| warning: false
+#| message: false
+#| cache: false
+getwd()
+```
+
+Load the necessary R libraries
+
+```{r}
+#| label: site replacement libraries
+#| output: false
+#| eval: true
+#| warning: false
+#| message: false
+#| cache: false
+```
+
+Establish the global environment and paths
+
+```{r}
+#| label: site replacement global parameters
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+Load any helper functions
+
+```{r}
+#| label: site replacement functions
+#| results: hide
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+### Python
+
+```{python}
+#| label: python site replacement libraries
+#| output: false
+#| eval: true
+#| warning: false
+#| message: false
+#| cache: false
+```
+```{python}
+#| label: python site replacement global parameters
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+```
+:::
+
+## Import data
+
+::: {.panel-tabset}
+
+### R
+
+:::: {.panel-tabset}
+
+#### 1. Full reef level spatio-temporal benthic data
+
+These data represent the synthesized "truth" and are thereby useful to
+compare to the various modelled outcomes.
+
+```{r}
+#| label: read all reefs data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+```{r}
+#| label: read all reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+#| dependson: "read all reefs data"
+#| code-fold: false
+benthos_reefs_sf 
+```
+
+```{r}
+#| label: all reefs temporal summary
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: all reefs temporal summary plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "read all reefs data"
+```
+
+![](../output/figures/R_all_temporal_summary_plot.png){width=500px}
+
+#### 2. All sampled reefs
+
+These data represent a simulated sampling design in which 25 fixed
+(though randomly selected from among all the defined reefs in the
+synthetic spatial domain) reefs are monitored over a continuous 12
+year period.
+
+```{r}
+#| label: read sampled reefs data
+#| results: markup
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+```
+
+```{r}
+#| label: read sampled reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+#| code-fold: false
+benthos_fixed_locs_obs 
+```
+
+```{r}
+#| label: sampled simple raw means
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+```{r}
+#| label: sampled simple raw means plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/R_full_simple_raw_means_plot.png){width=500px}
+
+#### 3. Replace a reef
+
+These data represent the fixed 25 sites, yet the site with the lowest
+coral cover is discontinued after 9 years and the highest performing
+reef is only introduced after 9 years. In this way, these data are
+intended to mimic the scenario in which a poor reef is replaced by a
+relatively good reef.
+
+```{r}
+#| label: read sampled reefs data 1
+#| results: markup
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+```
+
+```{r}
+#| label: read sampled reefs data 1 show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+#| code-fold: false
+benthos_fixed_locs_obs_1 
+```
+
+```{r}
+#| label: sampled reefs data 1 plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/R_sampled_reefs_1_plot.png){width=500px}
+
+#### 4. Replace a reef (V2)
+
+These data represent a more extreme version of the above reef
+replacement situation in that there are only a total of five reefs and
+thus the replacement represents a higher fraction of reefs.
+
+```{r}
+#| label: read sampled reefs data 2
+#| results: markup
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+```
+
+```{r}
+#| label: read sampled reefs data 2 show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+#| code-fold: false
+benthos_fixed_locs_obs_2 
+```
+
+```{r}
+#| label: sampled reefs data 2 plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/R_sampled_reefs_2_plot.png){width=500px}
+
+::::
+
+### Python
+
+:::: {.panel-tabset}
+
+#### 1. Full reef level spatio-temporal benthic data
+
+These data represent the synthesized "truth" and are thereby useful to
+compare to the various modelled outcomes.
+
+```{python}
+#| label: python read all reefs data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+     
+```{python}
+#| label: python read all reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+#| dependson: "read all reefs data"
+#| code-fold: false
+```
+
+```{python}
+#| label: python all reefs temporal summary
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: true
+#| code-fold: true
+```
+
+```{python}
+#| label: python all reefs temporal summary plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+```
+
+![](../output/figures/Python_all_temporal_summary_plot.png){width=500px}
+
+#### 2. All sampled reefs
+
+These data represent a simulated sampling design in which 25 fixed
+(though randomly selected from among all the defined reefs in the
+synthetic spatial domain) reefs are monitored over a continuous 12
+year period.
+
+```{python}
+#| label: python read sampled reefs data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python read sampled reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: python sampled simple raw means
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: false
+```
+
+```{r}
+#| label: python sampled simple raw means plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/Python_full_simple_raw_means_plot.png){width=500px}
+
+#### 3. Replace a reef
+
+These data represent the fixed 25 sites, yet the site with the lowest
+coral cover is discontinued after 9 years and the highest performing
+reef is only introduced after 9 years. In this way, these data are
+intended to mimic the scenario in which a poor reef is replaced by a
+relatively good reef.
+
+```{python}
+#| label: python read sampled reefs data 1
+#| results: markup
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+```
+
+```{python}
+#| label: python read sampled reefs data 1 show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{python}
+#| label: python sampled reefs data 1 plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/Python_sampled_reefs_1_plot.png){width=500px}
+
+#### 4. Replace a reef (V2)
+
+These data represent a more extreme version of the above reef
+replacement situation in that there are only a total of five reefs and
+thus the replacement represents a higher fraction of reefs.
+
+```{python}
+#| label: python read sampled reefs data 2
+#| results: markup
+#| echo: true
+#| cache: false
+#| dependson: "read all reefs data"
+```
+
+```{python}
+#| label: python read sampled reefs data 2 show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{python}
+#| label: python sampled reefs data 2 plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+![](../output/figures/Python_sampled_reefs_2_plot.png){width=500px}
+
+::::
+
+:::
+ 
+
+## Data preparations
+
+Perform the following data preparation steps:
+
+- specifically declare any categorical variables (as factors in R,
+  categories in python)
+- ensure that all levels of hierarchical (varying) effects have unique
+  IDs
+- express cover as a proportion out of 1 as is necessary for modelling
+  against a beta distribution
+- create a prediction grid containing all years in the monitoring
+  range
+
+::: {.panel-tabset}
+
+### R
+
+:::: {.panel-tabset}
+
+#### All sampled reefs
+
+```{r}
+#| label: sampled data prep 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{r}
+#| label: newdata 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+#### Replace a reef
+
+```{r}
+#| label: sampled data prep 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: newdata 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+#### Replace a reef (V2)
+
+```{r}
+#| label: sampled data prep 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{r}
+#| label: newdata 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+
+::::
+
+### Python
+    
+:::: {.panel-tabset}
+
+#### All sampled reefs
+
+```{python}
+#| label: python sampled data prep 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python newdata 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+#### Replace a reef
+
+```{python}
+#| label: python sampled data prep 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python newdata 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+#### Replace a reef (V2)
+
+```{python}
+#| label: python sampled data prep 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python newdata 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+::::
+
+:::
+
+ 
+
+## Modelled trends
+
+The following table lists datasets that are used in the comparison
+figures along with their respective legend entries.
+
+::: {.callout-note collapse=true}
+### view table
+| Dataset                          | Description                                                                       | Legend label(s)                       |
+|----------------------------------|-----------------------------------------------------------------------------------|---------------------------------------|
+| `benthos_reefs_sf`               | All reef-level data                                                               |                                       |
+| `benthos_reefs_temporal_summary` | All global-level data                                                             | all mean / all median                 |
+| `all_sampled_sum`                | Simple stats of all sampled data (25 sites)                                       | all_sampled_mean / all_sampled_median |
+|                                  |                                                                                   |                                       |
+| `benthos_fixed_locs_obs_0`       | All sampled data (25 sites)                                                       |                                       |
+| `mod_glmmTMB_0`                  | glmmTMB model of all sampled data (25 sites)                                      |                                       |
+| `glmmTMB_0_sum`                  | Estimated marginal means from all sampled data (25 sites)                         | glmmTMB                               |
+| `mod_brms_0`                     | brms model of all sampled data (25 sites)                                         |                                       |
+| `brms_0_sum`                     | Estimated marginal means from all sampled data (25 sites)                         | brms                                  |
+| `mod_stan_0`                     | stan model of all sampled data (25 sites)                                         |                                       |
+| `stan_0_sum`                     | Estimated marginal means from all sampled data (25 sites)                         | stan                                  |
+| `mod_gbm_0`                      | gbm model of all sampled data (25 sites)                                          |                                       |
+| `gbm_0_sum`                      | Estimated predictions from all sampled data (25 sites)                            | gbm                                   |
+| `mod_gbm_0b`                     | gbm model with covariates of all sampled data (25 sites)                          |                                       |
+| `gbm_0b_sum`                     | Estimated predictions with covariates from all sampled data (25 sites)            | gbm                                   |
+| `gbm_0c_sum`                     | Estimated predictions with covariates from all sampled data (all sites)           | gbm                                   |
+| `mod_dbarts_0`                   | bart model with covariates of all sampled ata (25 sites)                          |                                       |
+| `dbarts_0_sum`                   | Estimated predictions from all sampled data (25 sites)                            | dbarts                                |
+| `mod_dbarts_0b`                  | bart model with covariates of all sampled ata (25 sites)                          |                                       |
+| `dbarts_0b_sum`                  | Estimated predictions with covariates from all sampled data (25 sites)            | dbarts                                |
+| `dbarts_0c_sum`                  | Estimated predictions with covariates from all data (all sites)                   | dbarts                                |
+|                                  |                                                                                   |                                       |
+| `benthos_fixed_locs_obs_1`       | Replaced sampled data (25 sites)                                                  |                                       |
+| `mod_glmmTMB_1`                  | glmmTMB model of replaced sampled data (25 sites)                                 |                                       |
+| `glmmTMB_1_sum`                  | Estimated marginal means from replaced sampled data (25 sites)                    | glmmTMB                               |
+| `mod_brms_1`                     | brms model of replaced sampled data (25 sites)                                    |                                       |
+| `brms_1_sum`                     | Estimated marginal means from replaced sampled data (25 sites)                    | brms                                  |
+| `mod_stan_1`                     | stan model of replaced sampled data (25 sites)                                    |                                       |
+| `stan_1_sum`                     | Estimated marginal means from replaced sampled data (25 sites)                    | stan                                  |
+| `mod_gbm_1`                      | gbm model of replaced sampled data (25 sites)                                     |                                       |
+| `gbm_1_sum`                      | Estimated predictions from replaced sampled data (25 sites)                       | gbm                                   |
+| `mod_gbm_1b`                     | gbm model with covariates of replaced sampled data (25 sites)                     |                                       |
+| `gbm_1b_sum`                     | Estimated predictions with covariates from replaced sampled data (25 sites)       | gbm                                   |
+| `gbm_1c_sum`                     | Estimated predictions with covariates from replaced sampled data (replaced sites) | gbm                                   |
+| `mod_dbarts_1`                   | bart model with covariates of replaced sampled ata (25 sites)                     |                                       |
+| `dbarts_1_sum`                   | Estimated predictions from replaced sampled data (25 sites)                       | dbarts                                |
+| `mod_dbarts_1b`                  | bart model with covariates of replaced sampled ata (25 sites)                     |                                       |
+| `dbarts_1b_sum`                  | Estimated predictions with covariates from replaced sampled data (25 sites)       | dbarts                                |
+| `dbarts_1c_sum`                  | Estimated predictions with covariates from replaced data (all sites)              | dbarts                                |
+|                                  |                                                                                   |                                       |
+| `benthos_fixed_locs_obs_2`       | Replaced sampled data (5 sites)                                                   |                                       |
+| `mod_glmmTMB_2`                  | glmmTMB model of replaced sampled data (5 sites)                                  |                                       |
+| `glmmTMB_2_sum`                  | Estimated marginal means from replaced sampled data (5 sites)                     | glmmTMB                               |
+| `mod_brms_2`                     | brms model of replaced sampled data (5 sites)                                     |                                       |
+| `brms_2_sum`                     | Estimated marginal means from replaced sampled data (5 sites)                     | brms                                  |
+| `mod_stan_2`                     | stan model of replaced sampled data (5 sites)                                     |                                       |
+| `stan_2_sum`                     | Estimated marginal means from replaced sampled data (5 sites)                     | stan                                  |
+| `mod_gbm_2`                      | gbm model of replaced sampled data (5 sites)                                      |                                       |
+| `gbm_2_sum`                      | Estimated predictions from replaced sampled data (5 sites)                        | gbm                                   |
+| `mod_gbm_2b`                     | gbm model with covariates of replaced sampled data (5 sites)                      |                                       |
+| `gbm_2b_sum`                     | Estimated predictions with covariates from replaced sampled data (5 sites)        | gbm                                   |
+| `gbm_2c_sum`                     | Estimated predictions with covariates from replaced sampled data (replaced sites) | gbm                                   |
+| `mod_dbarts_2`                   | bart model with covariates of replaced sampled ata (5 sites)                      |                                       |
+| `dbarts_2_sum`                   | Estimated predictions from replaced sampled data (5 sites)                        | dbarts                                |
+| `mod_dbarts_2b`                  | bart model with covariates of replaced sampled ata (5 sites)                      |                                       |
+| `dbarts_2b_sum`                  | Estimated predictions with covariates from replaced sampled data (5 sites)        | dbarts                                |
+| `dbarts_2c_sum`                  | Estimated predictions with covariates from replaced data (all sites)              | dbarts                                |
+
+
+| Model  | Description                       |
+|--------|-----------------------------------|
+| Simple | Simple hierarchical means/medians |
+|        |                                   |
+
+:::
+
+::: {.panel-tabset}
+
+### All sampled reefs
+
+:::: {.panel-tabset}
+
+#### glmmTMB
+
+```{r}
+#| label: glmmTMB_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: glmmTMB_0_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_0_emmeans plot
+#| eval: false
+#| results: markup
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_0"
+```
+
+![](../output/figures/R_pdp_mod_glmmTMB_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- glmmTMB modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+
+##### Model Validation
+
+```{r}
+#| label: glmmTMB_0_dharma
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_0_dharma plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 4
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_0"
+```
+
+![](../output/figures/R_dharma_mod_glmmTMB_0.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: glmmTMB_0_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_0"
+mod_glmmTMB_0 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_glmmTMB_0.rds")
+)
+mod_glmmTMB_0 |> summary()
+```
+
+:::::
+
+#### brms
+
+```{r}
+#| label: brms_pre_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: brms_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+##### Partial dependency plot
+
+```{r}
+#| label: brms_0_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: brms_0_emmeans plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+![](../output/figures/R_pdp_mod_brms_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- brms modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: brms_trace_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+![](../output/figures/R_brms_trace_0.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: brms_ac_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+![](../output/figures/R_brms_ac_0.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: brms_rhat_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+![](../output/figures/R_brms_rhat_0.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: brms_ess_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+![](../output/figures/R_brms_ess_0.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: brms_ppc_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+```
+
+![](../output/figures/R_brms_ppc_0.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: brms_0_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_0"
+mod_brms_0 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_brms_0.rds")
+)
+mod_brms_0 |> summary()
+```
+
+:::::
+
+#### stan
+
+```{r}
+#| label: stan_pre_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: stan_0_pdp
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_0_pdp plot
+#| results: markup
+#| echo: true
+#| eval: false
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_pdp_mod_stan_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- stan modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: stan_trace_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_trace_0.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: stan_ac_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_ac_0.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: stan_rhat_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_rhat_0.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: stan_ess_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_ess_0.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: stan_ppc_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+```
+
+![](../output/figures/R_stan_ppc_0.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: stan_0_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_0"
+mod_stan_0 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_stan_0.rds")
+)
+mod_stan_0$print(
+  variables = c("phi", "beta", "sd_1", "sd_2", "sd_3"),
+  max_rows = 20
+)
+mod_stan_0$print(
+  variables = "cellmeans",
+  max_rows = 20
+)
+```
+
+:::::
+
+#### GBM
+
+```{r}
+#| label: gbm_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: gbm_pdp_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_gbm_0_plot_
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- gbm modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+
+:::::
+
+#### GBM + covariates
+
+```{r}
+#| label: gbm_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+```{r}
+#| label: gbm_pdp_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_0b plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_0b.png){width=700px}
+![](../output/figures/R_infl_mod_gbm_0b.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- gbm modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
+
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: gbm_pdp_0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_0c plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_0c.png){width=700px}
+![](../output/figures/R_infl_mod_gbm_0c.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- gbm modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
+
+:::::
+
+#### dbarts
+
+```{r}
+#| label: dbarts_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_0_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_0.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- gbm modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+
+:::::
+
+#### dbarts + covariates
+
+```{r}
+#| label: dbarts_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+```{r}
+#| label: dbarts_pdp_0b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_0b_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_0b.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- dbarts modelled estimates are consistent with the 25 site same
+  data, yet biased lower than the "truth"
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: dbarts_pdp_0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_0c_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_0c.png){width=700px}
+
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (red and khaki)
+- dbarts modelled estimates are slightly elevated above the 25 site same
+  data, yet still biased lower than the "truth"
+
+:::::
+
+::::
+
+### Replace a reef
+
+:::: {.panel-tabset}
+
+#### glmmTMB
+
+```{r}
+#| label: glmmTMB_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: glmmTMB_1_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_1_emmeans plot
+#| eval: false
+#| results: markup
+#| echo: true
+#| fig-width: 12
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_1"
+```
+
+![](../output/figures/R_pdp_mod_glmmTMB_1.png){width=900px}
+
+- left figure compares glmmTMB modelled estimates to the sample data
+- right figure compares glmmTMB modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and khaki dashed lines) are lower than the true
+  global average (blue and purple) - right side figure
+- glmmTMB modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+
+##### Model Validation
+
+```{r}
+#| label: glmmTMB_1_dharma
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_1_dharma plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 4
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_1"
+```
+
+![](../output/figures/R_dharma_mod_glmmTMB_1.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: glmmTMB_1_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_1"
+mod_glmmTMB_1 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_glmmTMB_1.rds")
+)
+mod_glmmTMB_1 |> summary()
+```
+
+:::::
+
+#### brms
+
+```{r}
+#| label: brms_pre_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: brms_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+##### Partial dependency plot
+
+```{r}
+#| label: brms_1_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: brms_1_emmeans plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 12
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_1"
+```
+
+![](../output/figures/R_pdp_mod_brms_1.png){width=900px}
+
+- left figure compares brms modelled estimates to the sample data
+- right figure compares brms modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- brms modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: brms_trace_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_1"
+```
+
+![](../output/figures/R_brms_trace_1.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: brms_ac_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_1"
+```
+
+![](../output/figures/R_brms_ac_1.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: brms_rhat_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_1"
+```
+
+![](../output/figures/R_brms_rhat_1.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: brms_ess_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_1"
+```
+
+![](../output/figures/R_brms_ess_1.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: brms_ppc_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_1"
+```
+
+![](../output/figures/R_brms_ppc_1.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: brms_1_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_1"
+mod_brms_1 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_brms_1.rds")
+)
+mod_brms_1 |> summary()
+```
+
+:::::
+
+#### stan
+
+```{r}
+#| label: stan_pre_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: stan_1_pdp
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_1_pdp plot
+#| results: markup
+#| echo: true
+#| eval: false
+#| fig-width: 12
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_1"
+```
+
+![](../output/figures/R_pdp_mod_stan_1.png){width=900px}
+
+- left figure compares stan modelled estimates to the sample data
+- right figure compares stan modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- stan modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: stan_trace_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_1"
+```
+
+![](../output/figures/R_stan_trace_1.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: stan_ac_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_1"
+```
+
+![](../output/figures/R_stan_ac_1.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: stan_rhat_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_1"
+```
+
+![](../output/figures/R_stan_rhat_1.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: stan_ess_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_1"
+```
+
+![](../output/figures/R_stan_ess_1.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: stan_ppc_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_1"
+```
+
+![](../output/figures/R_stan_ppc_1.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: stan_1_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_1"
+mod_stan_1 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_stan_1.rds")
+)
+mod_stan_1$print(
+  variables = c("phi", "beta", "sd_1", "sd_2", "sd_3"),
+  max_rows = 20
+)
+mod_stan_1$print(
+  variables = "cellmeans",
+  max_rows = 20
+)
+```
+
+:::::
+
+
+#### GBM
+
+```{r}
+#| label: gbm_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: gbm_pdp_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_gbm_1_plot_
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_1.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+
+:::::
+
+#### GBM + covariates
+
+```{r}
+#| label: gbm_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+```{r}
+#| label: gbm_pdp_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_1b plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_1b.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_1b.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: gbm_pdp_1c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_1c plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_1c.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_1c.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time (though note that this is
+  because this partial is the result of the same model, just predicted
+  onto the full data grid)
+
+:::::
+
+#### dbarts
+
+```{r}
+#| label: dbarts_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_1_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_1.png){width=900px}
+
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are slightly lower than the 25 site,
+  replacement data, and thus biased lower than the "truth"
+
+:::::
+
+#### dbarts + covariates
+
+```{r}
+#| label: dbarts_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+```{r}
+#| label: dbarts_pdp_1b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_1b_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_1b.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_1b.png){width=900px}
+
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- relative influences mainly space/time 
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: dbarts_pdp_1c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_1c_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_1c.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_1b.png){width=900px}
+
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are slightly higher than the 25 site,
+  replacement data, yet biased lower than the "truth"
+- relative influences mainly space/time (though note that this is
+  because this partial is the result of the same model, just predicted
+  onto the full data grid)
+:::::
+
+::::
+
+### Replace a reef (V2)
+
+:::: {.panel-tabset}
+
+#### glmmTMB
+
+```{r}
+#| label: glmmTMB_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: glmmTMB_2_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_2_emmeans plot
+#| eval: false
+#| results: markup
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_2"
+```
+
+![](../output/figures/R_pdp_mod_glmmTMB_2.png){width=900px}
+
+- left figure compares glmmTMB modelled estimates to the sample data
+- right figure compares glmmTMB modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- glmmTMB modelled estimates are slightly higher than the 5 site,
+  replacement data, yet biased lower than the "truth"
+- the uncertainty is relatively high
+
+##### Model Validation
+
+```{r}
+#| label: glmmTMB_2_dharma
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_2_dharma plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 4
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_2"
+```
+
+![](../output/figures/R_dharma_mod_glmmTMB_2.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: glmmTMB_2_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_2"
+mod_glmmTMB_2 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_glmmTMB_2.rds")
+)
+mod_glmmTMB_2 |> summary()
+```
+
+:::::
+
+#### brms
+
+```{r}
+#| label: brms_pre_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: brms_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+##### Partial dependency plot
+
+```{r}
+#| label: brms_2_emmeans
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: brms_2_emmeans plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_pdp_mod_brms_2.png){width=900px}
+
+- left figure compares brms modelled estimates to the sample data
+- right figure compares brms modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- brms modelled estimates are slightly higher than the 5 site,
+  replacement data, yet biased lower than the "truth"
+- the uncertainty is relatively high
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: brms_trace_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_trace_2.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: brms_ac_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_ac_2.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: brms_rhat_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_rhat_2.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: brms_ess_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_ess_2.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: brms_ppc_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+```
+
+![](../output/figures/R_brms_ppc_2.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: brms_2_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_2"
+mod_brms_2 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_brms_2.rds")
+)
+mod_brms_2 |> summary()
+```
+
+:::::
+
+#### stan
+
+```{r}
+#| label: stan_pre_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: stan_2_pdp
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: stan_2_pdp plot
+#| results: markup
+#| echo: true
+#| eval: false
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_pdp_mod_stan_2.png){width=900px}
+
+- left figure compares brms modelled estimates to the sample data
+- right figure compares brms modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- brms modelled estimates are slightly higher than the 5 site,
+  replacement data, yet biased lower than the "truth"
+- the uncertainty is relatively high, but not as high as brms or glmmTMB
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: stan_trace_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_trace_2.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: stan_ac_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_ac_2.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: stan_rhat_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_rhat_2.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: stan_ess_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_ess_2.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: stan_ppc_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+```
+
+![](../output/figures/R_stan_ppc_2.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: stan_2_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "stan_2"
+mod_stan_2 <- readRDS(
+  file = paste0(data_path, "synthetic/mod_stan_2.rds")
+)
+mod_stan_2$print(
+  variables = c("phi", "beta", "sd_2", "sd_2", "sd_3"),
+  max_rows = 20
+)
+mod_stan_2$print(
+  variables = "cellmeans",
+  max_rows = 20
+)
+```
+
+:::::
+
+#### GBM
+
+```{r}
+#| label: gbm_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: gbm_pdp_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_gbm_2_plot_
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_2.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates deviate substantially from the full 25 site
+  dataset, particularly after year 9
+- gbm modelled estimates are consistent with the observed 5 site
+  replacement data - e.g. adversely impacted by the replacement of a
+  poor reef with a good reef.
+- gbm derived predictions lack uncertainty estimates
+
+:::::
+
+#### GBM + covariates
+
+```{r}
+#| label: gbm_2b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_2b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+```{r}
+#| label: gbm_pdp_2b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_2b plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_2b.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_2b.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates deviate substantially from the full 25 site
+  dataset, particularly after year 9
+- gbm modelled estimates are consistent with the observed 5 site
+  replacement data - e.g. adversely impacted by the replacement of a
+  poor reef with a good reef.
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: gbm_pdp_2c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_2c plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_2c.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_2c.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are more consistent with the full 25 site
+  dataset, e.g., they are less impacted by the replacement of a poor
+  reef with a good reef.
+- gbm modelled estimates deviate from the observed 5 site
+  replacement data after year 9.
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
+
+:::::
+
+#### dbarts
+
+```{r}
+#| label: dbarts_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_2_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_2.png){width=900px}
+
+:::::
+
+#### dbarts + covariates
+
+```{r}
+#| label: dbarts_2b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+```{r}
+#| label: dbarts_pdp_2b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_2b_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_2b.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_2b.png){width=900px}
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: dbarts_pdp_2c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_2c_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_2c.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_2b.png){width=900px}
+
+:::::
+
+
+::::
+
+:::
+ 
+ 
