@@ -145,6 +145,10 @@ jobs:
       - name: Run R
         run: |
           make -i run_R
+
+      # Run Render
+      - name: Run R
+        run: |
           make -i render_docs
 
       # Step 4: Upload the _targets folder as an artifact
