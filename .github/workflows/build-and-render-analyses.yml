@@ -112,6 +112,14 @@ jobs:
           } else {
             message("CmdStan already installed at: ", cmdstanr::cmdstan_path())
           }
+          
+      # install quarto
+      - name: Install quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+      - name: Change ImageMagick policy to allow pdf->png conversion.
+        run: |
+          sudo sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
+          
 
       - name: Cache targets and output
         uses: actions/cache@v4
@@ -136,7 +144,7 @@ jobs:
       - name: Run R
         run: |
           make -i run_R
-          #make -i render_docs
+          make -i render_docs
 
       # Step 4: Upload the _targets folder as an artifact
       #- name: Upload _targets artifact
@@ -145,3 +153,9 @@ jobs:
       #    name: _targets
       #    path: R/_targets
 
+      # Deploy site to gh-pages branch
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: docs
