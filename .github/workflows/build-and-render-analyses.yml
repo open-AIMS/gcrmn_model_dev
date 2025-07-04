@@ -80,6 +80,7 @@ jobs:
             any::Rgraphviz
             any::emmeans
             any::gridGraphics
+            any::reticulate
             stan-dev/cmdstanr
             jmgirard/standist
 
