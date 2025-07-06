@@ -1,0 +1,208 @@
+
+---
+title: "Comparing model types"
+author: "Murray Logan"
+date: today
+date-format: "DD/MM/YYYY"
+format:
+  html:
+    ## Format
+    theme: [default, resources/style.scss]
+    css: resources/style.css
+    html-math-method: mathjax
+    ## Table of contents
+    toc: true
+    toc-float: true
+    ## Numbering
+    number-sections: true
+    number-depth: 3
+    ## Layout
+    page-layout: full
+    fig-caption-location: "bottom"
+    fig-align: "center"
+    fig-width: 4
+    fig-height: 4
+    out-width: 500px
+    fig-dpi: 72
+    tbl-cap-location: top
+    ## Code
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+    code-line-numbers: true
+    code-block-border-left: "#ccc"
+    code-copy: true
+    highlight-style: atom-one
+    ## Execution
+    execute:
+      echo: true
+      #cache: true
+    ## Rendering
+    embed-resources: true
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+## execute: 
+##   cache: true
+jupyter: python3
+output_dir: "docs"
+documentclass: article
+fontsize: 12pt
+mainfont: Arial
+mathfont: LiberationMono
+monofont: DejaVu Sans Mono
+classoption: a4paper
+bibliography: resources/references.bib
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+knitr::opts_chunk$set(
+    cache.lazy = FALSE,
+    tidy = "styler"
+)
+## allow indented chunks
+assignInNamespace(".sep.label",
+  "^\\ *(#|--)+\\s*(@knitr|----+)(.*?)-*\\s*$",
+    ns = "knitr"
+)
+## remove the indentation from all python chunks that start
+## with indentation
+codes <- knitr::knit_code$get()
+process_chunks <- function(codes) {
+  nms <- names(codes)
+  wch <- which(startsWith(names(codes), "python"))
+  codes1 <- lapply(1:length(codes), function(i) {
+    if (i %in% wch) {
+      x <- gsub("^ {4}", "", codes[[i]])
+    } else {
+      x <- codes[[i]]
+    }
+    x
+  })
+  names(codes1) <- nms
+  codes1
+}
+knitr::knit_code$set(
+  process_chunks(codes)
+)
+```
+
+## Purpose
+
+The purpose of this site is to contrast a few different approaches to
+modelling broad scale spatio-temporal that are suitable for both very
+large and small sample data sets in the context of the upcoming GCRMN
+report. More specifically, we have identified the following modelling
+challenges for which analyses of simulated data will hopefully provide
+model choice guidance:
+
+- **Site replacements**: when monitored sites are removed from a
+  design and replaced with alternative sites. Of particular concern is
+  the situation in which a poor site is discontinued (perhaps it
+  becomes so degraded it no longer functions as a coral reef) and is
+  replaced by a relatively good new site (with the argument that there
+  is no value in establishing a new poor site that might similarly
+  disappear in the near future). Unfortunately, this shifts the bias
+  and has the potential to confound the timeseries.
+
+- **Unsampled years**: when the timeseries are punctuated with missing
+  years. Ideally, it is important that the analyses are able to
+  estimate trends across the full timeseries. Hence estimates are
+  necessary, even when data are unavailable.
+
+- **Use of covariates**: whilst other covariates (such as sea surface
+  temperature and cyclones could be used to inform trends at locations
+  and times for which observed data are lacking, they also have the
+  potential to induce new biases. For example, if models are “trained”
+  with wave energy (or wind) data in which no major storms occurred
+  and coral cover grew, it is possible that the model could “learn”
+  that coral cover is positively correlated with wave energy. When
+  predicting to a different area that did experience substantial
+  stores (that might be expected to have a negative impact on coral
+  cover), such a model might erroneously predict substantial increases
+  in coral cover.
+
+There are also additional complications of using covariates that are
+likely to represent acute impacts. Whilst, coral cover can decline
+rapidly in response to a disturbance, it typically takes time to
+recover (if at all) to its pre-disturbance state. As a result, the
+state of coral at any specific time is the result of an accumulation
+of conditions over the past and not just the most recent conditions.
+To account for this in a modelling perspective, is likely to require
+either:
+
+Inclusion of the previous years cover estimate in a model (which
+effectively means the model is parameterised on changes in cover).
+This is obviously infeasible for the first year of a monitoring
+program or a program without fixed sites and also becomes a
+proportionally bigger issue with shorter the time series. Inclusion of
+multiple lagged versions of each of the covariates that are likely to
+represent causal disturbances.
+
+## Approach
+
+To explore the above challenges, we have elected to take two approaches:
+
+1. create exemplar datasets from a simulated landscape and apply a
+   range of candidate models to each of these datasets. Since the
+   landscape is fully simulated, the modelled outcomes can be compared
+   to the "truth". Furthermore, this approach permits us to explore
+   the suitability of different modelling approaches to very specific
+   challenges (such as site replacements or temporal gaps) in complete
+   isolation.
+2. select exemplar cases from the real collated data and apply a range
+   of candidate models. Whilst less controlled, this approach allows
+   us to explore the impact of modelling decisions on real situation.
+
+The current site will focus on the former of these approaches as it
+does not require the dissemination of real data for which there might
+be embargoes or other restrictions in place.
+
+## The simulated landscape
+
+To simulate a coral reef landscape, we are making use of an R package
+(`synthos`). This package starts with a spatial array representing the
+state of a coral reef (hard coral, soft coral and algae cover) at time
+0.  Realistic spatio-temporal footprints for three broad types of
+disturbances (cyclones, ocean temperature and an "other") are also
+defined. These disturbances are then used to perturb the coral reef
+benthos over time and space in conjunction with some growth. The net
+result is a full spatio-temporal grid of each of hard coral cover,
+soft coral cover and algae cover to act as the "truth".
+
+The synthos package also permits us to apply different monitoring
+sampling designs to mimic the collection of observational data over
+space and time. For example, we could nominate a sampling design
+comprised of 25 randomly selected reefs, each of which are monitored
+over a 12 year period and comprise of samples collected from 50 photos
+along five transects in each of three sites from each reef.
+
+We used the synthos package to construct specific datasets that each
+focused on one of the modelling challenges outlined above. Details of
+the codes used to create the base of those datasets (e.g. the full
+spatio-temporal landscape and the observed monitoring datasets) are
+outlined [here](synthetic_data.html).
+
+## Investigation of modelling approaches
+
+The following table describes each of the modelling challenges along
+with the associated dataset and link to the modelling outcomes. Note,
+the first case in each challenge represents the ideal full
+spatio-temporal observation grid and is there for comparison.
+  
+| Challenge        | Dataset name               | Description                                                                   | Link                                            |
+|------------------|----------------------------|-------------------------------------------------------------------------------|-------------------------------------------------|
+| Reef replacement |                            |                                                                               | [site_replacements.html](site_replacement.html) |
+|                  | `benthos_fixed_locs_obs`   | Full monitoring sample 25 sites, 12 years complete                            | [Model](site_replacement.html#modelled-trends)  |
+|                  | `benthos_fixed_locs_obs_1` | 25 sites, 12 years complete, poorest site replaced by strongest after 9 years | [Model](site_replacement.html#modelled-trends)  |
+|                  | `benthos_fixed_locs_obs_2` | 5 sites, 12 years complete, poorest site replaced by strongest after 9 years  | [Model](site_replacement.html#modelled-trends)  |
+| Missing years    |                            |                                                                               | [missing_years.html](missing_years.html)        |
+|                  | `benthos_fixed_locs_obs`   | Full monitoring sample 25 sites, 12 years complete                            | [Model](site_replacement.html#modelled-trends)  |
+|                  | `benthos_fixed_locs_obs_3` | 25 sites, 12 years, 5 site with gap between years 2 and 6                     | [Model](missing_years.html#modelled-trends)     |
+|                  | `benthos_fixed_locs_obs_4` | 5 sites, 12 years, 5 site with gap between years 2 and 6                      | [Model](missing_years.html#modelled-trends)     |
