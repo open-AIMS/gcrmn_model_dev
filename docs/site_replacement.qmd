@@ -97,54 +97,15 @@ knitr::knit_code$set(
 ## Purpose
 
 The purpose of this page is to contrast a few different approaches to
-modelling broad scale spatio-temporal that are suitable for both very
-large and small sample data sets in the context of the upcoming GCRMN
-report. More specifically, we have identified the following modelling
-challenges for which analyses of simulated data will hopefully provide
-model choice guidance:
-
-- **Site replacements**: when monitored sites are removed from a
-  design and replaced with alternative sites. Of particular concern is
-  the situation in which a poor site is discontinued (perhaps it
-  becomes so degraded it no longer functions as a coral reef) and is
-  replaced by a relatively good new site (with the argument that there
-  is no value in establishing a new poor site that might similarly
-  disappear in the near future). Unfortunately, this shifts the bias
-  and has the potential to confound the timeseries.
-
-- **Unsampled years**: when the timeseries are punctuated with missing
-  years. Ideally, it is important that the analyses are able to
-  estimate trends across the full timeseries. Hence estimates are
-  necessary, even when data are unavailable.
-
-- **Use of covariates**: whilst other covariates (such as sea surface
-  temperature and cyclones could be used to inform trends at locations
-  and times for which observed data are lacking, they also have the
-  potential to induce new biases. For example, if models are "trained"
-  with wave energy (or wind) data in which no major storms occurred
-  and coral cover grew, it is possible that the model could "learn"
-  that coral cover is positively correlated with wave energy. When
-  predicting to a different area that did experience substantial
-  stores (that might be expected to have a negative impact on coral
-  cover), such a model might erroneously predict substantial increases
-  in coral cover.
-  
-  There are also additional complications of using covariates that are
-  likely to represent acute impacts. Whilst, coral cover can decline
-  rapidly in response to a disturbance, it typically takes time to
-  recover (if at all) to its pre-disturbance state. As a result, the
-  state of coral at any specific time is the result of an accumulation
-  of conditions over the past and not just the most recent conditions.
-  To account for this in a modelling perspective, is likely to require
-  either:
-  
-  - Inclusion of the previous years cover estimate in a model (which
-    effectively means the model is parameterised on changes in cover).
-    This is obviously infeasible for the first year of a monitoring
-    program or a program without fixed sites and also becomes a
-    proportionally bigger issue with shorter the time series.
-  - Inclusion of multiple lagged versions of each of the covariates
-    that are likely to represent causal disturbances.
+modelling broad scale spatio-temporal specifically in relation to
+**site replacements**. Site replacements are when monitored sites are
+removed from a design and replaced with alternative sites. Of
+particular concern is the situation in which a poor site is
+discontinued (perhaps it becomes so degraded it no longer functions as
+a coral reef) and is replaced by a relatively good new site (with the
+argument that there is no value in establishing a new poor site that
+might similarly disappear in the near future). Unfortunately, this
+shifts the bias and has the potential to confound the timeseries.
 
 ## Preparations
 
@@ -774,12 +735,39 @@ figures along with their respective legend entries.
 | `dbarts_2c_sum`                  | Estimated predictions with covariates from replaced data (all sites)              | dbarts                                |
 
 
-| Model  | Description                       |
-|--------|-----------------------------------|
-| Simple | Simple hierarchical means/medians |
-|        |                                   |
 
 :::
+
+Each of the sections below features a set of partial dependency plots.
+These plots present the modelled temporal trends compared to a range
+of other non-modelled estimates. The following table, defines each of
+the trends presented throughout the partial plots. In the table,
+**challenging data** refers to a dataset that has the focal modelling
+challenge (for example, for the _Replace a reef_ issue, the
+challenging data are observed data with a reef replacement.
+
+
+| Trend                                                | Description                                                                       |
+|------------------------------------------------------|-----------------------------------------------------------------------------------|
+| `all mean`, `all median`, `true mean`, `true median` | Simple hierarchical means/medians for the full spatio-temporal grid (the "truth") |
+| `all_sampled_ mean`, `all_sampled_ median`           | Simple hierarchical means/medians for the 25 sites / 12 years observational data  |
+| `simple data mean`, `simple data median`             | Simple hierarchical means/medians for the **challenging data**                    |
+| `glmmTMB`                                            | Modelled trends from a glmmTMB (frequentist) model                                |
+| `brms`                                               | Modelled trends for a brms (Bayesian) model                                       |
+| `stan`                                               | Modelled trends from a bespoke STAN (Bayesian) model                              |
+| `gbm`                                                | Modelled trends from a Gradient Boosted Model (regression tree)                   |
+| `dbarts`                                             | Modelled trends from a Bayesian Added Regression Tree                             |
+|                                                      |                                                                                   |
+
+Partial plots that display both a modelled trend as well as `simple
+data mean` and `simple data median` allow us to compare how well the
+model fits the training data.
+
+Partial plots that display both a modelling trend as well as
+`all_sampled_ mean`, `all_sampled_ median` and either `all mean`/`all
+median` or `true mean`/`true median` allow us to compare the accuracy
+of the model to both the full observed data and the full
+spatio-temporal (truth) grid.
 
 ::: {.panel-tabset}
 

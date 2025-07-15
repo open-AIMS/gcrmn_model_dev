@@ -478,13 +478,39 @@ figures along with their respective legend entries.
 | `dbarts_4b_sum`                  | Estimated predictions with covariates from gapped sampled data (all sites)        | dbarts                                |
 | `dbarts_4c_sum`                  | Estimated predictions with covariates from gapped data (all sites)              | dbarts                                |
 
-
-| Model  | Description                       |
-|--------|-----------------------------------|
-| Simple | Simple hierarchical means/medians |
-|        |                                   |
-
 :::
+
+Each of the sections below features a set of partial dependency plots.
+These plots present the modelled temporal trends compared to a range
+of other non-modelled estimates. The following table, defines each of
+the trends presented throughout the partial plots. In the table,
+**challenging data** refers to a dataset that has the focal modelling
+challenge (for example, for the _Replace a reef_ issue, the
+challenging data are observed data with a reef replacement.
+
+
+| Trend                                                | Description                                                                       |
+|------------------------------------------------------|-----------------------------------------------------------------------------------|
+| `all mean`, `all median`, `true mean`, `true median` | Simple hierarchical means/medians for the full spatio-temporal grid (the "truth") |
+| `all_sampled_ mean`, `all_sampled_ median`           | Simple hierarchical means/medians for the 25 sites / 12 years observational data  |
+| `simple data mean`, `simple data median`             | Simple hierarchical means/medians for the **challenging data**                    |
+| `glmmTMB`                                            | Modelled trends from a glmmTMB (frequentist) model                                |
+| `brms`                                               | Modelled trends for a brms (Bayesian) model                                       |
+| `stan`                                               | Modelled trends from a bespoke STAN (Bayesian) model                              |
+| `gbm`                                                | Modelled trends from a Gradient Boosted Model (regression tree)                   |
+| `dbarts`                                             | Modelled trends from a Bayesian Added Regression Tree                             |
+|                                                      |                                                                                   |
+
+Partial plots that display both a modelled trend as well as `simple
+data mean` and `simple data median` allow us to compare how well the
+model fits the training data.
+
+Partial plots that display both a modelling trend as well as
+`all_sampled_ mean`, `all_sampled_ median` and either `all mean`/`all
+median` or `true mean`/`true median` allow us to compare the accuracy
+of the model to both the full observed data and the full
+spatio-temporal (truth) grid.
+
 
 ::: {.panel-tabset}
 
@@ -2276,4 +2302,286 @@ mod_stan_4$print(
 
 :::::
 
+#### GBM
+
+```{r}
+#| label: gbm_4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: gbm_pdp_4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_gbm_4_plot_
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_4.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+
+:::::
+
+#### GBM + covariates
+
+```{r}
+#| label: gbm_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: gbm_post_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+```{r}
+#| label: gbm_pdp_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_4b plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_4b.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_4b.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: gbm_pdp_4c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: pdp_pdp_4c plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_gbm_4c.png){width=900px}
+![](../output/figures/R_infl_mod_gbm_4c.png){width=900px}
+
+- left figure compares gbm modelled estimates to the sample data
+- right figure compares gbm modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- gbm modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- gbm derived predictions lack uncertainty estimates
+- relative influences mainly space/time (though note that this is
+  because this partial is the result of the same model, just predicted
+  onto the full data grid)
+
+:::::
+
+#### dbarts
+
+```{r}
+#| label: dbarts_4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+```{r}
+#| label: dbarts_pdp_4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_4_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_4.png){width=900px}
+
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are slightly lower than the 25 site,
+  replacement data, and thus biased lower than the "truth"
+
+:::::
+
+#### dbarts + covariates
+
+```{r}
+#| label: dbarts_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+```{r}
+#| label: dbarts_pdp_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_4b_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_4b.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_4b.png){width=900px}
+
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are consistent with the 25 site,
+  replacement data, yet biased lower than the "truth"
+- relative influences mainly space/time 
+
+##### Partial dependency plot (full domain)
+
+```{r}
+#| label: dbarts_pdp_4c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{r}
+#| label: dbarts_4c_pdp plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+![](../output/figures/R_pdp_mod_dbarts_4c.png){width=900px}
+![](../output/figures/R_infl_mod_dbarts_4b.png){width=900px}
+
+- left figure compares dbarts modelled estimates to the sample data
+- right figure compares dbarts modelled estimates to the simple
+  hierarchical sampled means/medians and the true means/medians
+- sampled reefs (blue and green dashed lines) are lower than the true
+  global average (orange and khaki) - right side figure
+- dbarts modelled estimates are slightly higher than the 25 site,
+  replacement data, yet biased lower than the "truth"
+- relative influences mainly space/time (though note that this is
+  because this partial is the result of the same model, just predicted
+  onto the full data grid)
+  
+:::::
+
+::::
+
 :::
+
