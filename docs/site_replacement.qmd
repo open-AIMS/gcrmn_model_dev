@@ -95,7 +95,7 @@ knitr::knit_code$set(
 ```
 
 ## Purpose
-
+    
 The purpose of this page is to contrast a few different approaches to
 modelling broad scale spatio-temporal specifically in relation to
 **site replacements**. Site replacements are when monitored sites are
@@ -1435,6 +1435,72 @@ mod_stan_0$print(
 
 :::::
 
+#### pymc-bart + covariates
+
+```{python}
+#| label: python sampled data barts data 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python sampled data barts fit 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+![](../output/figures/python_pdp_pymc_bart_0b.png){width=700px}
+ 
+```{python}
+#| label: python sampled data barts prep plot 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python sampled data barts plot 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+##### Partial dependency plot (full domain)
+
+![](../output/figures/python_pdp_pymc_bart_0c.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python sampled data barts plot 0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+:::::
+ 
 ::::
 
 ### Replace a reef
@@ -2132,10 +2198,77 @@ mod_stan_1$print(
 - relative influences mainly space/time (though note that this is
   because this partial is the result of the same model, just predicted
   onto the full data grid)
+
+:::::
+
+#### pymc-bart + covariates
+
+```{python}
+#| label: python sampled data barts data 1 
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python sampled data barts fit 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+ 
+![](../output/figures/python_pdp_pymc_bart_1b.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python sampled data barts plot 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+
+##### Partial dependency plot (full domain)
+
+![](../output/figures/python_pdp_pymc_bart_1c.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 1c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python sampled data barts plot 1c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
 :::::
 
 ::::
-
+  
 ### Replace a reef (V2)
 
 :::: {.panel-tabset}
@@ -2815,9 +2948,73 @@ mod_stan_2$print(
 
 :::::
 
+#### pymc-bart + covariates
+
+```{python}
+#| label: python sampled data barts data 2 
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python sampled data barts fit 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+![](../output/figures/python_pdp_pymc_bart_2b.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python sampled data barts plot 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+
+##### Partial dependency plot (full domain)
+
+![](../output/figures/python_pdp_pymc_bart_2c.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 2c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python sampled data barts plot 2c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+:::::
 
 ::::
 
 :::
- 
  

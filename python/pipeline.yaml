@@ -1,6 +1,11 @@
 meta:
   extract_upstream: false
 
+executor:
+  dotted_path: ploomber.executors.Parallel
+  processes: 4 # limit to a max of 2 processes
+  start_method: spawn # start child process using 'spawn' method
+
 tasks:
   - source: site_replacement.site_replacement_global_parameters_
     product: cache/site_replacement_global_parameters_.pkl
@@ -92,3 +97,108 @@ tasks:
   - source: site_replacement.newdata_2_
     product: cache/newdata_2_.pkl
     upstream: [site_replacement_global_parameters_, sampled_reefs_data_prep_2_]
+
+    ## Modelled trends
+    ## All sampled reefs ------------------------------------------------
+  - source: site_replacement.sampled_reefs_bart_data_0_
+    product: cache/sampled_reefs_bart_data_0_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_data_prep_0_]
+
+  - source: site_replacement.sampled_reefs_bart_fit_0_
+    product: cache/sampled_reefs_bart_fit_0_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_data_0_]
+
+  - source: site_replacement.sampled_reefs_bart_prep_plot_0_
+    product: cache/sampled_reefs_bart_prep_plot_0_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_0_, sampled_reefs_bart_data_0_]
+
+  - source: site_replacement.sampled_reefs_bart_plot_0_
+    product: cache/sampled_reefs_bart_plot_0_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_prep_plot_0_]
+
+  - source: site_replacement.sampled_reefs_bart_prep_plot_0c_
+    product: cache/sampled_reefs_bart_prep_plot_0c_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_0_, sampled_reefs_bart_data_0_]
+
+  - source: site_replacement.sampled_reefs_bart_plot_0c_
+    product: cache/sampled_reefs_bart_plot_0c_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_prep_plot_0c_]
+
+    ## Replace a reef --------------------------------------------------
+  - source: site_replacement.sampled_reefs_bart_data_1_
+    product: cache/sampled_reefs_bart_data_1_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_data_prep_1_]
+
+  - source: site_replacement.sampled_reefs_bart_fit_1_
+    product: cache/sampled_reefs_bart_fit_1_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_data_1_]
+
+  - source: site_replacement.sampled_reefs_bart_prep_plot_1_
+    product: cache/sampled_reefs_bart_prep_plot_1_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_1_, sampled_reefs_bart_data_1_]
+
+  - source: site_replacement.sampled_reefs_bart_plot_1_
+    product: cache/sampled_reefs_bart_plot_1_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_prep_plot_1_]
+
+  - source: site_replacement.sampled_reefs_bart_prep_plot_1c_
+    product: cache/sampled_reefs_bart_prep_plot_1c_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_1_, sampled_reefs_bart_data_1_]
+
+  - source: site_replacement.sampled_reefs_bart_plot_1c_
+    product: cache/sampled_reefs_bart_plot_1c_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_prep_plot_1c_]
+
+    ## Replace a reef (V2) ---------------------------------------------
+
+  - source: site_replacement.sampled_reefs_bart_data_2_
+    product: cache/sampled_reefs_bart_data_2_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_data_prep_2_]
+
+  - source: site_replacement.sampled_reefs_bart_fit_2_
+    product: cache/sampled_reefs_bart_fit_2_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_data_2_]
+
+  - source: site_replacement.sampled_reefs_bart_prep_plot_2_
+    product: cache/sampled_reefs_bart_prep_plot_2_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_2_, sampled_reefs_bart_data_2_]
+
+  - source: site_replacement.sampled_reefs_bart_plot_2_
+    product: cache/sampled_reefs_bart_plot_2_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_prep_plot_2_]
+
+  - source: site_replacement.sampled_reefs_bart_prep_plot_2c_
+    product: cache/sampled_reefs_bart_prep_plot_2c_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_2_, sampled_reefs_bart_data_2_]
+
+  - source: site_replacement.sampled_reefs_bart_plot_2c_
+    product: cache/sampled_reefs_bart_plot_2c_.pkl
+    upstream: [site_replacement_global_parameters_, sampled_reefs_bart_prep_plot_2c_]
+
+  ## - source: site_replacement.sampled_reefs_bart_prep_0_
+  ##   product: cache/sampled_reefs_bart_prep_0_.pkl
+  ##   upstream: [site_replacement_global_parameters_, sampled_reefs_data_prep_0_]
+
+  ## - source: site_replacement.sampled_reefs_bart_fit_0_
+  ##   product: cache/sampled_reefs_bart_fit_0_.pkl
+  ##   upstream: [site_replacement_global_parameters_, sampled_reefs_bart_prep_0_]
+
+  ## - source: site_replacement.sampled_reefs_bart_post_0_
+  ##   product: cache/sampled_reefs_bart_post_0_.pkl
+  ##   upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_0_, sampled_reefs_bart_prep_0_]
+
+  ## - source: site_replacement.sampled_reefs_bart_plot_0_
+  ##   product: cache/sampled_reefs_bart_plot_0_.pkl
+  ##   upstream: [site_replacement_global_parameters_, sampled_reefs_bart_post_0_, sampled_reefs_bart_prep_0_]
+
+  ## - source: site_replacement.sampled_reefs_bart_post_0c_
+  ##   product: cache/sampled_reefs_bart_post_0c_.pkl
+  ##   upstream: [site_replacement_global_parameters_, sampled_reefs_bart_prep_0_, sampled_reefs_bart_fit_0_]
+
+  ## - source: site_replacement.sampled_reefs_bart_plot_0c_
+  ##   product: cache/sampled_reefs_bart_plot_0c_.pkl
+  ##   upstream: [site_replacement_global_parameters_, sampled_reefs_bart_post_0c_, sampled_reefs_bart_prep_0_]
+
+  ## - source: site_replacement.test
+  ##   product: cache/test.pkl
+  ##   upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_0_, sampled_reefs_bart_data_0_]
