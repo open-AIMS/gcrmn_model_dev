@@ -202,3 +202,160 @@ tasks:
   ## - source: site_replacement.test
   ##   product: cache/test.pkl
   ##   upstream: [site_replacement_global_parameters_, sampled_reefs_bart_fit_0_, sampled_reefs_bart_data_0_]
+
+  ## Missing years =========================================================================
+  - source: missing_years.missing_years_global_parameters_
+    product: cache/missing_years_global_parameters_.pkl
+    name: missing_years_global_parameters_
+
+  - source: missing_years.missing_years_read_all_reefs_data_
+    product: cache/missing_years_read_all_reefs_data_.pkl
+    upstream: [missing_years_global_parameters_]
+
+  - source: missing_years.missing_years_read_all_reefs_data_show_
+    product: cache/missing_years_read_all_reefs_data_show_.pkl
+    upstream: [missing_years_read_all_reefs_data_]
+
+  - source: missing_years.missing_years_read_all_temporal_summary_
+    product: cache/missing_years_read_all_temporal_summary_.pkl
+    upstream: [missing_years_read_all_reefs_data_]
+
+  - source: missing_years.missing_years_read_all_temporal_summary_plot_
+    product: cache/missing_years_read_all_temporal_summary_plot_.png
+    upstream: [missing_years_read_all_temporal_summary_, missing_years_global_parameters_]
+
+    ## All sampled reefs --------------------------------------------------
+  - source: missing_years.missing_years_read_sampled_reefs_data_
+    product: cache/missing_years_read_sampled_reefs_data_.pkl
+    upstream: [missing_years_global_parameters_]
+
+  - source: missing_years.missing_years_read_sampled_reefs_data_show_
+    product: cache/missing_years_read_sampled_reefs_data_show_.pkl
+    upstream: [missing_years_read_sampled_reefs_data_]
+
+  - source: missing_years.missing_years_sampled_simple_raw_means_ 
+    product: cache/missing_years_sampled_simple_raw_means_.pkl
+    upstream: [missing_years_read_sampled_reefs_data_]
+
+  - source: missing_years.missing_years_sampled_simple_raw_means_plot_
+    product: cache/missing_years_sampled_simple_raw_means_plot_.png
+    upstream: [missing_years_global_parameters_, missing_years_sampled_simple_raw_means_]
+
+    ## Temporal gap some reefs -------------------------------------------
+  - source: missing_years.read_sampled_reefs_data_3_
+    product: cache/read_sampled_reefs_data_3_
+    upstream: [missing_years_global_parameters_]
+
+  - source: missing_years.read_sampled_reefs_data_3_show_
+    product: cache/read_sampled_reefs_data_3_show_.pkl
+    upstream: [read_sampled_reefs_data_3_]
+
+  - source: missing_years.sampled_reefs_data_3_plot_
+    product: cache/sampled_reefs_data_3_plot_.png
+    upstream: [missing_years_global_parameters_, read_sampled_reefs_data_3_]
+
+    ## Temporal gap all reefs -------------------------------------------
+  - source: missing_years.read_sampled_reefs_data_4_
+    product: cache/read_sampled_reefs_data_4_
+    upstream: [missing_years_global_parameters_]
+
+  - source: missing_years.read_sampled_reefs_data_4_show_
+    product: cache/read_sampled_reefs_data_4_show_.pkl
+    upstream: [read_sampled_reefs_data_4_]
+
+  - source: missing_years.sampled_reefs_data_4_plot_
+    product: cache/sampled_reefs_data_4_plot_.png
+    upstream: [missing_years_global_parameters_, read_sampled_reefs_data_4_]
+
+    ## Data transformations
+    ## All sampled reefs ------------------------------------------------
+  - source: missing_years.missing_years_sampled_reefs_data_prep_0_
+    product: cache/missing_years_sampled_reefs_data_prep_0_.pkl
+    upstream: [missing_years_global_parameters_, missing_years_read_sampled_reefs_data_]
+
+  - source: missing_years.missing_years_newdata_0_
+    product: cache/missing_years_newdata_0_.pkl
+    upstream: [missing_years_global_parameters_, missing_years_sampled_reefs_data_prep_0_]
+
+    ## Temporal gap some reefs -------------------------------------------
+
+  - source: missing_years.sampled_reefs_data_prep_3_
+    product: cache/sampled_reefs_data_prep_3_.pkl
+    upstream: [missing_years_global_parameters_, read_sampled_reefs_data_3_]
+
+  - source: missing_years.newdata_3_
+    product: cache/newdata_3_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_data_prep_3_]
+
+    ## Temporal gap all reefs -------------------------------------------
+
+  - source: missing_years.sampled_reefs_data_prep_4_
+    product: cache/sampled_reefs_data_prep_4_.pkl
+    upstream: [missing_years_global_parameters_, read_sampled_reefs_data_4_]
+
+  - source: missing_years.newdata_4_
+    product: cache/newdata_4_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_data_prep_4_]
+
+
+    ## Modelled trends
+    ## All sampled reefs ------------------------------------------------
+  - source: missing_years.missing_years_sampled_reefs_bart_data_0_
+    product: cache/missing_years_sampled_reefs_bart_data_0_.pkl
+    upstream: [missing_years_global_parameters_, missing_years_sampled_reefs_data_prep_0_]
+
+  - source: missing_years.missing_years_sampled_reefs_bart_fit_0_
+    product: cache/missing_years_sampled_reefs_bart_fit_0_.pkl
+    upstream: [missing_years_global_parameters_, missing_years_sampled_reefs_bart_data_0_]
+
+  - source: missing_years.missing_years_sampled_reefs_bart_prep_plot_0_
+    product: cache/missing_years_sampled_reefs_bart_prep_plot_0_.pkl
+    upstream: [missing_years_global_parameters_, missing_years_sampled_reefs_bart_fit_0_, missing_years_sampled_reefs_bart_data_0_]
+
+  - source: missing_years.missing_years_sampled_reefs_bart_plot_0_
+    product: cache/missing_years_sampled_reefs_bart_plot_0_.pkl
+    upstream: [missing_years_global_parameters_, missing_years_sampled_reefs_bart_prep_plot_0_]
+
+  - source: missing_years.missing_years_sampled_reefs_bart_prep_plot_0c_
+    product: cache/missing_years_sampled_reefs_bart_prep_plot_0c_.pkl
+    upstream: [missing_years_global_parameters_, missing_years_sampled_reefs_bart_fit_0_, missing_years_sampled_reefs_bart_data_0_]
+
+  - source: missing_years.missing_years_sampled_reefs_bart_plot_0c_
+    product: cache/missing_years_sampled_reefs_bart_plot_0c_.pkl
+    upstream: [missing_years_global_parameters_, missing_years_sampled_reefs_bart_prep_plot_0c_]
+
+    ## Temporal gap some reefs -------------------------------------------
+
+  - source: missing_years.sampled_reefs_bart_data_3_
+    product: cache/sampled_reefs_bart_data_3_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_data_prep_3_]
+
+  - source: missing_years.sampled_reefs_bart_fit_3_
+    product: cache/sampled_reefs_bart_fit_3_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_bart_data_3_]
+
+  - source: missing_years.sampled_reefs_bart_prep_plot_3_
+    product: cache/sampled_reefs_bart_prep_plot_3_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_bart_fit_3_, sampled_reefs_bart_data_3_]
+
+  - source: missing_years.sampled_reefs_bart_plot_3_
+    product: cache/sampled_reefs_bart_plot_3_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_bart_prep_plot_3_]
+
+  - source: missing_years.sampled_reefs_bart_prep_plot_3c_
+    product: cache/sampled_reefs_bart_prep_plot_3c_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_bart_fit_3_, sampled_reefs_bart_data_3_]
+
+  - source: missing_years.sampled_reefs_bart_plot_3c_
+    product: cache/sampled_reefs_bart_plot_3c_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_bart_prep_plot_3c_]
+
+    ## Temporal gap all reefs -------------------------------------------
+
+  - source: missing_years.sampled_reefs_bart_data_4_
+    product: cache/sampled_reefs_bart_data_4_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_data_prep_4_]
+
+  - source: missing_years.sampled_reefs_bart_fit_4_
+    product: cache/sampled_reefs_bart_fit_4_.pkl
+    upstream: [missing_years_global_parameters_, sampled_reefs_bart_data_4_]

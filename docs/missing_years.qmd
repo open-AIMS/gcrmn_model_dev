@@ -72,6 +72,7 @@ assignInNamespace(".sep.label",
 )
 knitr::read_chunk("../R/site_replacement.R")
 knitr::read_chunk("../R/missing_years.R")
+knitr::read_chunk("../python/missing_years.py")
 ## knitr::read_chunk("../python/site_replacement.py")
 ## remove the indentation from all python chunks that start
 ## with indentation
@@ -144,6 +145,24 @@ Load any helper functions
 #| cache: false
 ```
 
+### Python
+
+```{python}
+#| label: python missing years libraries
+#| output: false
+#| eval: true
+#| warning: false
+#| message: false
+#| cache: false
+```
+
+```{python}
+#| label: python missing years global parameters
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+```
 :::
 
 ## Import data
@@ -158,6 +177,8 @@ Load any helper functions
 
 These data represent the synthesized "truth" and are thereby useful to
 compare to the various modelled outcomes.
+
+![](../output/figures/R_all_temporal_summary_plot.png){width=500px}
 
 ```{r}
 #| label: read all reefs data
@@ -199,14 +220,14 @@ benthos_reefs_sf
 #| dependson: "read all reefs data"
 ```
 
-![](../output/figures/R_all_temporal_summary_plot.png){width=500px}
-
 #### 2. All sampled reefs
 
 These data represent a simulated sampling design in which 25 fixed
 (though randomly selected from among all the defined reefs in the
 synthetic spatial domain) reefs are monitored over a continuous 12
 year period.
+
+![](../output/figures/R_full_simple_raw_means_plot.png){width=500px}
 
 ```{r}
 #| label: read sampled reefs data
@@ -249,12 +270,12 @@ benthos_fixed_locs_obs
 #| dependson: "read sampled reefs data"
 ```
 
-![](../output/figures/R_full_simple_raw_means_plot.png){width=500px}
-
 #### 3. Temporal gap in some reefs
 
 These data represent the fixed 25 sites, however some of the reefs
 have a temporal gap between years 2 and 6.
+
+![](../output/figures/R_sampled_reefs_3_plot.png){width=500px}
 
 ```{r}
 #| label: read sampled reefs data 3
@@ -287,12 +308,12 @@ benthos_fixed_locs_obs_3
 #| dependson: "read sampled reefs data"
 ```
 
-![](../output/figures/R_sampled_reefs_3_plot.png){width=500px}
-
 #### 4. Temporal gap in all reefs
 
 These data represent the fixed 25 sites, however all of the reefs
 have a temporal gap between years 2 and 6.
+
+![](../output/figures/R_sampled_reefs_4_plot.png){width=500px}
 
 ```{r}
 #| label: read sampled reefs data 4
@@ -325,10 +346,170 @@ benthos_fixed_locs_obs_4
 #| dependson: "read sampled reefs data"
 ```
 
-![](../output/figures/R_sampled_reefs_4_plot.png){width=500px}
+::::
 
+### Python
 
+:::: {.panel-tabset}
 
+#### 1. Full reef level spatio-temporal benthic data
+
+These data represent the synthesized "truth" and are thereby useful to
+compare to the various modelled outcomes.
+
+![](../output/figures/Python_all_temporal_summary_plot.png){width=500px}
+
+```{python}
+#| label: python missing years read all reefs data 3
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+```{python}
+#| label: python missing years read all reefs data show 3
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+#| dependson: "python missing years read all reefs data 3"
+#| code-fold: false
+```
+
+```{python}
+#| label: python missing years all reefs temporal summary 3
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: true
+#| code-fold: true
+```
+
+```{python}
+#| label: python missing years all reefs temporal summary plot 3
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+```
+
+#### 2. All sampled reefs
+
+These data represent a simulated sampling design in which 25 fixed
+(though randomly selected from among all the defined reefs in the
+synthetic spatial domain) reefs are monitored over a continuous 12
+year period.
+
+![](../output/figures/Python_full_simple_raw_means_plot.png){width=500px}
+
+```{python}
+#| label: python missing years read sampled reefs data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python missing years read sampled reefs data show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: python missing years sampled simple raw means
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: false
+```
+
+```{r}
+#| label: python missing years sampled simple raw means plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "read sampled reefs data"
+```
+
+#### 3. Temporal gap in some reefs
+
+These data represent the fixed 25 sites, however some of the reefs
+have a temporal gap between years 2 and 6.
+
+![](../output/figures/Python_sampled_reefs_3_plot.png){width=500px}
+ 
+```{python}
+#| label: python read sampled reefs data 3
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python read sampled reefs data 3 show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{python}
+#| label: python sampled reefs data 3 plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "python read sampled reefs data 3 show"
+```
+ 
+#### 4. Temporal gap in all reefs
+
+These data represent the fixed 25 sites, however all of the reefs
+have a temporal gap between years 2 and 6.
+
+![](../output/figures/Python_sampled_reefs_4_plot.png){width=500px}
+ 
+```{python}
+#| label: python read sampled reefs data 4
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python read sampled reefs data 4 show
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{python}
+#| label: python sampled reefs data 4 plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: false
+#| dependson: "python read sampled reefs data 3 show"
+```
+ 
 ::::
 
 :::
@@ -405,7 +586,62 @@ Perform the following data preparation steps:
 #| cache: false
 ```
 
+::::
 
+### Python
+    
+:::: {.panel-tabset}
+
+#### All sampled reefs
+
+```{python}
+#| label: python missing years sampled data prep 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python missing years newdata 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+#### Temporal gap in some reefs
+
+```{python}
+#| label: python sampled data prep 3
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python newdata 3
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+#### Temporal gap in all reefs
+
+```{python}
+#| label: python sampled data prep 4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+```{python}
+#| label: python newdata 4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
 
 ::::
 
@@ -1178,6 +1414,72 @@ mod_stan_0$print(
 
 :::::
 
+#### pymc-bart + covariates
+
+```{python}
+#| label: python missing years sampled data barts data 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python missing years sampled data barts fit 0
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+![](../output/figures/python_pdp_pymc_bart_0b.png){width=700px}
+ 
+```{python}
+#| label: python missing years sampled data barts prep plot 0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python missing years sampled data barts plot 0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+##### Partial dependency plot (full domain)
+
+![](../output/figures/python_pdp_pymc_bart_0c.png){width=700px}
+
+```{python}
+#| label: python missing years sampled data barts prep plot 0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python missing years sampled data barts plot 0c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+:::::
+
 ::::
 
 
@@ -1876,6 +2178,72 @@ mod_stan_3$print(
   because this partial is the result of the same model, just predicted
   onto the full data grid)
   
+:::::
+
+#### pymc-bart + covariates
+
+```{python}
+#| label: python sampled data barts data 3
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python sampled data barts fit 3
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+![](../output/figures/python_pdp_pymc_bart_3b.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 3
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python sampled data barts plot 3
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+##### Partial dependency plot (full domain)
+
+![](../output/figures/python_pdp_pymc_bart_3c.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 3c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python sampled data barts plot 3c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
 :::::
 
 ::::
@@ -2581,6 +2949,7 @@ mod_stan_4$print(
   
 :::::
 
+ 
 ::::
 
 :::
