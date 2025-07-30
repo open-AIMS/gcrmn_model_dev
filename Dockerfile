@@ -86,8 +86,8 @@ RUN apt-get update \
 
 RUN pip3 install --break-system-packages pandas
 RUN pip3 install --break-system-packages numpy
-RUN pip3 install --break-system-packages arviz
-RUN pip3 install --break-system-packages seaborn
+## RUN pip3 install --break-system-packages arviz
+## RUN pip3 install --break-system-packages seaborn
 RUN pip3 install --break-system-packages pymc
 RUN pip3 install --break-system-packages pymc-bart
 RUN pip3 install --break-system-packages preliz
