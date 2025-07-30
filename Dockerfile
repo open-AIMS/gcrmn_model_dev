@@ -25,27 +25,36 @@ RUN R -e "options(repos = \
 "
 
 RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
   pak::pkg_install(c('rmarkdown', 'quarto')); \
   pak::pkg_install(c('tidyverse')); \
   pak::pkg_install(c('sf', 'knitr', 'patchwork')); \
 "
 
 RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
-  pak::pkg_install(c('testthat', 'usethis')); \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
+  pak::pkg_install(c('testthat', 'usethis', 'remotes')); \
 "
 RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
   pak::pkg_install(c('glmmTMB', 'emmeans', 'DHARMa', 'performance', 'see')); \
   pak::pkg_install(c('gbm', 'dbarts')); \
+  pak::pkg_install(c('simstudy')); \
+"
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
+  pak::pkg_install(c('targets', 'tarchetypes')); \
+"
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
+  pak::pkg_install(c('graph', 'Rgraphviz', 'gridGraphics')); \
 "
 
 RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2024-04-11/\")); \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
   pak::pkg_install(c('stan-dev/cmdstanr')); \
   pak::pkg_install(c('brms')); \
-  pak::pkg_install(c('tidybayes', 'posterior', 'bayesplot', 'HDInterval', 'jmgirard/standist', 'bayestestR')); \
+  pak::pkg_install(c('tidybayes', 'posterior', 'bayesplot', 'HDInterval', 'jmgirard/standist', 'bayestestR', 'rstan')); \
 "
 
 # Install CmdStan
@@ -75,6 +84,10 @@ RUN apt-get update \
   python3-dev \
   && rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install --break-system-packages pandas
+RUN pip3 install --break-system-packages numpy
+RUN pip3 install --break-system-packages arviz
+RUN pip3 install --break-system-packages seaborn
 RUN pip3 install --break-system-packages pymc
 RUN pip3 install --break-system-packages pymc-bart
 RUN pip3 install --break-system-packages preliz
@@ -85,10 +98,9 @@ RUN R -e "options(repos = \
   pak::pkg_install(c('reticulate', 'styler')); \
 "
 
-RUN R -e "options(repos = \
-    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
-  pak::pkg_install(c('targets', 'tarchetypes')); \
-"
+
+
+## INLA
 
 RUN R -e "install.packages('INLA',repos=c(getOption('repos'),INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)"
 
