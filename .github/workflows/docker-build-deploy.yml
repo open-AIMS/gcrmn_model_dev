@@ -10,7 +10,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
-obs:
+jobs:
   build-image:
     runs-on: ubuntu-latest
 
