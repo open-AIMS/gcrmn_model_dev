@@ -1,0 +1,29 @@
+name: Build and Render Analyses
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-render:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Pull the prebuilt Docker image from GitHub Container Registry
+      - name: Pull Docker image
+        run: |
+          docker pull ghcr.io/open-aims/gcrmn_model_dev:main
+
+      # Step 3: Run the Docker container and execute `make R_container`
+      - name: Run R_container
+        run: |
+          docker run --rm \
+            -v "$(shell pwd)":/home/Project \
+            ghcr.io/open-aims/gcrmn_model_dev:main \
+            make run_R
