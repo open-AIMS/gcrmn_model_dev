@@ -24,6 +24,6 @@ jobs:
       - name: Run R_container
         run: |
           docker run --rm \
-            -v "$(shell pwd)":/home/Project \
+            -v ${{ github.workspace }}:/home/Project \
             ghcr.io/open-aims/gcrmn_model_dev:main \
             make run_R
