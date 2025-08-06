@@ -1168,3 +1168,232 @@ def sampled_reefs_bart_fit_4_(product, upstream):
         "ppc2": ppc2
     }
     pickle.dump(trace_dict, open(product, "wb"))
+
+def sampled_reefs_bart_prep_plot_4_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_4_"], "rb"))
+    ppc1 = trace_dict["ppc1"]
+    data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_4_"], "rb"))
+    sample_data = data_dict["sample_data"]
+    benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
+    ## ---- python sampled data barts prep plot 4 
+    posterior_predictive = ppc1.posterior_predictive["y"]  # replace "y_pred" with your variable name
+    year_array = sample_data["Year"].values  # must match the shape of predictions
+
+    # Add 'Year' as a coordinate to the xarray
+    posterior_predictive = posterior_predictive.assign_coords({"y_dim_0": year_array})
+    # Group by Year and compute mean per chain/draw
+    avg_preds = posterior_predictive.groupby("y_dim_0").mean("y_dim_0")
+    # Rename dimension for clarity
+    avg_preds = avg_preds.rename({"y_dim_0": "Year"})
+    modelled_trend = az.summary(avg_preds, hdi_prob=0.95)
+    modelled_trend["Year"] = avg_preds.coords["Year"].values
+
+    ## Summarise the sampled data
+    sample_data_summary = (
+        sample_data.groupby("Year").agg(
+            Mean=("HCC", "mean"),
+            Median=("HCC", "median")
+        ).reset_index()
+    )
+
+    ## Summarise the full grid
+    benthos_reefs_temporal_summary = (
+        benthos_reefs_sf.groupby("Year").agg(
+            Mean=("HCC", "mean"),
+            Median=("HCC", "median"),
+            SD=("HCC", "std"),
+            Lower=("HCC", lambda x: x.quantile(0.025)),
+            Upper=("HCC", lambda x: x.quantile(0.975))
+        ).reset_index()
+    )
+    years = np.unique(year_array)
+    cover_mean = avg_preds.mean(dim=["draw", "chain"])
+    cover = avg_preds
+    ## ----end
+    summary_dict = {
+        "modelled_trend": modelled_trend,
+        "sample_data_summary": sample_data_summary,
+        "benthos_reefs_temporal_summary": benthos_reefs_temporal_summary,
+        "years": years,
+        "cover_mean": cover_mean,
+        "cover": cover
+    }
+    pickle.dump(summary_dict, open(product, "wb"))
+
+def sampled_reefs_bart_plot_4_(product, upstream):
+    # paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    # ppc2 = pickle.load(open(upstream["sampled_reefs_bart_post_0c_"], "rb"))
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    summary_dict = pickle.load(open(upstream["sampled_reefs_bart_prep_plot_4_"], "rb"))
+    modelled_trend = summary_dict["modelled_trend"]
+    sample_data_summary = summary_dict["sample_data_summary"]
+    benthos_reefs_temporal_summary = summary_dict["benthos_reefs_temporal_summary"]
+    years = summary_dict["years"]
+    cover_mean = summary_dict["cover_mean"]
+    cover = summary_dict["cover"]
+    ## ---- python sampled data barts plot 4 
+    def multiply_by_100(x, pos):
+        return f"{x * 100:.0f}"
+    plt.figure(figsize=(8, 6))
+    plt.plot(years, cover_mean, "w", lw=3)
+    # Add true mean line
+    plt.plot(
+        benthos_reefs_temporal_summary["Year"],
+        benthos_reefs_temporal_summary["Mean"],
+        label="True mean",
+        color="blue"
+    )
+    # Add true median line
+    plt.plot(
+        benthos_reefs_temporal_summary["Year"],
+        benthos_reefs_temporal_summary["Median"],
+        label="True median",
+        color="green"
+    )
+    # Add sample mean line
+    plt.plot(
+        sample_data_summary["Year"],
+        sample_data_summary["Mean"]/100,
+        label="Sample mean",
+        color="blue",
+        linestyle="--"
+    )
+    # Add sample mean line
+    plt.plot(
+        sample_data_summary["Year"],
+        sample_data_summary["Median"]/100,
+        label="Sample median",
+        color="green",
+        linestyle="--"
+    )
+    az.plot_hdi(years, cover, smooth=False,
+                fill_kwargs={"label":"95% HDI"}, hdi_prob=0.95)
+    az.plot_hdi(years, cover, smooth=False,
+                fill_kwargs={"label":"50% HDI", "alpha": 1}, hdi_prob=0.50)
+    # Add labels and title
+    # Apply the custom formatter to the y-axis
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(multiply_by_100))
+    plt.xlabel("Year")
+    plt.ylabel("Mean")
+    plt.title("Mean with HDI per Year")
+    plt.legend()
+    ## ----end
+    plt.savefig(f"{paths['fig_path']}python_pdp_pymc_bart_4b.png", dpi=300, bbox_inches='tight')
+    results=1
+    pickle.dump(results, open(product, "wb"))
+
+def sampled_reefs_bart_prep_plot_4c_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_4_"], "rb"))
+    ppc2 = trace_dict["ppc2"]
+    data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_4_"], "rb"))
+    sample_data = data_dict["sample_data"]
+    full_data = data_dict["full_data"]
+    benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
+    ## ---- python sampled data barts prep plot 4c 
+    posterior_predictive = ppc2.posterior_predictive["y"]  # replace "y_pred" with your variable name
+    year_array = full_data["Year"].values  # must match the shape of predictions
+
+    # Add 'Year' as a coordinate to the xarray
+    posterior_predictive = posterior_predictive.assign_coords({"y_dim_0": year_array})
+    # Group by Year and compute mean per chain/draw
+    avg_preds = posterior_predictive.groupby("y_dim_0").mean("y_dim_0")
+    # Rename dimension for clarity
+    avg_preds = avg_preds.rename({"y_dim_0": "Year"})
+    modelled_trend = az.summary(avg_preds, hdi_prob=0.95)
+    modelled_trend["Year"] = avg_preds.coords["Year"].values
+
+    ## Summarise the sampled data
+    sample_data_summary = (
+        sample_data.groupby("Year").agg(
+            Mean=("HCC", "mean"),
+            Median=("HCC", "median")
+        ).reset_index()
+    )
+
+    ## Summarise the full grid
+    benthos_reefs_temporal_summary = (
+        benthos_reefs_sf.groupby("Year").agg(
+            Mean=("HCC", "mean"),
+            Median=("HCC", "median"),
+            SD=("HCC", "std"),
+            Lower=("HCC", lambda x: x.quantile(0.025)),
+            Upper=("HCC", lambda x: x.quantile(0.975))
+        ).reset_index()
+    )
+    years = np.unique(year_array)
+    cover_mean = avg_preds.mean(dim=["draw", "chain"])
+    cover = avg_preds
+    ## ----end
+    summary_dict = {
+        "modelled_trend": modelled_trend,
+        "sample_data_summary": sample_data_summary,
+        "benthos_reefs_temporal_summary": benthos_reefs_temporal_summary,
+        "years": years,
+        "cover_mean": cover_mean,
+        "cover": cover
+    }
+    pickle.dump(summary_dict, open(product, "wb"))
+
+def sampled_reefs_bart_plot_4c_(product, upstream):
+    # paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    # ppc2 = pickle.load(open(upstream["sampled_reefs_bart_post_0c_"], "rb"))
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    summary_dict = pickle.load(open(upstream["sampled_reefs_bart_prep_plot_4c_"], "rb"))
+    modelled_trend = summary_dict["modelled_trend"]
+    sample_data_summary = summary_dict["sample_data_summary"]
+    benthos_reefs_temporal_summary = summary_dict["benthos_reefs_temporal_summary"]
+    years = summary_dict["years"]
+    cover_mean = summary_dict["cover_mean"]
+    cover = summary_dict["cover"]
+    ## ---- python sampled data barts plot 4c 
+    def multiply_by_100(x, pos):
+        return f"{x * 100:.0f}"
+    plt.figure(figsize=(8, 6))
+    plt.plot(years, cover_mean, "w", lw=3)
+    # Add true mean line
+    plt.plot(
+        benthos_reefs_temporal_summary["Year"],
+        benthos_reefs_temporal_summary["Mean"],
+        label="True mean",
+        color="blue"
+    )
+    # Add true median line
+    plt.plot(
+        benthos_reefs_temporal_summary["Year"],
+        benthos_reefs_temporal_summary["Median"],
+        label="True median",
+        color="green"
+    )
+    # Add sample mean line
+    plt.plot(
+        sample_data_summary["Year"],
+        sample_data_summary["Mean"]/100,
+        label="Sample mean",
+        color="blue",
+        linestyle="--"
+    )
+    # Add sample mean line
+    plt.plot(
+        sample_data_summary["Year"],
+        sample_data_summary["Median"]/100,
+        label="Sample median",
+        color="green",
+        linestyle="--"
+    )
+    az.plot_hdi(years, cover, smooth=False,
+                fill_kwargs={"label":"95% HDI"}, hdi_prob=0.95)
+    az.plot_hdi(years, cover, smooth=False,
+                fill_kwargs={"label":"50% HDI", "alpha": 1}, hdi_prob=0.50)
+    # Add labels and title
+    # Apply the custom formatter to the y-axis
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(multiply_by_100))
+    plt.xlabel("Year")
+    plt.ylabel("Mean")
+    plt.title("Mean with HDI per Year")
+    plt.legend()
+    ## ----end
+    plt.savefig(f"{paths['fig_path']}python_pdp_pymc_bart_4c.png", dpi=300, bbox_inches='tight')
+    results=1
+    pickle.dump(results, open(product, "wb"))

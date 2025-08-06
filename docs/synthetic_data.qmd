@@ -759,3 +759,230 @@ benthos_fixed_locs_obs_4 |>
 
 :::
  
+## Incomplete spatial domain
+
+Another set of common issues that arrise is when an area is either
+very sparsely represented (either spatially or temporally or both) or
+has no observational data at all. In this section, we will divide the
+full spatial domain into two sub-domains (Northern: latitudes above
+-16 degrees and Southern: latitudes not above -16 degrees). Then we
+will apply a more extensive sampling design to one of these
+sub-domains and the other sub-domains will be represented by either
+very few spatial locations or none at all. To summarise this, the
+design will comprise:
+
+| Data set   | Description                                                   |
+|------------|---------------------------------------------------------------|
+| dataset 10 | All Northern reefs                                            |
+| dataset 11 | All Southern reefs                                            |
+| dataset 12 | 25 Northern reefs, each with 2 sites and 5 transects per site |
+| dataset 13 | 2 Southern reefs, each with 2 sites and 5 transects per site  |
+
+Then in the modelling phase, we will fit a model for each of the above
+and evaluate how well each can represent the following:
+
+| Training set | To predict |
+|--------------|------------|
+| dataset 12   | dataset 11 |
+| dataset 13   | dataset 10 |
+
+```{r}
+#| label: synthetic landscape benthos reefs subdomains
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+
+
+
+::: {.panel-tabset}
+### All Northern reefs
+
+```{r}
+#| label: synthetic landscape benthos reefs northern
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+```{r}
+#| label: synthetic landscape benthos reefs northern plot
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| fig-width: 8
+#| fig-height: 6
+benthos_reefs_pts_northern <- readRDS(
+  file = paste0(data_path, "synthetic/benthos_reefs_pts_northern.rds")
+)
+benthos_reefs_pts_northern |>
+  ggplot() +
+  geom_sf(aes(fill = HCC, color = HCC)) +
+  facet_wrap(~Year) +
+  scale_fill_viridis_c() +
+  scale_color_viridis_c() +
+  theme_bw()
+```
+### All Southern reefs
+
+```{r}
+#| label: synthetic landscape benthos reefs northern
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: synthetic landscape benthos reefs southern plot
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| fig-width: 8
+#| fig-height: 6
+benthos_reefs_pts_southern <- readRDS(
+  file = paste0(data_path, "synthetic/benthos_reefs_pts_southern.rds")
+)
+benthos_reefs_pts_southern |>
+  ggplot() +
+  geom_sf(aes(fill = HCC, color = HCC)) +
+  facet_wrap(~Year) +
+  scale_fill_viridis_c() +
+  scale_color_viridis_c() +
+  theme_bw()
+```
+
+### Northern sampled reefs
+
+```{r}
+#| label: synthetic landscape benthos reefs northern sampled
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: synthetic landscape benthos reefs northern sampled plot
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| fig-width: 8
+#| fig-height: 6
+spatial_domain <- st_geometry(
+  st_multipoint(
+    x = rbind(
+      c(0, -10),
+      c(3, -10),
+      c(10, -20),
+      c(1, -21),
+      c(2, -16),
+      c(0, -10)
+    )
+  )
+) |>
+  st_set_crs(4326) |>
+  st_cast("POLYGON") 
+
+split_line <- st_linestring(matrix(
+  c(0, -16, 180, -16),
+  nrow = 2, byrow = TRUE),
+  dim = "XY") |>
+  st_sfc(crs = st_crs(config$crs))
+
+bbox_split <-
+  spatial_domain |>
+  st_bbox() |>
+  st_as_sfc() |>
+  lwgeom::st_split(split_line) |>
+  st_collection_extract("POLYGON") |>
+  st_as_sf() |>
+  mutate(ypos = st_coordinates(st_centroid(x))[,"Y"]) |> 
+  mutate(Half = ifelse(ypos == max(ypos), "Northern", "Southern"))
+
+benthos_fixed_locs_northern_sf <- readRDS(
+  file = paste0(data_path, "synthetic/benthos_fixed_locs_northern_sf.rds")
+)
+bbox_split |> st_intersection(spatial_domain) |>
+  filter(Half == "Northern") |> 
+  ggplot() +
+  geom_sf() +
+  geom_sf(data = benthos_fixed_locs_northern_sf,
+    aes(fill = plogis(HCC), color = plogis(HCC))) +
+  facet_wrap(~Year) +
+  scale_fill_viridis_c() +
+  scale_color_viridis_c() +
+  theme_bw()
+```
+
+### Southern sampled reefs
+
+```{r}
+#| label: synthetic landscape benthos reefs southern sampled
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: synthetic landscape benthos reefs southern sampled plot
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| fig-width: 8
+#| fig-height: 6
+spatial_domain <- st_geometry(
+  st_multipoint(
+    x = rbind(
+      c(0, -10),
+      c(3, -10),
+      c(10, -20),
+      c(1, -21),
+      c(2, -16),
+      c(0, -10)
+    )
+  )
+) |>
+  st_set_crs(4326) |>
+  st_cast("POLYGON") 
+
+split_line <- st_linestring(matrix(
+  c(0, -16, 180, -16),
+  nrow = 2, byrow = TRUE),
+  dim = "XY") |>
+  st_sfc(crs = st_crs(config$crs))
+
+bbox_split <-
+  spatial_domain |>
+  st_bbox() |>
+  st_as_sfc() |>
+  lwgeom::st_split(split_line) |>
+  st_collection_extract("POLYGON") |>
+  st_as_sf() |>
+  mutate(ypos = st_coordinates(st_centroid(x))[,"Y"]) |> 
+  mutate(Half = ifelse(ypos == max(ypos), "Northern", "Southern"))
+
+benthos_fixed_locs_southern_sf <- readRDS(
+  file = paste0(data_path, "synthetic/benthos_fixed_locs_southern_sf.rds")
+)
+bbox_split |> st_intersection(spatial_domain) |>
+  filter(Half == "Southern") |> 
+  ggplot() +
+  geom_sf() +
+  geom_sf(data = benthos_fixed_locs_southern_sf,
+    aes(fill = plogis(HCC), color = plogis(HCC))) +
+  facet_wrap(~Year) +
+  scale_fill_viridis_c() +
+  scale_color_viridis_c() +
+  theme_bw()
+```
+
+:::
+

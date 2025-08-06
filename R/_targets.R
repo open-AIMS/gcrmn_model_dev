@@ -11,11 +11,13 @@ tar_option_set(
     "posterior", "gbm", "dbarts", "HDInterval"),  # Load required packages
   format = "rds"                    # Default storage format
 )
-
+## lapply(packages, library, character.only = TRUE)
  
-source("synthetic_data.R")    # Load the synthetic data generation script
-source("site_replacement.R")  # Load the modelling of site replacement script
+source("helper_functions.R")    # Load the modelling of incomplete spatial script
+source("synthetic_data.R")      # Load the synthetic data generation script
+source("site_replacement.R")    # Load the modelling of site replacement script
 source("missing_years.R")       # Load the modelling of missing years script
+source("incomplete_spatial.R")  # Load the modelling of incomplete spatial script
 
 list(
   ## tar_target(synthetic_data_output,
@@ -24,5 +26,7 @@ list(
   ## tar_target(site_replacement_output,
   site_replacement(),
   ## )
-  missing_years()
+  missing_years(),
+  helper_functions(),
+  incomplete_spatial()
 )

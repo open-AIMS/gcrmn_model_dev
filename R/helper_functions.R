@@ -44,6 +44,648 @@ make_brms_dharma_res <- function(brms_model, seed = 10, ...) {
 ## ----end
 
 
+source("model_functions.R")
+helper_functions <- function() {
+  targets <- list(
+    tar_target(DHARMa_glmmTMB_, {
+      ## ---- DHARMa_glmmTMB_function
+      DHARMa_glmmTMB <- function(mod, data_path, fig_path, filename = "mod_glmmTMB_12") {
+        resids <- mod |> 
+          simulateResiduals(n = 1000)
+        saveRDS(resids,
+          file = paste0(data_path, paste0("synthetic/", filename, "_dharma.rds"))
+        )
+        g <- wrap_elements(~testUniformity(resids)) +
+          wrap_elements(~plotResiduals(resids)) +
+          wrap_elements(~testDispersion(resids))
+        ggsave(
+          filename = paste0(
+            fig_path, "R_dharma_", filename, ".png"
+          ),
+          g,
+          width = 10, height = 4, dpi = 72
+        )
+      }
+      ## ----end
+      DHARMa_glmmTMB
+    }),
+
+    tar_target(pred_glmmTMB_, {
+      ## ---- pred_glmmTMB_function
+      pred_glmmTMB <- function(mod,
+                               type = 1,
+                               model_type = "",
+                               newdata = newdata,
+                               true_sum = true_sum,
+                               data_path, fig_path,
+                               filename = "mod_glmmTMB_12") {
+        model_type <- ifelse(model_type == "covariates", "b", model_type)
+        if (model_type == "") {
+          
+          pred_glmmTMB <- 
+            mod |> emmeans(~fYear, at = newdata, type = "response") |>
+            as.data.frame() |> 
+            rename(median = response, lower = asymp.LCL, upper = asymp.UCL) |>
+            mutate(Year = as.numeric(as.character(fYear))) |>
+            mutate(type = "glmmTMB")
+          saveRDS(pred_glmmTMB,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+        } else if (model_type == "b") {
+          newdata <- newdata |>
+            mutate(fYear = factor(Year, levels = unique(Year)),
+              Site = NA, Transect = NA)
+          if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
+            newdata <- newdata |>
+              mutate(
+                Longitude = st_coordinates(st_centroid(newdata))[, 1],
+                Latitude = st_coordinates(st_centroid(newdata))[, 2],
+                )
+          }
+          pred <- predict(mod, newdata = newdata,
+            re.form =  ~ 0,
+            allow.new.levels = TRUE
+            ## se.fit = TRUE
+          )
+
+          pred_glmmTMB <- 
+            newdata |>
+            ungroup() |> 
+            mutate(
+              fit = plogis(pred)
+            ) |>
+            group_by(Year) |>
+            summarise(median = median(fit, na.rm = TRUE),
+              lower = HDInterval::hdi(fit)[1],
+              upper = HDInterval::hdi(fit)[2]
+              )
+          saveRDS(pred_glmmTMB,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+          
+        }
+
+        g1 <-
+          pred_glmmTMB |>
+          ggplot() +
+          geom_ribbon(aes(x = Year, ymin = lower, ymax = upper, fill = "glmmTMB", colour = "glmmTMB"),
+            alpha = 0.8) +
+          geom_line(aes(x = Year, y = median, color = "glmmTMB"),
+            linewidth = 2) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Mean, colour = "simple data mean"),
+            linetype = "dashed",
+            linewidth = 1) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Median, colour = "simple data median"),
+            linetype = "dashed",
+            linewidth = 1) +
+          scale_color_manual("",
+            values = c("white", "green", "blue"),
+            breaks = c("glmmTMB", "simple data mean", "simple data median")
+            ) +
+          scale_fill_manual("",
+            values = c("orange", NA, NA),
+            breaks = c("glmmTMB", "simple data mean", "simple data median")
+            ) +
+          scale_y_continuous("Coral cover (%)", labels = function(x) x * 100) +
+          guides(
+            fill = "none", #guide_legend(override.aes = list(color = "orange")),
+            color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
+          ) +
+          theme_classic() 
+        
+        ggsave(
+          filename = paste0(
+            fig_path, "R_pdp_", type, "_", filename, model_type, ".png"
+          ),
+          g1,
+          width = 6, height = 4, dpi = 72
+        )
+      }
+      ## ----end
+      pred_glmmTMB
+    }),
+    
+    tar_target(mse_glmmTMB_, {
+      calc_mse <- calc_mse_
+      ## ---- mse_glmmTMB_function
+      mse_glmmTMB <- function(mod, newdata = newdata, type, model_type = "covariates") {
+        newdata <- newdata |>
+          mutate(fYear = factor(Year, levels = unique(Year)),
+            Site = NA, Transect = NA)
+        if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
+          newdata <- newdata |>
+            mutate(
+              Longitude = st_coordinates(st_centroid(newdata))[, 1],
+              Latitude = st_coordinates(st_centroid(newdata))[, 2],
+              )
+        }
+        pred <- predict(mod, newdata = newdata,
+          re.form =  ~ 0,
+          allow.new.levels = TRUE
+        )
+        newdata <- newdata |>
+          ungroup() |> 
+          mutate(fit = plogis(pred))
+        mse_glmmTMB <- calc_mse(newdata) |>
+          mutate(model = "glmmTMB", type = type, model_type = model_type)
+      }
+      ## ----end
+      mse_glmmTMB
+    }),
+
+    tar_target(pred_brms_, {
+      ## ---- pred_brms_function
+      pred_brms <- function(mod,
+                               type = 1,
+                               model_type = "",
+                               newdata = newdata,
+                               true_sum = true_sum,
+                               data_path, fig_path,
+                               filename = "mod_brms_12") {
+        model_type <- ifelse(model_type == "covariates", "b", model_type)
+        if (model_type == "") {
+          
+          pred_brms <- 
+            mod |> emmeans(~fYear, at = newdata, type = "response") |>
+            as.data.frame() |> 
+            rename(median = response, lower = lower.HPD, upper = upper.HPD) |>
+            mutate(Year = as.numeric(as.character(fYear))) |>
+            mutate(type = "brms")
+          saveRDS(pred_brms,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+        } else if (model_type == "b") {
+          newdata <- newdata |>
+            mutate(fYear = factor(Year, levels = unique(Year)))
+          if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
+            newdata <- newdata |>
+              mutate(
+                Longitude = st_coordinates(st_centroid(newdata))[, 1],
+                Latitude = st_coordinates(st_centroid(newdata))[, 2],
+                )
+          }
+          newdata <- newdata |>
+            dplyr::select(Reef, Longitude, Latitude, Year, fYear, CYC, DHW, OTHER)
+          pred <- add_epred_draws(mod, newdata = newdata,
+            re_formula =  ~ 0,
+          )
+
+          pred_brms <- 
+            pred |> 
+            ungroup() |> 
+            group_by(Year, .draw) |>
+            summarise(fit = mean(.epred)) |>
+            ungroup() |>
+            group_by(Year) |>
+            summarise_draws(median, HDInterval::hdi)
+            
+          saveRDS(pred_brms,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+          
+        }
+
+        g1 <-
+          pred_brms |>
+          ggplot() +
+          geom_ribbon(aes(x = Year, ymin = lower, ymax = upper, fill = "brms", colour = "brms"),
+            alpha = 0.8) +
+          geom_line(aes(x = Year, y = median, color = "brms"),
+            linewidth = 2) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Mean, colour = "simple data mean"),
+            linetype = "dashed",
+            linewidth = 1) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Median, colour = "simple data median"),
+            linetype = "dashed",
+            linewidth = 1) +
+          scale_color_manual("",
+            values = c("white", "green", "blue"),
+            breaks = c("brms", "simple data mean", "simple data median")
+            ) +
+          scale_fill_manual("",
+            values = c("orange", NA, NA),
+            breaks = c("brms", "simple data mean", "simple data median")
+            ) +
+          scale_y_continuous("Coral cover (%)", labels = function(x) x * 100) +
+          guides(
+            fill = "none", #guide_legend(override.aes = list(color = "orange")),
+            color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
+          ) +
+          theme_classic() 
+        
+        ggsave(
+          filename = paste0(
+            fig_path, "R_pdp_", type, "_", filename, model_type, ".png"
+          ),
+          g1,
+          width = 6, height = 4, dpi = 72
+        )
+      }
+      ## ----end
+      pred_brms
+    }),
+
+    tar_target(mse_brms_, {
+      calc_mse <- calc_mse_
+      ## ---- mse_brms_function
+      mse_brms <- function(mod, newdata = newdata, type, model_type = "covariates") {
+        newdata <- newdata |>
+          mutate(fYear = factor(Year, levels = unique(Year)),
+            Site = NA, Transect = NA)
+        if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
+          newdata <- newdata |>
+            mutate(
+              Longitude = st_coordinates(st_centroid(newdata))[, 1],
+              Latitude = st_coordinates(st_centroid(newdata))[, 2],
+              )
+        }
+
+        pred <- add_epred_draws(mod, newdata = newdata,
+          re_formula =  ~ 0,
+          )
+        newdata <- pred |>
+          ungroup() |> 
+          mutate(fit = .epred)
+        mse_brms <- calc_mse(newdata) |>
+          mutate(model = "brms", type = type, model_type = model_type)
+      }
+      ## ----end
+      mse_brms
+    }),
+
+    tar_target(pred_stan_, {
+      ## ---- pred_stan_function
+      pred_stan <- function(mod,
+                               type = 1,
+                               model_type = "",
+                               newdata = newdata,
+                               true_sum = true_sum,
+                               data_path, fig_path,
+                               filename = "mod_stan_12") {
+        model_type <- ifelse(model_type == "covariates", "b", model_type)
+        if (model_type == "") {
+          
+          stan_sum <-
+            mod$draws(variables = "cellmeans") |>
+            posterior::as_draws_df() |>
+            posterior::summarise_draws(
+              median,
+              HDInterval::hdi,
+              ~ HDInterval::hdi(., credMass = c(0.9)),
+              rhat,
+              ess_bulk,
+              ess_tail
+            ) |>
+            rename(lower_90 = V4, upper_90 = V5) |>
+            bind_cols(newdata) |>
+            mutate(Year = as.numeric(as.character(fYear)))
+
+
+          pred_stan <- 
+            stan_sum |> 
+            mutate(type = "stan")
+          saveRDS(pred_stan,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+        } else if (model_type == "b") {
+          
+        }
+
+        g1 <-
+          pred_stan |>
+          ggplot() +
+          geom_ribbon(aes(x = Year, ymin = lower, ymax = upper, fill = "stan", colour = "stan"),
+            alpha = 0.8) +
+          geom_line(aes(x = Year, y = median, color = "stan"),
+            linewidth = 2) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Mean, colour = "simple data mean"),
+            linetype = "dashed",
+            linewidth = 1) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Median, colour = "simple data median"),
+            linetype = "dashed",
+            linewidth = 1) +
+          scale_color_manual("",
+            values = c("white", "green", "blue"),
+            breaks = c("stan", "simple data mean", "simple data median")
+            ) +
+          scale_fill_manual("",
+            values = c("orange", NA, NA),
+            breaks = c("stan", "simple data mean", "simple data median")
+            ) +
+          scale_y_continuous("Coral cover (%)", labels = function(x) x * 100) +
+          guides(
+            fill = "none", #guide_legend(override.aes = list(color = "orange")),
+            color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
+          ) +
+          theme_classic() 
+        
+        ggsave(
+          filename = paste0(
+            fig_path, "R_pdp_", type, "_", filename, model_type, ".png"
+          ),
+          g1,
+          width = 6, height = 4, dpi = 72
+        )
+      }
+      ## ----end
+      pred_stan
+    }),
+
+    tar_target(mse_stan_, {
+      calc_mse <- calc_mse_
+      ## ---- mse_stan_function
+      mse_stan <- function(mod, newdata = newdata, type, model_type = "covariates") {
+        newdata <- newdata |>
+          ungroup() |> 
+          mutate(fYear = factor(Year, levels = unique(Year)),
+            Site = NA, Transect = NA)
+        if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
+          newdata <- newdata |>
+            mutate(
+              Longitude = st_coordinates(st_centroid(newdata))[, 1],
+              Latitude = st_coordinates(st_centroid(newdata))[, 2],
+              )
+        }
+        Xmat <- model.matrix(~ -1 + fYear, data = newdata)
+        stan_sum <-
+          mod$draws(variables = "beta") |>
+          posterior::as_draws_df() |>
+          dplyr::select(-.iteration, -.chain) |>
+          group_by(.draw) |>
+          nest() |>
+          mutate(pred = map(.x = data,
+            .f = ~ {
+              fit <-
+                .x |> 
+                as.matrix() |>
+                as.vector() %*% t(Xmat) |>
+                as.vector() |>
+                plogis()
+              newdata |> mutate(fit = fit) 
+            })) |>
+          dplyr::select(-data) |>
+          unnest(pred)
+        
+        newdata <- stan_sum |>
+          ungroup() 
+        mse_stan <- calc_mse(newdata) |>
+          mutate(model = "stan", type = type, model_type = model_type)
+      }
+      ## ----end
+      mse_stan
+    }),
+
+    tar_target(pred_gbm_, {
+      ## ---- pred_gbm_function
+      pred_gbm <- function(mod,
+                           n.trees,
+                               type = 1,
+                               model_type = "",
+                               newdata = newdata,
+                               true_sum = true_sum,
+                               data_path, fig_path,
+                               filename = "mod_gbm_12") {
+        model_type <- ifelse(model_type == "covariates", "b", model_type)
+        if (model_type == "") {
+          pred_gbm <- newdata |>
+            mutate(median = predict(mod, newdata, n.trees = n.trees, type = "response")) |> 
+            mutate(Year = as.numeric(as.character(fYear))) |>
+            mutate(type = "gbm")
+
+          saveRDS(pred_gbm,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+        } else if (model_type == "b") {
+          newdata <- newdata |>
+            mutate(fYear = factor(Year, levels = unique(Year))) |>
+            ungroup()  
+          pred_gbm <- newdata |>
+            mutate(median = predict(mod, newdata, n.trees = n.trees, type = "response")) |> 
+            ## mutate(Year = as.numeric(as.character(fYear))) |>
+            group_by(Year) |>
+            summarise(median = median(median)) |> 
+            mutate(type = "gbm") |>
+            ungroup()
+
+          saveRDS(pred_gbm,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+        }
+
+        g1 <-
+          pred_gbm |>
+          ggplot() +
+          ## geom_ribbon(aes(x = Year, ymin = lower, ymax = upper, fill = "gbm", colour = "gbm"),
+          ##   alpha = 0.8) +
+          geom_line(aes(x = Year, y = median, color = "gbm"),
+            linewidth = 2) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Mean, colour = "simple data mean"),
+            linetype = "dashed",
+            linewidth = 1) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Median, colour = "simple data median"),
+            linetype = "dashed",
+            linewidth = 1) +
+          scale_color_manual("",
+            values = c("orange", "green", "blue"),
+            breaks = c("gbm", "simple data mean", "simple data median")
+            ) +
+          ## scale_fill_manual("",
+          ##   values = c("orange", NA, NA),
+          ##   breaks = c("gbm", "simple data mean", "simple data median")
+          ##   ) +
+          scale_y_continuous("Coral cover (%)", labels = function(x) x * 100) +
+          ## guides(
+          ##   fill = "none", #guide_legend(override.aes = list(color = "orange")),
+          ##   color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
+          ## ) +
+          theme_classic() 
+        
+        ggsave(
+          filename = paste0(
+            fig_path, "R_pdp_", type, "_", filename, model_type, ".png"
+          ),
+          g1,
+          width = 6, height = 4, dpi = 72
+        )
+      }
+      ## ----end
+      pred_gbm
+    }),
+    
+    tar_target(mse_gbm_, {
+      calc_mse <- calc_mse_
+      ## ---- mse_gbm_function
+      mse_gbm <- function(mod, newdata = newdata, n.trees, type, model_type = "covariates") {
+        newdata <- newdata |>
+          ungroup() |> 
+          mutate(fYear = factor(Year, levels = unique(Year)),
+            Site = NA, Transect = NA)
+        if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
+          newdata <- newdata |>
+            mutate(
+              Longitude = st_coordinates(st_centroid(newdata))[, 1],
+              Latitude = st_coordinates(st_centroid(newdata))[, 2],
+              )
+        }
+
+        newdata <- newdata |>
+          mutate(fit = predict(mod, newdata, n.trees = n.trees, type = "response")) |> 
+          mutate(type = "gbm") |>
+          ungroup()
+        mse_gbm <- calc_mse(newdata) |>
+          mutate(model = "gbm", type = type, model_type = model_type)
+      }
+      ## ----end
+      mse_gbm
+    }),
+
+    tar_target(pred_dbarts_, {
+      ## ---- pred_dbarts_function
+      pred_dbarts <- function(preds,
+                              type = 1,
+                               model_type = "",
+                               newdata = newdata,
+                               true_sum = true_sum,
+                               data_path, fig_path,
+                               filename = "mod_dbarts_12") {
+        model_type <- ifelse(model_type == "covariates", "b", model_type)
+        if (model_type == "") {
+          pred_dbarts <- newdata |>
+            bind_cols(preds) |> 
+            mutate(Year = as.numeric(as.character(fYear))) |>
+            mutate(type = "dbarts")
+          saveRDS(pred_dbarts,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+        } else if (model_type == "b") {
+          full_preds <- 
+            t(preds) |>
+            as.data.frame() |>
+            mutate(i = 1:n()) |>
+            pivot_longer(cols = -i, names_to = ".draw") |>
+            mutate(.draw = as.numeric(str_remove(.draw, "V"))) |>
+            left_join(newdata |>
+                        ungroup() |> 
+                        mutate(i = 1:n()),
+              by = "i") |>
+            ungroup() 
+
+          pred_dbarts <-
+            full_preds |> 
+            group_by(Year, .draw) |>
+            summarise(median = median(value)) |>
+            ungroup() |>
+            group_by(Year) |>
+            summarise_draws(median, HDInterval::hdi) |> 
+            dplyr::select(-variable) |> 
+            mutate(type = "dbarts")
+
+          saveRDS(pred_dbarts,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+        }
+
+        g1 <-
+          pred_dbarts |>
+          ggplot() +
+          geom_ribbon(aes(x = Year, ymin = lower, ymax = upper, fill = "dbarts", colour = "dbarts"),
+            alpha = 0.8) +
+          geom_line(aes(x = Year, y = median, color = "dbarts"),
+            linewidth = 2) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Mean, colour = "simple data mean"),
+            linetype = "dashed",
+            linewidth = 1) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Median, colour = "simple data median"),
+            linetype = "dashed",
+            linewidth = 1) +
+          scale_color_manual("",
+            values = c("white", "green", "blue"),
+            breaks = c("dbarts", "simple data mean", "simple data median")
+            ) +
+          scale_fill_manual("",
+            values = c("orange", NA, NA),
+            breaks = c("dbarts", "simple data mean", "simple data median")
+            ) +
+          scale_y_continuous("Coral cover (%)", labels = function(x) x * 100) +
+          guides(
+            fill = "none", #guide_legend(override.aes = list(color = "orange")),
+            color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
+          ) +
+          theme_classic() 
+        
+        ggsave(
+          filename = paste0(
+            fig_path, "R_pdp_", type, "_", filename, model_type, ".png"
+          ),
+          g1,
+          width = 6, height = 4, dpi = 72
+        )
+      }
+      ## ----end
+      pred_dbarts
+    }),
+
+    tar_target(mse_dbarts_, {
+      calc_mse <- calc_mse_
+      ## ---- mse_dbarts_function
+      mse_dbarts <- function(preds, newdata = newdata, type, model_type = "covariates") {
+
+        newdata <- 
+          t(preds) |>
+          as.data.frame() |>
+          mutate(i = 1:n()) |>
+          pivot_longer(cols = -i, names_to = ".draw", values_to = "fit") |>
+          mutate(.draw = as.numeric(str_remove(.draw, "V"))) |>
+          left_join(newdata |>
+                      ungroup() |> 
+                      mutate(i = 1:n()),
+            by = "i") |>
+          ungroup() 
+        mse_dbarts <- calc_mse(newdata) |>
+          mutate(model = "dbarts", type = type, model_type = model_type)
+      }
+      ## ----end
+      mse_dbarts
+    }),
+
+    tar_target(calc_mse_, {
+      ## ---- calc_mse_function
+      calc_mse <- function(dat) {
+        dat |>
+          mutate(
+            se_r = (fit - HCC)^2,
+            acc = exp(log(fit) - log(HCC)),
+            acc = abs(acc - 1)
+          ) |>
+          summarise(
+            mse_mean = mean(se_r),
+            mse_median = median(se_r),
+            acc_mean = mean(acc),
+            acc_median = median(acc),
+            lower = HDInterval::hdi(acc)[1],
+            upper = HDInterval::hdi(acc)[2]
+          )
+      }
+      ## ----end
+      calc_mse
+    }
+    )
+
+    
+  )
+  return(targets)
+}
+
 
 ## ---- GCRMN_plotCellMeans_function
 GCMRN_plotCellMeans <- function(cellMeans, pointsize=1, linesize=0.75,

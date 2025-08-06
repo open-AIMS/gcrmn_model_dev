@@ -2949,6 +2949,72 @@ mod_stan_4$print(
   
 :::::
 
+#### pymc-bart + covariates
+
+```{python}
+#| label: python sampled data barts data 4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python sampled data barts fit 4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot (sample data only)
+
+![](../output/figures/python_pdp_pymc_bart_4b.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{python}
+#| label: python sampled data barts plot 4
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+##### Partial dependency plot (full domain)
+
+![](../output/figures/python_pdp_pymc_bart_4c.png){width=700px}
+
+```{python}
+#| label: python sampled data barts prep plot 4c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+```{python}
+#| label: python sampled data barts plot 4c
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+:::::
+
  
 ::::
 

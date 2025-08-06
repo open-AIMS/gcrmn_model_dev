@@ -8,6 +8,7 @@ synthetic_data <- function() {
         library(tidyverse)  # for data manipulation and visualisation
         library(synthos)    # for synthetic data generation
         library(sf)         # for spatial data handling and visualisation
+        library(lwgeom)     # for spatial data handling and visualisation
         ## ----end
       }
     ),
@@ -307,7 +308,227 @@ synthetic_data <- function() {
         file = paste0(data_path, "synthetic/benthos_fixed_locs_obs_disturb_list.rds")
       )
       ## ----end
+    }),
+
+    ## Incomplete spatial coverage
+
+    ## Subdomains
+    tar_target(synthetic_incomplete_coverage_benthos_reefs_locs_, {
+      benthos_reefs_pts <- synthetic_landscape_benthos_reefs_
+      config <- synthetic_landscape_config_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic landscape benthos reefs subdomains
+      ## Divide the spatial domain into two halves
+      benthos_reefs_pts_subdomains <- benthos_reefs_pts |>
+        mutate(
+          Half = ifelse(st_coordinates(geometry)[, 2] > -16, "Northern", "Southern")
+        )
+      saveRDS(benthos_reefs_pts_subdomains, file = paste0(
+        data_path,
+        "synthetic/benthos_reefs_pts_subdomains.rds"
+      ))
+      ## ----end
+      benthos_reefs_pts_subdomains 
+    }),
+
+    ## Northern reefs 
+    tar_target(synthetic_northern_reefs_benthos_reefs_locs_, {
+      benthos_reefs_pts_subdomains <- synthetic_incomplete_coverage_benthos_reefs_locs_
+      config <- synthetic_landscape_config_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic landscape benthos reefs northern
+      benthos_reefs_pts_subdomains <- readRDS(file = paste0(
+        data_path,
+        "synthetic/benthos_reefs_pts_subdomains.rds"
+      ))
+      benthos_reefs_pts_northern <- benthos_reefs_pts_subdomains |>
+        filter(Half == "Northern") 
+      saveRDS(benthos_reefs_pts_northern, file = paste0(
+        data_path,
+        "synthetic/benthos_reefs_pts_northern.rds"
+      ))
+      ## ----end
+      benthos_reefs_pts_northern 
+    }),
+    ## Northern sampled reefs 
+    tar_target(synthetic_northern_sampled_reefs_benthos_reefs_locs_, {
+      benthos_reefs_pts_northern <- synthetic_northern_reefs_benthos_reefs_locs_
+      config <- synthetic_landscape_config_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic landscape benthos reefs northern sampled
+      config <- list(n_locs = 25, n_sites = 2, seed = 123)
+      benthos_fixed_locs_northern_sf <- sampling_design_large_scale_fixed(
+        benthos_reefs_pts_northern, config)
+      saveRDS(benthos_fixed_locs_northern_sf, file = paste0(
+        data_path,
+        "synthetic/benthos_fixed_locs_northern_sf.rds"
+      ))
+      ## ----end
+      benthos_fixed_locs_northern_sf
+    }),
+    tar_target(synthetic_northern_sampled_reefs_benthos_reefs_locs_obs_, {
+      benthos_fixed_locs_northern_sf <- synthetic_northern_sampled_reefs_benthos_reefs_locs_
+      config <- synthetic_landscape_config_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic northern benthos reefs locs obs
+      config <- list(
+        Number_of_transects_per_site = 5,
+        Depths = 2,
+        Number_of_frames_per_transect = 100,
+        Points_per_frame = 5,
+        ## Note, the following are on the link scale
+        hcc_site_sigma = 0.5, # variability in Sites within Locations
+        hcc_transect_sigma = 0.2, # variability in Transects within Sites
+        hcc_sigma = 0.1, # random noise
+
+        sc_site_sigma = 0.05, # variability in Sites within Locations
+        sc_transect_sigma = 0.02, # variability in Transects within Sites
+        sc_sigma = 0.01, # random noise
+
+        ma_site_sigma = 0.5, # variability in Sites within Locations
+        ma_transect_sigma = 0.2, # variability in Transects within Sites
+        ma_sigma = 0.1 # random noise
+      )
+
+      benthos_fixed_locs_northern_obs <- sampling_design_fine_scale_fixed(
+        benthos_fixed_locs_northern_sf,
+        config
+      )
+      saveRDS(benthos_fixed_locs_northern_obs, file = paste0(
+        data_path,
+        "synthetic/benthos_fixed_locs_northern_obs.rds"
+      ))
+      ## save as csv
+      write_csv(
+        benthos_fixed_locs_northern_obs,
+        paste0(data_path, "synthetic/benthos_fixed_locs_northern_obs.csv")
+      )
+      ## ----end
+      benthos_fixed_locs_northern_obs
+    }),
+    tar_target(synthetic_northern_sampled_reefs_benthos_reefs_locs_obs_disturb_, {
+      benthos_fixed_locs_northern_obs <- synthetic_northern_sampled_reefs_benthos_reefs_locs_obs_
+      benthos_reefs_pts_northern <- synthetic_northern_reefs_benthos_reefs_locs_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic northern benthos reefs locs obs disturb
+      benthos_fixed_locs_northern_obs_disturb <- benthos_fixed_locs_northern_obs |>
+        left_join(
+          benthos_reefs_pts_northern |>
+            dplyr::select(Reef, Year, CYC, DHW, OTHER) |>
+            distinct(),
+          by = c("Reef", "Year"),
+          relationship = "many-to-many"
+        ) 
+      saveRDS(benthos_fixed_locs_northern_obs_disturb, file = paste0(
+        data_path,
+        "synthetic/benthos_fixed_locs_northern_obs_disturb.rds"
+      ))
+      write_csv(
+        benthos_fixed_locs_northern_obs_disturb,
+        paste0(data_path, "synthetic/benthos_fixed_locs_northern_obs_disturb.csv")
+      )
+      ## ----end
+      benthos_fixed_locs_northern_obs_disturb 
+    }),
+
+
+    ## Southern reefs 
+    tar_target(synthetic_southern_reefs_benthos_reefs_locs_, {
+      benthos_reefs_pts_subdomains <- synthetic_incomplete_coverage_benthos_reefs_locs_
+      config <- synthetic_landscape_config_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic landscape benthos reefs southern
+      benthos_reefs_pts_southern <- benthos_reefs_pts_subdomains |>
+        filter(Half == "Southern") 
+      saveRDS(benthos_reefs_pts_southern, file = paste0(
+        data_path,
+        "synthetic/benthos_reefs_pts_southern.rds"
+      ))
+      ## ----end
+      benthos_reefs_pts_southern 
+    }),
+    ## Southern sampled reefs 
+    tar_target(synthetic_southern_sampled_reefs_benthos_reefs_locs_, {
+      benthos_reefs_pts_southern <- synthetic_southern_reefs_benthos_reefs_locs_
+      config <- synthetic_landscape_config_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic landscape benthos reefs southern sampled
+      config <- list(n_locs = 2, n_sites = 2, seed = 123)
+      benthos_fixed_locs_southern_sf <- sampling_design_large_scale_fixed(
+        benthos_reefs_pts_southern, config)
+      saveRDS(benthos_fixed_locs_southern_sf, file = paste0(
+        data_path,
+        "synthetic/benthos_fixed_locs_southern_sf.rds"
+      ))
+      ## ----end
+      benthos_fixed_locs_southern_sf
+    }),
+    tar_target(synthetic_southern_sampled_reefs_benthos_reefs_locs_obs_, {
+      benthos_fixed_locs_southern_sf <- synthetic_southern_sampled_reefs_benthos_reefs_locs_
+      config <- synthetic_landscape_config_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic southern benthos reefs locs obs
+      config <- list(
+        Number_of_transects_per_site = 5,
+        Depths = 2,
+        Number_of_frames_per_transect = 100,
+        Points_per_frame = 5,
+        ## Note, the following are on the link scale
+        hcc_site_sigma = 0.5, # variability in Sites within Locations
+        hcc_transect_sigma = 0.2, # variability in Transects within Sites
+        hcc_sigma = 0.1, # random noise
+
+        sc_site_sigma = 0.05, # variability in Sites within Locations
+        sc_transect_sigma = 0.02, # variability in Transects within Sites
+        sc_sigma = 0.01, # random noise
+
+        ma_site_sigma = 0.5, # variability in Sites within Locations
+        ma_transect_sigma = 0.2, # variability in Transects within Sites
+        ma_sigma = 0.1 # random noise
+      )
+
+      benthos_fixed_locs_southern_obs <- sampling_design_fine_scale_fixed(
+        benthos_fixed_locs_southern_sf,
+        config
+      )
+      saveRDS(benthos_fixed_locs_southern_obs, file = paste0(
+        data_path,
+        "synthetic/benthos_fixed_locs_southern_obs.rds"
+      ))
+      ## save as csv
+      write_csv(
+        benthos_fixed_locs_southern_obs,
+        paste0(data_path, "synthetic/benthos_fixed_locs_southern_obs.csv")
+      )
+      ## ----end
+      benthos_fixed_locs_southern_obs
+    }),
+    tar_target(synthetic_southern_sampled_reefs_benthos_reefs_locs_obs_disturb_, {
+      benthos_fixed_locs_southern_obs <- synthetic_southern_sampled_reefs_benthos_reefs_locs_obs_
+      benthos_reefs_pts_southern <- synthetic_southern_reefs_benthos_reefs_locs_
+      data_path <- synthetic_global_parameters_$data_path
+      ## ---- synthetic southern benthos reefs locs obs disturb
+      benthos_fixed_locs_southern_obs_disturb <- benthos_fixed_locs_southern_obs |>
+        left_join(
+          benthos_reefs_pts_southern |>
+            dplyr::select(Reef, Year, CYC, DHW, OTHER) |>
+            distinct(),
+          by = c("Reef", "Year"),
+          relationship = "many-to-many"
+        ) 
+      saveRDS(benthos_fixed_locs_southern_obs_disturb, file = paste0(
+        data_path,
+        "synthetic/benthos_fixed_locs_southern_obs_disturb.rds"
+      ))
+      write_csv(
+        benthos_fixed_locs_southern_obs_disturb,
+        paste0(data_path, "synthetic/benthos_fixed_locs_southern_obs_disturb.csv")
+      )
+      ## ----end
+      benthos_fixed_locs_southern_obs_disturb 
     })
+
+
   )
   return(targets)
 }
