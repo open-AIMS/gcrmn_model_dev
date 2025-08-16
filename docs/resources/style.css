@@ -421,7 +421,8 @@ max-width: 85%
 }
 
 .tabset-left > .nav-tabs {
-	width:100px;
+	  width:200px;
+    flex-direction: column;
 }
 
 .tabset-left>.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
@@ -433,6 +434,8 @@ max-width: 85%
 
 .tabset-left > .nav-tabs > li {
 	margin-bottom:0px !important;
+  word-wrap: break-word;
+  display: contents;
 }
 
 .tabset-left > .nav-tabs>li>a {
@@ -442,7 +445,7 @@ max-width: 85%
 	border-bottom:1px solid #dddddd;
 	border-right:none !important;
 	border-radius: 4px 0px 0px 4px;
-	width:100px;
+	width:200px;
 }
 
 .tabset-left > .nav-tabs {
@@ -457,7 +460,7 @@ max-width: 85%
     width: 100%;
 }
 .tabset-left > .tab-content{
-    flex: 85%;
+    flex: 65%;
     width: 100%;
 	border-top:1px solid #666;
 }

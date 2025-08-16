@@ -304,6 +304,60 @@ site_replacement <- function() {
     }),
     
     ## Data preparations ==============================================
+    ## Full reef-level data -------------------------------------------
+    tar_target(site_replacements_data_prep_, {
+      benthos_reefs_sf <- read_all_reefs_data_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- sampled data prep
+      benthos_reefs <- benthos_reefs_sf |>
+        mutate(
+          fYear = as.factor(Year),
+          Reef = as.factor(Reef),
+          cover = HCC/100
+        )
+      benthos_reefs
+      ## ----end
+      benthos_reefs 
+    }),
+    tar_target(site_replacements_newdata_, {
+      benthos_reefs <- site_replacements_data_prep_
+      ## ---- newdata 
+      newdata <-
+        benthos_reefs |>
+        tidyr::expand(fYear)
+      newdata
+      ## ----end
+      newdata
+    }),
+    tar_target(site_replacements_newdata_b_, {
+      benthos_reefs <- site_replacements_data_prep_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- newdata b
+      newdata_b <-
+        benthos_reefs |> 
+        mutate(Longitude = st_coordinates(geometry)[, 1],
+          Latitude = st_coordinates(geometry)[, 2]) |>
+        st_drop_geometry() |>
+        group_by(Year, Reef) |>
+        summarise(
+          HCC = mean(HCC),
+          CYC = mean(CYC),
+          DHW = mean(DHW),
+          OTHER = mean(OTHER),
+          Longitude = mean(Longitude),
+          Latitude = mean(Latitude)
+          )
+      newdata_b
+      saveRDS(newdata_b,
+        file = paste0(
+          data_path,
+          "synthetic/newdata_b.rds"
+        )
+      )
+      ## ----end
+      newdata_b
+    }),
+    
     ## All sampled reefs ----------------------------------------------
     tar_target(site_replacements_data_prep_0_, {
       benthos_fixed_locs_obs <- read_sampled_reefs_data_
@@ -328,6 +382,34 @@ site_replacement <- function() {
         tidyr::expand(fYear)
       ## ----end
       newdata_0
+    }),
+    tar_target(site_replacements_newdata_0b_, {
+      benthos_fixed_locs_obs_0 <- site_replacements_data_prep_0_
+      data_path <- site_replacement_global_parameters_$data_path
+      ## ---- newdata 0b
+      newdata_0b <-
+        benthos_fixed_locs_obs_0 |> 
+        ## mutate(Longitude = st_coordinates(geometry)[, 1],
+        ##   Latitude = st_coordinates(geometry)[, 2]) |>
+        ## st_drop_geometry() |>
+        group_by(Year, Reef) |>
+        summarise(
+          HCC = mean(HCC),
+          CYC = mean(CYC),
+          DHW = mean(DHW),
+          OTHER = mean(OTHER),
+          Longitude = mean(Longitude),
+          Latitude = mean(Latitude)
+          )
+      newdata_0b
+      saveRDS(newdata_0b,
+        file = paste0(
+          data_path,
+          "synthetic/newdata_0b.rds"
+        )
+      )
+      ## ----end
+      newdata_0b
     }),
     ## Replace a reef -------------------------------------------------
     tar_target(site_replacements_data_prep_1_, {

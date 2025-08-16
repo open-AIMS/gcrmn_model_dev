@@ -80,10 +80,14 @@ helper_functions <- function() {
                                data_path, fig_path,
                                filename = "mod_glmmTMB_12") {
         model_type <- ifelse(model_type == "covariates", "b", model_type)
+        old_newdata <- newdata
+        alp <- 0.8
         if (model_type == "") {
-          
+          if (nrow(newdata) > length(unique(mod$frame$fYear))) {
+            newdata <- mod$frame |> expand(fYear)
+          }
           pred_glmmTMB <- 
-            mod |> emmeans(~fYear, at = newdata, type = "response") |>
+            mod |> emmeans(~fYear, at = newdata, type = "response") |> 
             as.data.frame() |> 
             rename(median = response, lower = asymp.LCL, upper = asymp.UCL) |>
             mutate(Year = as.numeric(as.character(fYear))) |>
@@ -92,9 +96,13 @@ helper_functions <- function() {
             file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
           ) 
         } else if (model_type == "b") {
+          sample_yrs <- mod$frame |>
+            pull(fYear) |> unique()
           newdata <- newdata |>
             mutate(fYear = factor(Year, levels = unique(Year)),
               Site = NA, Transect = NA)
+          newdata <- newdata |> 
+            filter(fYear %in% sample_yrs) |> droplevels() 
           if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
             newdata <- newdata |>
               mutate(
@@ -125,6 +133,20 @@ helper_functions <- function() {
           
         }
 
+        all_years <- pred_glmmTMB |>
+          reframe(Year = full_seq(Year, period = 1))
+        sample_yrs <- pred_glmmTMB |>
+          full_join(all_years, by = "Year") 
+        gap_years_boundary <- pred_glmmTMB |>
+          reframe(Year = range(setdiff(full_seq(Year, period = 1), Year)) + c(-1, 1))
+        gap_yrs <- pred_glmmTMB |>
+          right_join(gap_years_boundary, by = "Year") 
+
+        if (nrow(gap_yrs) > 0) {
+         alp <- 0.1 
+         pred_glmmTMB <- sample_yrs
+        }
+        
         g1 <-
           pred_glmmTMB |>
           ggplot() +
@@ -154,6 +176,16 @@ helper_functions <- function() {
             color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
           ) +
           theme_classic() 
+        if (nrow(gap_yrs) > 0) {
+          g1 <- g1 +
+            geom_ribbon(data = gap_yrs,
+              aes(x = Year, ymin = lower, ymax = upper,
+                fill = "glmmTMB", colour = "glmmTMB"),
+              alpha = 0.1) +
+            geom_line(data = gap_yrs, aes(x = Year, y = median,
+              colour = "glmmTMB"),
+              linewidth = 1)
+        }
         
         ggsave(
           filename = paste0(
@@ -171,9 +203,16 @@ helper_functions <- function() {
       calc_mse <- calc_mse_
       ## ---- mse_glmmTMB_function
       mse_glmmTMB <- function(mod, newdata = newdata, type, model_type = "covariates") {
+        sample_yrs <- mod$frame |>
+          pull(fYear) |> unique()
+        ## if (nrow(newdata) > length(unique(mod$frame$fYear))) {
+        ##   newdata <- mod$frame |> expand(fYear)
+        ## }
         newdata <- newdata |>
           mutate(fYear = factor(Year, levels = unique(Year)),
             Site = NA, Transect = NA)
+        newdata <- newdata |> 
+          filter(fYear %in% sample_yrs) |> droplevels() 
         if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
           newdata <- newdata |>
             mutate(
@@ -181,6 +220,7 @@ helper_functions <- function() {
               Latitude = st_coordinates(st_centroid(newdata))[, 2],
               )
         }
+
         pred <- predict(mod, newdata = newdata,
           re.form =  ~ 0,
           allow.new.levels = TRUE
@@ -206,7 +246,9 @@ helper_functions <- function() {
                                filename = "mod_brms_12") {
         model_type <- ifelse(model_type == "covariates", "b", model_type)
         if (model_type == "") {
-          
+          if (nrow(newdata) > length(unique(mod$frame$fYear))) {
+            newdata <- mod$data |> expand(fYear)
+          }
           pred_brms <- 
             mod |> emmeans(~fYear, at = newdata, type = "response") |>
             as.data.frame() |> 
@@ -217,8 +259,14 @@ helper_functions <- function() {
             file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
           ) 
         } else if (model_type == "b") {
+          sample_yrs <- mod$data |>
+            pull(fYear) |> unique()
           newdata <- newdata |>
-            mutate(fYear = factor(Year, levels = unique(Year)))
+            ungroup() |> 
+            mutate(fYear = factor(Year, levels = unique(Year)),
+              Site = NA, Transect = NA)
+          newdata <- newdata |> 
+            filter(fYear %in% sample_yrs) |> droplevels() 
           if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
             newdata <- newdata |>
               mutate(
@@ -239,13 +287,28 @@ helper_functions <- function() {
             summarise(fit = mean(.epred)) |>
             ungroup() |>
             group_by(Year) |>
-            summarise_draws(median, HDInterval::hdi)
+            summarise_draws(median, HDInterval::hdi) |>
+            ungroup()
             
           saveRDS(pred_brms,
             file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
           ) 
           
         }
+        all_years <- pred_brms |>
+          reframe(Year = full_seq(Year, period = 1))
+        sample_yrs <- pred_brms |>
+          full_join(all_years, by = "Year") 
+        gap_years_boundary <- pred_brms |>
+          reframe(Year = range(setdiff(full_seq(Year, period = 1), Year)) + c(-1, 1))
+        gap_yrs <- pred_brms |>
+          right_join(gap_years_boundary, by = "Year") 
+
+        if (nrow(gap_yrs) > 0) {
+         alp <- 0.1 
+         pred_brms <- sample_yrs
+        }
+        
 
         g1 <-
           pred_brms |>
@@ -276,6 +339,18 @@ helper_functions <- function() {
             color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
           ) +
           theme_classic() 
+
+        if (nrow(gap_yrs) > 0) {
+          g1 <- g1 +
+            geom_ribbon(data = gap_yrs,
+              aes(x = Year, ymin = lower, ymax = upper,
+                fill = "brms", colour = "brms"),
+              alpha = 0.1) +
+            geom_line(data = gap_yrs, aes(x = Year, y = median,
+              colour = "brms"),
+              linewidth = 1)
+        }
+        
         
         ggsave(
           filename = paste0(
@@ -293,9 +368,13 @@ helper_functions <- function() {
       calc_mse <- calc_mse_
       ## ---- mse_brms_function
       mse_brms <- function(mod, newdata = newdata, type, model_type = "covariates") {
+        sample_yrs <- mod$data |>
+          pull(fYear) |> unique()
         newdata <- newdata |>
           mutate(fYear = factor(Year, levels = unique(Year)),
             Site = NA, Transect = NA)
+        newdata <- newdata |> 
+          filter(fYear %in% sample_yrs) |> droplevels() 
         if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
           newdata <- newdata |>
             mutate(
@@ -325,10 +404,14 @@ helper_functions <- function() {
                                newdata = newdata,
                                true_sum = true_sum,
                                data_path, fig_path,
-                               filename = "mod_stan_12") {
+                            filename = "mod_stan_12",
+                            newdata_sampled = newdata
+                            ) {
         model_type <- ifelse(model_type == "covariates", "b", model_type)
+        ## newdata_full <- newdata
         if (model_type == "") {
-          
+         vars <- get_variables(mod) 
+         if (sum(str_detect(vars, "cellmeans")) > 0) {
           stan_sum <-
             mod$draws(variables = "cellmeans") |>
             posterior::as_draws_df() |>
@@ -343,7 +426,25 @@ helper_functions <- function() {
             rename(lower_90 = V4, upper_90 = V5) |>
             bind_cols(newdata) |>
             mutate(Year = as.numeric(as.character(fYear)))
-
+         } else {
+           newdata_full <- newdata |>
+             reframe(fYear = factor(full_seq(as.numeric(as.character(fYear)), period = 1)))
+           stan_sum <- 
+             mod$draws(variables = "Years") |>
+             posterior::as_draws_df() |>
+             mutate(across(starts_with("Years"), plogis)) |> 
+             posterior::summarise_draws(
+               median,
+               HDInterval::hdi,
+               ~ HDInterval::hdi(., credMass = c(0.9)),
+               rhat,
+               ess_bulk,
+               ess_tail
+             ) |>
+             rename(lower_90 = V4, upper_90 = V5) |>
+             bind_cols(newdata_full) |>
+             mutate(Year = as.numeric(as.character(fYear)))
+         }
 
           pred_stan <- 
             stan_sum |> 
@@ -355,6 +456,28 @@ helper_functions <- function() {
           
         }
 
+        all_yrs <- pred_stan |>
+          reframe(Year = full_seq(Year, period = 1))
+        ## sample_yrs <- newdata |>
+        ##   left_join(pred_stan, by = "fYear") 
+        sample_yrs <- pred_stan |>
+          right_join(newdata_sampled, by = "fYear") 
+        gap_yrs <- sample_yrs |>
+          reframe(Year = setdiff(full_seq(Year, period = 1), Year))
+        if (nrow(gap_yrs) > 0) {
+          gap_yrs <- gap_yrs |>
+            reframe(Year = full_seq(range(Year) + c(-1, 1), period = 1))
+          pred_stan_gap_yrs <- pred_stan |>
+            right_join(gap_yrs, by = "Year") 
+          sample_yrs <- sample_yrs |>
+            full_join(all_yrs, by = "Year")
+        }
+
+        if (nrow(gap_yrs) > 0) {
+         alp <- 0.1 
+         pred_stan <- sample_yrs
+        }
+        
         g1 <-
           pred_stan |>
           ggplot() +
@@ -384,6 +507,17 @@ helper_functions <- function() {
             color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
           ) +
           theme_classic() 
+
+        if (nrow(gap_yrs) > 0) {
+          g1 <- g1 +
+            geom_ribbon(data = pred_stan_gap_yrs,
+              aes(x = Year, ymin = lower, ymax = upper,
+                fill = "stan", colour = "stan"),
+              alpha = 0.1) +
+            geom_line(data = pred_stan_gap_yrs, aes(x = Year, y = median,
+              colour = "stan"),
+              linewidth = 1)
+        }
         
         ggsave(
           filename = paste0(
@@ -400,7 +534,8 @@ helper_functions <- function() {
     tar_target(mse_stan_, {
       calc_mse <- calc_mse_
       ## ---- mse_stan_function
-      mse_stan <- function(mod, newdata = newdata, type, model_type = "covariates") {
+      mse_stan <- function(mod, newdata = newdata, type, model_type = "covariates",
+                           sample_yrs_only = TRUE) {
         newdata <- newdata |>
           ungroup() |> 
           mutate(fYear = factor(Year, levels = unique(Year)),
@@ -412,26 +547,50 @@ helper_functions <- function() {
               Latitude = st_coordinates(st_centroid(newdata))[, 2],
               )
         }
-        Xmat <- model.matrix(~ -1 + fYear, data = newdata)
-        stan_sum <-
-          mod$draws(variables = "beta") |>
-          posterior::as_draws_df() |>
-          dplyr::select(-.iteration, -.chain) |>
-          group_by(.draw) |>
-          nest() |>
-          mutate(pred = map(.x = data,
-            .f = ~ {
-              fit <-
-                .x |> 
-                as.matrix() |>
-                as.vector() %*% t(Xmat) |>
-                as.vector() |>
-                plogis()
-              newdata |> mutate(fit = fit) 
-            })) |>
-          dplyr::select(-data) |>
-          unnest(pred)
-        
+        vars <- get_variables(mod) 
+        ## use the following for either models without full gaps or
+        ## if you only want to predict to the sampled years
+        if (sum(str_detect(vars, "cellmeans")) > 0 | sample_yrs_only) {
+          Xmat <- model.matrix(~ -1 + fYear, data = newdata)
+          stan_sum <-
+            mod$draws(variables = "beta") |>
+            posterior::as_draws_df() |>
+            dplyr::select(-.iteration, -.chain) |>
+            group_by(.draw) |>
+            nest() |>
+            mutate(pred = map(.x = data,
+              .f = ~ {
+                fit <-
+                  .x |> 
+                  as.matrix() |>
+                  as.vector() %*% t(Xmat) |>
+                  as.vector() |>
+                  plogis()
+                newdata |> mutate(fit = fit) 
+              })) |>
+            dplyr::select(-data) |>
+            unnest(pred)
+        } else { ## all years (even those not sampled)
+          Xmat <- model.matrix(~ -1 + fYear, data = newdata)
+          stan_sum <-
+            mod$draws(variables = "Years") |>
+            posterior::as_draws_df() |>
+            dplyr::select(-.iteration, -.chain) |>
+            group_by(.draw) |>
+            nest() |>
+            mutate(pred = map(.x = data,
+              .f = ~ {
+                fit <-
+                  .x |> 
+                  as.matrix() |>
+                  as.vector() %*% t(Xmat) |>
+                  as.vector() |>
+                  plogis()
+                newdata |> mutate(fit = fit) 
+              })) |>
+            dplyr::select(-data) |>
+            unnest(pred)
+        }
         newdata <- stan_sum |>
           ungroup() 
         mse_stan <- calc_mse(newdata) |>
@@ -450,7 +609,9 @@ helper_functions <- function() {
                                newdata = newdata,
                                true_sum = true_sum,
                                data_path, fig_path,
-                               filename = "mod_gbm_12") {
+                           filename = "mod_gbm_12",
+                            newdata_sampled = newdata
+                           ) {
         model_type <- ifelse(model_type == "covariates", "b", model_type)
         if (model_type == "") {
           pred_gbm <- newdata |>
@@ -477,12 +638,39 @@ helper_functions <- function() {
             file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
           ) 
         }
+        ## print(newdata_sampled)
+        if (!"fYear" %in% colnames(newdata_sampled)) {
+          newdata_sampled <- newdata_sampled |>
+            mutate(fYear = factor(Year, levels = unique(Year)))
+        }
+        if (!"Year" %in% colnames(newdata_sampled)) {
+          newdata_sampled <- newdata_sampled |>
+            mutate(Year = as.numeric(as.character(fYear)))
+        }
+        all_yrs <- pred_gbm |>
+          reframe(Year = full_seq(Year, period = 1))
+        sample_yrs <- pred_gbm |>
+          right_join(newdata_sampled, by = "Year") 
+        gap_yrs <- sample_yrs |>
+          reframe(Year = setdiff(full_seq(Year, period = 1), Year))
+        if (nrow(gap_yrs) > 0) {
+          gap_yrs <- gap_yrs |>
+            reframe(Year = full_seq(range(Year) + c(-1, 1), period = 1))
+          pred_gbm_gap_yrs <- pred_gbm |>
+            right_join(gap_yrs, by = "Year") 
+          sample_yrs <- sample_yrs |>
+            full_join(all_yrs, by = "Year")
+        }
+
+
+        if (nrow(gap_yrs) > 0) {
+         alp <- 0.1 
+         pred_gbm <- sample_yrs
+        }
 
         g1 <-
           pred_gbm |>
           ggplot() +
-          ## geom_ribbon(aes(x = Year, ymin = lower, ymax = upper, fill = "gbm", colour = "gbm"),
-          ##   alpha = 0.8) +
           geom_line(aes(x = Year, y = median, color = "gbm"),
             linewidth = 2) +
           geom_line(data = true_sum,
@@ -508,6 +696,12 @@ helper_functions <- function() {
           ## ) +
           theme_classic() 
         
+        if (nrow(gap_yrs) > 0) {
+          g1 <- g1 +
+            geom_line(data = na.omit(pred_gbm_gap_yrs), aes(x = Year, y = median,
+              colour = "gbm"),
+              linewidth = 2, alpha = 0.5)
+        }
         ggsave(
           filename = paste0(
             fig_path, "R_pdp_", type, "_", filename, model_type, ".png"
@@ -555,7 +749,9 @@ helper_functions <- function() {
                                newdata = newdata,
                                true_sum = true_sum,
                                data_path, fig_path,
-                               filename = "mod_dbarts_12") {
+                              filename = "mod_dbarts_12",
+                              newdata_sampled = newdata
+                              ) {
         model_type <- ifelse(model_type == "covariates", "b", model_type)
         if (model_type == "") {
           pred_dbarts <- newdata |>
@@ -572,7 +768,7 @@ helper_functions <- function() {
             mutate(i = 1:n()) |>
             pivot_longer(cols = -i, names_to = ".draw") |>
             mutate(.draw = as.numeric(str_remove(.draw, "V"))) |>
-            left_join(newdata |>
+            left_join(newdata_sampled |>
                         ungroup() |> 
                         mutate(i = 1:n()),
               by = "i") |>
@@ -586,13 +782,55 @@ helper_functions <- function() {
             group_by(Year) |>
             summarise_draws(median, HDInterval::hdi) |> 
             dplyr::select(-variable) |> 
-            mutate(type = "dbarts")
+            mutate(type = "dbarts") |>
+            ungroup()
 
           saveRDS(pred_dbarts,
             file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
           ) 
         }
 
+        all_years <- pred_dbarts |>
+          reframe(Year = full_seq(Year, period = 1))
+        sample_yrs <- pred_dbarts |>
+          full_join(all_years, by = "Year") 
+        gap_years_boundary <- pred_dbarts |>
+          reframe(Year = range(setdiff(full_seq(Year, period = 1), Year)) + c(-1, 1))
+        gap_yrs <- pred_dbarts |>
+          right_join(gap_years_boundary, by = "Year") 
+
+        if (nrow(gap_yrs) > 0) {
+         alp <- 0.1 
+         pred_dbarts <- sample_yrs
+        }
+        ## if (!"fYear" %in% colnames(newdata_sampled)) {
+        ##   newdata_sampled <- newdata_sampled |>
+        ##     mutate(fYear = factor(Year, levels = unique(Year)))
+        ## }
+        ## if (!"Year" %in% colnames(newdata_sampled)) {
+        ##   newdata_sampled <- newdata_sampled |>
+        ##     mutate(Year = as.numeric(as.character(fYear)))
+        ## }
+        ## all_yrs <- pred_gbm |>
+        ##   reframe(Year = full_seq(Year, period = 1))
+        ## sample_yrs <- pred_gbm |>
+        ##   right_join(newdata_sampled, by = "Year") 
+        ## gap_yrs <- sample_yrs |>
+        ##   reframe(Year = setdiff(full_seq(Year, period = 1), Year))
+        ## if (nrow(gap_yrs) > 0) {
+        ##   gap_yrs <- gap_yrs |>
+        ##     reframe(Year = full_seq(range(Year) + c(-1, 1), period = 1))
+        ##   pred_gbm_gap_yrs <- pred_gbm |>
+        ##     right_join(gap_yrs, by = "Year") 
+        ##   sample_yrs <- sample_yrs |>
+        ##     full_join(all_yrs, by = "Year")
+        ## }
+
+
+        if (nrow(gap_yrs) > 0) {
+         alp <- 0.1 
+         pred_gbm <- sample_yrs
+        }
         g1 <-
           pred_dbarts |>
           ggplot() +
@@ -622,6 +860,17 @@ helper_functions <- function() {
             color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
           ) +
           theme_classic() 
+        
+        if (nrow(gap_yrs) > 0) {
+          g1 <- g1 +
+            geom_ribbon(data = gap_yrs,
+              aes(x = Year, ymin = lower, ymax = upper,
+                fill = "dbarts", colour = "dbarts"),
+              alpha = 0.1) +
+            geom_line(data = gap_yrs, aes(x = Year, y = median,
+              colour = "dbarts"),
+              linewidth = 1)
+        }
         
         ggsave(
           filename = paste0(
@@ -656,6 +905,137 @@ helper_functions <- function() {
       }
       ## ----end
       mse_dbarts
+    }),
+
+    tar_target(pred_xgboost_, {
+      ## ---- pred_xgboost_function
+      pred_xgboost <- function(mod,
+                               type = 1,
+                               model_type = "",
+                               newdata = newdata,
+                               true_sum = true_sum,
+                               data_path, fig_path,
+                               filename = "mod_xgboost_12",
+                               newdata_sampled = newdata
+                               ) {
+        model_type <- ifelse(model_type == "covariates", "b", model_type)
+        if (model_type == "") {
+        } else if (model_type == "b") {
+          newdata <- newdata |>
+            mutate(fYear = factor(Year, levels = unique(Year))) |>
+            ungroup()  
+          
+          pred_xgboost <- newdata |>
+            mutate(median = predict(mod, newdata)$.pred) |> 
+            group_by(Year) |>
+            summarise(median = median(median)) |> 
+            mutate(type = "xgboost") |>
+            ungroup()
+
+          saveRDS(pred_xgboost,
+            file = paste0(data_path, paste0("synthetic/", filename, model_type, "_", type, ".rds"))
+          ) 
+        }
+
+        all_yrs <- pred_xgboost |>
+          reframe(Year = full_seq(Year, period = 1))
+        ## sample_yrs <- pred_xgboost |>
+        ##   full_join(all_yrs, by = "Year") 
+        sample_yrs <- pred_xgboost |>
+          right_join(newdata_sampled |>
+           dplyr::select(Year) |> distinct(),
+            by = "Year") 
+        gap_yrs <- sample_yrs |>
+          reframe(Year = setdiff(full_seq(Year, period = 1), Year))
+
+        ## gap_years_boundary <- pred_xgboost |>
+        ##   reframe(Year = range(setdiff(full_seq(Year, period = 1), Year)) + c(-1, 1))
+        ## gap_yrs <- pred_xgboost |>
+        ##   right_join(gap_years_boundary, by = "Year") 
+
+        if (nrow(gap_yrs) > 0) {
+          gap_yrs <- gap_yrs |>
+            reframe(Year = full_seq(range(Year) + c(-1, 1), period = 1))
+          pred_xgboost_gap_yrs <- pred_xgboost |>
+            right_join(gap_yrs, by = "Year") 
+          sample_yrs <- sample_yrs |>
+            full_join(all_yrs, by = "Year")
+        }
+        if (nrow(gap_yrs) > 0) {
+         alp <- 0.1 
+         pred_xgboost <- sample_yrs
+        }
+        g1 <-
+          pred_xgboost |>
+          ggplot() +
+          geom_line(aes(x = Year, y = median, color = "xgboost"),
+            linewidth = 2) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Mean, colour = "simple data mean"),
+            linetype = "dashed",
+            linewidth = 1) +
+          geom_line(data = true_sum,
+            aes(x = Year, y = Median, colour = "simple data median"),
+            linetype = "dashed",
+            linewidth = 1) +
+          scale_color_manual("",
+            values = c("orange", "green", "blue"),
+            breaks = c("xgboost", "simple data mean", "simple data median")
+            ) +
+          ## scale_fill_manual("",
+          ##   values = c("orange", NA, NA),
+          ##   breaks = c("gbm", "simple data mean", "simple data median")
+          ##   ) +
+          scale_y_continuous("Coral cover (%)", labels = function(x) x * 100) +
+          ## guides(
+          ##   fill = "none", #guide_legend(override.aes = list(color = "orange")),
+          ##   color = guide_legend(override.aes = list(fill = c("orange", NA, NA)))
+          ## ) +
+          theme_classic() 
+        
+        if (nrow(gap_yrs) > 0) {
+          g1 <- g1 +
+            geom_line(data = pred_xgboost_gap_yrs, aes(x = Year, y = median,
+              colour = "xgboost"), alpha = 0.5,
+              linewidth = 2)
+        }
+        ggsave(
+          filename = paste0(
+            fig_path, "R_pdp_", type, "_", filename, model_type, ".png"
+          ),
+          g1,
+          width = 6, height = 4, dpi = 72
+        )
+      }
+      ## ----end
+      pred_xgboost
+    }),
+
+    tar_target(mse_xgboost_, {
+      calc_mse <- calc_mse_
+      ## ---- mse_xgboost_function
+      mse_xgboost <- function(mod, newdata = newdata, type, model_type = "covariates") {
+
+        newdata <- newdata |>
+          ungroup() |> 
+          mutate(fYear = factor(Year, levels = unique(Year)),
+            Site = NA, Transect = NA)
+        if ("geometry" %in% names(newdata) & !"Latitude" %in% names(newdata)) {
+          newdata <- newdata |>
+            mutate(
+              Longitude = st_coordinates(st_centroid(newdata))[, 1],
+              Latitude = st_coordinates(st_centroid(newdata))[, 2],
+              )
+        }
+        newdata <- newdata |>
+          mutate(fit = predict(mod, newdata)$.pred) |> 
+          mutate(type = "xgboost") |>
+          ungroup()
+        mse_xgboost <- calc_mse(newdata) |>
+          mutate(model = "xgboost", type = type, model_type = model_type)
+      }
+      ## ----end
+      mse_xgboost
     }),
 
     tar_target(calc_mse_, {

@@ -426,6 +426,68 @@ def sampled_reefs_data_4_plot_(product, upstream):
 
 ## All sampled reefs --------------------------------------------------
 
+## All reefs -----------------------------------------
+
+def missing_years_benthos_reefs_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    benthos_reefs_sf = pickle.load(open(upstream["missing_years_read_all_reefs_data_"], "rb"))
+    ## ---- python benthos reefs
+    pd.set_option("display.max_columns", None)  # Show all columns
+    benthos_reefs = benthos_reefs_sf.copy()
+    benthos_reefs[['Longitude', 'Latitude']] = (
+      benthos_reefs['geometry']
+      .str.strip('c()')
+      .str.split(',', expand = True)
+      .astype(float)
+    )
+    # newdata_b = (
+    #   benthos_fixed_locs_obs_0.groupby(["Year", "Reef"], as_index=False, observed=True).agg(
+    #     HCC = ("HCC", "mean"),
+    #     CYC = ("CYC", "mean"),
+    #     DHW = ("DHW", "mean"),
+    #     OTHER = ("OTHER", "mean"),
+    #     Longitude = ("Longitude", "mean"),
+    #     Latitude = ("Latitude", "mean")
+    #   ).reset_index()
+    # )
+    benthos_reefs
+    ## ----end
+    pickle.dump(benthos_reefs, open(product, "wb"))
+
+def missing_years_newdata_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    benthos_reefs = pickle.load(open(upstream["missing_years_benthos_reefs_"], "rb"))
+    ## ---- python newdata
+    newdata = pd.MultiIndex.from_product(
+        [benthos_reefs["Year"].unique()],
+        names=["Year"]
+    ).to_frame(index=False)
+    
+    newdata
+    ## ----end
+    pickle.dump(newdata, open(product, "wb"))
+
+def missing_years_newdata_b_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    benthos_reefs = pickle.load(open(upstream["missing_years_benthos_reefs_"], "rb"))
+    ## ---- python newdata b
+    pd.set_option("display.max_columns", None)  # Show all columns
+    newdata_b = (
+      benthos_reefs.groupby(["Year", "Reef"], as_index=False, observed=True).agg(
+        HCC = ("HCC", "mean"),
+        CYC = ("CYC", "mean"),
+        DHW = ("DHW", "mean"),
+        OTHER = ("OTHER", "mean"),
+        Longitude = ("Longitude", "mean"),
+        Latitude = ("Latitude", "mean")
+      ).reset_index()
+    )
+    newdata_b
+    ## ----end
+    pickle.dump(newdata_b, open(product, "wb"))
+
+## All sampled reefs -----------------------------------------
+
 def missing_years_sampled_reefs_data_prep_0_(product, upstream):
     benthos_fixed_locs_obs = pickle.load(open(upstream["missing_years_read_sampled_reefs_data_"], "rb"))
     ## ---- python missing years sampled data prep 0
@@ -440,6 +502,7 @@ def missing_years_sampled_reefs_data_prep_0_(product, upstream):
             cover=lambda df: df["HCC"] / 100  # Calculate cover
         )
     )
+    benthos_fixed_locs_obs_0 
     ## ----end
     pickle.dump(benthos_fixed_locs_obs_0, open(product, "wb"))
 
@@ -450,6 +513,7 @@ def missing_years_newdata_0_(product, upstream):
         [benthos_fixed_locs_obs_0["fYear"].unique()],
         names=["fYear"]
     ).to_frame(index=False)
+    newdata_0
     ## ----end
     pickle.dump(newdata_0, open(product, "wb"))
 
@@ -469,6 +533,7 @@ def sampled_reefs_data_prep_3_(product, upstream):
             cover=lambda df: df["HCC"] / 100  # Calculate cover
         )
     )
+    benthos_fixed_locs_obs_3
     ## ----end
     pickle.dump(benthos_fixed_locs_obs_3, open(product, "wb"))
 
@@ -479,9 +544,30 @@ def newdata_3_(product, upstream):
         [benthos_fixed_locs_obs_3["fYear"].unique()],
         names=["fYear"]
     ).to_frame(index=False)
+    newdata_3
     ## ----end
     pickle.dump(newdata_3, open(product, "wb"))
 
+def newdata_3b_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    benthos_fixed_locs_obs_3 = pickle.load(open(upstream["sampled_reefs_data_prep_3_"], "rb"))
+    ## ---- python newdata 3b
+    pd.set_option("display.max_columns", None)  # Show all columns
+    newdata_3b = (
+      benthos_fixed_locs_obs_3.groupby(["Year", "Reef"], as_index=False, observed=True).agg(
+        HCC = ("HCC", "mean"),
+        CYC = ("CYC", "mean"),
+        DHW = ("DHW", "mean"),
+        OTHER = ("OTHER", "mean"),
+        Longitude = ("Longitude", "mean"),
+        Latitude = ("Latitude", "mean")
+      ).reset_index()
+    )
+    newdata_3b
+    ## ----end
+    pickle.dump(newdata_3b, open(product, "wb"))
+
+    
 ## Temporal gap of all reefs -----------------------------------------
 
 def sampled_reefs_data_prep_4_(product, upstream):
@@ -498,6 +584,7 @@ def sampled_reefs_data_prep_4_(product, upstream):
             cover=lambda df: df["HCC"] / 100  # Calculate cover
         )
     )
+    benthos_fixed_locs_obs_4
     ## ----end
     pickle.dump(benthos_fixed_locs_obs_4, open(product, "wb"))
 
@@ -508,8 +595,28 @@ def newdata_4_(product, upstream):
         [benthos_fixed_locs_obs_4["fYear"].unique()],
         names=["fYear"]
     ).to_frame(index=False)
+    newdata_4
     ## ----end
     pickle.dump(newdata_4, open(product, "wb"))
+
+def newdata_4b_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    benthos_fixed_locs_obs_4 = pickle.load(open(upstream["sampled_reefs_data_prep_4_"], "rb"))
+    ## ---- python newdata 4b
+    pd.set_option("display.max_columns", None)  # Show all columns
+    newdata_4b = (
+      benthos_fixed_locs_obs_4.groupby(["Year", "Reef"], as_index=False, observed=True).agg(
+        HCC = ("HCC", "mean"),
+        CYC = ("CYC", "mean"),
+        DHW = ("DHW", "mean"),
+        OTHER = ("OTHER", "mean"),
+        Longitude = ("Longitude", "mean"),
+        Latitude = ("Latitude", "mean")
+      ).reset_index()
+    )
+    newdata_4b
+    ## ----end
+    pickle.dump(newdata_4b, open(product, "wb"))
 
 ## Fit models ============================================
 
@@ -814,6 +921,8 @@ def sampled_reefs_bart_data_3_(product, upstream):
     ##    spatio-temporal domain.
     paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
     benthos_fixed_locs_obs_3 = pickle.load(open(upstream["sampled_reefs_data_prep_3_"], "rb"))
+    newdata_3b = pickle.load(open(upstream["newdata_3b_"], "rb"))
+    newdata_b = pickle.load(open(upstream["missing_years_newdata_b_"], "rb"))
     benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
     ## ---- python sampled data barts data 3
     benthos_fixed_locs_obs_3_prep = benthos_fixed_locs_obs_3.copy()
@@ -829,10 +938,15 @@ def sampled_reefs_bart_data_3_(product, upstream):
     # Convert to numeric
     full_data["Longitude"] = pd.to_numeric(full_data["Longitude"])
     full_data["Latitude"] = pd.to_numeric(full_data["Latitude"])
+
+    newdata_3b = newdata_3b
+    newdata_b = newdata_b
     ## ----end
     data_dict = {
         "sample_data": sample_data,
-        "full_data": full_data
+        "full_data": full_data,
+        "newdata_3b": newdata_3b,
+        "newdata_b": newdata_b
     }
     pickle.dump(data_dict, open(product, "wb"))
 
@@ -840,6 +954,8 @@ def sampled_reefs_bart_fit_3_(product, upstream):
     data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_3_"], "rb"))
     sample_data = data_dict["sample_data"]
     full_data = data_dict["full_data"]
+    newdata_3b = data_dict["newdata_3b"]
+    newdata_b = data_dict["newdata_b"]
     ## ---- python sampled data barts fit 3
     X = sample_data[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]]
     Y = sample_data["cover"]
@@ -855,32 +971,47 @@ def sampled_reefs_bart_fit_3_(product, upstream):
     with model_3:
         ppc1 = pm.sample_posterior_predictive(idata)
 
-    another_X = full_data[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]].copy()
+    # another_X = full_data[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]].copy()
+    # X = another_X[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]]
+    # Y = full_data["HCC"]
+    another_X = newdata_b[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]].copy()
     X = another_X[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]]
-    Y = full_data["HCC"]
+    Y = newdata_b["HCC"]
     with model_3:
-            pm.set_data({"data_X": another_X,
-                        "data_Y": np.arange(another_X.shape[0])
-                        })
-            ppc2 = pm.sample_posterior_predictive(idata)
+        pm.set_data({"data_X": another_X,
+                     "data_Y": np.arange(another_X.shape[0])
+                     })
+        ppc2 = pm.sample_posterior_predictive(idata)
+
+    another_X = newdata_3b[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]].copy()
+    X = another_X[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]]
+    Y = newdata_3b["HCC"]
+    with model_3:
+        pm.set_data({"data_X": another_X,
+                    "data_Y": np.arange(another_X.shape[0])
+                    })
+        ppc3 = pm.sample_posterior_predictive(idata)
     ## ----end
     trace_dict = {
         "idata": idata,
         "ppc1": ppc1,
-        "ppc2": ppc2
+        "ppc2": ppc2,
+        "ppc3": ppc3
     }
     pickle.dump(trace_dict, open(product, "wb"))
 
 def sampled_reefs_bart_prep_plot_3_(product, upstream):
     paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
     trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_3_"], "rb"))
-    ppc1 = trace_dict["ppc1"]
+    ppc3 = trace_dict["ppc3"]
     data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_3_"], "rb"))
-    sample_data = data_dict["sample_data"]
+    newdata_3b = data_dict["newdata_3b"]
     benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
+    sample_data = data_dict["sample_data"]
     ## ---- python sampled data barts prep plot 3 
-    posterior_predictive = ppc1.posterior_predictive["y"]  # replace "y_pred" with your variable name
-    year_array = sample_data["Year"].values  # must match the shape of predictions
+    posterior_predictive = ppc3.posterior_predictive["y"]  # replace "y_pred" with your variable name
+    # year_array = sample_data["Year"].values  # must match the shape of predictions
+    year_array = newdata_3b["Year"].values  # must match the shape of predictions
 
     # Add 'Year' as a coordinate to the xarray
     posterior_predictive = posterior_predictive.assign_coords({"y_dim_0": year_array})
@@ -939,20 +1070,20 @@ def sampled_reefs_bart_plot_3_(product, upstream):
         return f"{x * 100:.0f}"
     plt.figure(figsize=(8, 6))
     plt.plot(years, cover_mean, "w", lw=3)
-    # Add true mean line
-    plt.plot(
-        benthos_reefs_temporal_summary["Year"],
-        benthos_reefs_temporal_summary["Mean"],
-        label="True mean",
-        color="blue"
-    )
-    # Add true median line
-    plt.plot(
-        benthos_reefs_temporal_summary["Year"],
-        benthos_reefs_temporal_summary["Median"],
-        label="True median",
-        color="green"
-    )
+    # # Add true mean line
+    # plt.plot(
+    #     benthos_reefs_temporal_summary["Year"],
+    #     benthos_reefs_temporal_summary["Mean"],
+    #     label="True mean",
+    #     color="blue"
+    # )
+    # # Add true median line
+    # plt.plot(
+    #     benthos_reefs_temporal_summary["Year"],
+    #     benthos_reefs_temporal_summary["Median"],
+    #     label="True median",
+    #     color="green"
+    # )
     # Add sample mean line
     plt.plot(
         sample_data_summary["Year"],
@@ -985,6 +1116,32 @@ def sampled_reefs_bart_plot_3_(product, upstream):
     results=1
     pickle.dump(results, open(product, "wb"))
 
+def sampled_reefs_bart_mse_3b_1_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_3_"], "rb"))
+    ppc3 = trace_dict["ppc3"]
+    data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_3_"], "rb"))
+    newdata_3b = data_dict["newdata_3b"]
+    ## ---- python sampled data pymc_barts mse 3b 1 
+    posterior_predictive = ppc3.posterior_predictive["y"]
+    mse = (newdata_3b["HCC"]/100 - posterior_predictive.mean(dim=["draw", "chain"]))**2
+    acc = np.abs(np.exp(np.log(newdata_3b["HCC"]/100) - np.log(posterior_predictive.mean(dim=["draw", "chain"]))) - 1)
+    df = pd.DataFrame({
+        "mse_mean": [np.mean(mse)],
+        "mse_median": [np.median(mse)],
+        "acc_mean": [np.mean(acc)],
+        "acc_median": [np.median(acc)],
+        "model": ["pymc-bart"],
+        "lower": [np.quantile(mse, 0.025)],
+        "upper": [np.quantile(mse, 0.975)],
+        "type": 1,
+        "model_type": "covariates"
+    })
+    df.to_csv(f"{paths['data_path']}/modelled/pymc_bart_3b_mse_1.csv", index=False)
+    ## ----end
+    results=1
+    pickle.dump(results, open(product, "wb"))
+
 def sampled_reefs_bart_prep_plot_3c_(product, upstream):
     paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
     trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_3_"], "rb"))
@@ -992,10 +1149,11 @@ def sampled_reefs_bart_prep_plot_3c_(product, upstream):
     data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_3_"], "rb"))
     sample_data = data_dict["sample_data"]
     full_data = data_dict["full_data"]
+    newdata_b = data_dict["newdata_b"]
     benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
     ## ---- python sampled data barts prep plot 3c 
     posterior_predictive = ppc2.posterior_predictive["y"]  # replace "y_pred" with your variable name
-    year_array = full_data["Year"].values  # must match the shape of predictions
+    year_array = newdata_b["Year"].values  # must match the shape of predictions
 
     # Add 'Year' as a coordinate to the xarray
     posterior_predictive = posterior_predictive.assign_coords({"y_dim_0": year_array})
@@ -1068,22 +1226,22 @@ def sampled_reefs_bart_plot_3c_(product, upstream):
         label="True median",
         color="green"
     )
-    # Add sample mean line
-    plt.plot(
-        sample_data_summary["Year"],
-        sample_data_summary["Mean"]/100,
-        label="Sample mean",
-        color="blue",
-        linestyle="--"
-    )
-    # Add sample mean line
-    plt.plot(
-        sample_data_summary["Year"],
-        sample_data_summary["Median"]/100,
-        label="Sample median",
-        color="green",
-        linestyle="--"
-    )
+    # # Add sample mean line
+    # plt.plot(
+    #     sample_data_summary["Year"],
+    #     sample_data_summary["Mean"]/100,
+    #     label="Sample mean",
+    #     color="blue",
+    #     linestyle="--"
+    # )
+    # # Add sample mean line
+    # plt.plot(
+    #     sample_data_summary["Year"],
+    #     sample_data_summary["Median"]/100,
+    #     label="Sample median",
+    #     color="green",
+    #     linestyle="--"
+    # )
     az.plot_hdi(years, cover, smooth=False,
                 fill_kwargs={"label":"95% HDI"}, hdi_prob=0.95)
     az.plot_hdi(years, cover, smooth=False,
@@ -1100,6 +1258,32 @@ def sampled_reefs_bart_plot_3c_(product, upstream):
     results=1
     pickle.dump(results, open(product, "wb"))
 
+def sampled_reefs_bart_mse_3b_2_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_3_"], "rb"))
+    ppc2 = trace_dict["ppc2"]
+    data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_3_"], "rb"))
+    newdata_b = data_dict["newdata_b"]
+    ## ---- python sampled data pymc_barts mse 3b 2 
+    posterior_predictive = ppc2.posterior_predictive["y"]
+    mse = (newdata_b["HCC"] - posterior_predictive.mean(dim=["draw", "chain"]))**2
+    acc = np.abs(np.exp(np.log(newdata_b["HCC"]) - np.log(posterior_predictive.mean(dim=["draw", "chain"]))) - 1)
+    df = pd.DataFrame({
+        "mse_mean": [np.mean(mse)],
+        "mse_median": [np.median(mse)],
+        "acc_mean": [np.mean(acc)],
+        "acc_median": [np.median(acc)],
+        "model": ["pymc-bart"],
+        "lower": [np.quantile(mse, 0.025)],
+        "upper": [np.quantile(mse, 0.975)],
+        "type": 2,
+        "model_type": "covariates"
+    })
+    df.to_csv(f"{paths['data_path']}/modelled/pymc_bart_3b_mse_2.csv", index=False)
+    ## ----end
+    results=1
+    pickle.dump(results, open(product, "wb"))
+
 ## Temporal gap of all reefs -----------------------------------------
 
 def sampled_reefs_bart_data_4_(product, upstream):
@@ -1112,6 +1296,8 @@ def sampled_reefs_bart_data_4_(product, upstream):
     ##    spatio-temporal domain.
     paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
     benthos_fixed_locs_obs_4 = pickle.load(open(upstream["sampled_reefs_data_prep_4_"], "rb"))
+    newdata_4b = pickle.load(open(upstream["newdata_4b_"], "rb"))
+    newdata_b = pickle.load(open(upstream["missing_years_newdata_b_"], "rb"))
     benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
     ## ---- python sampled data barts data 4
     benthos_fixed_locs_obs_4_prep = benthos_fixed_locs_obs_4.copy()
@@ -1127,10 +1313,15 @@ def sampled_reefs_bart_data_4_(product, upstream):
     # Convert to numeric
     full_data["Longitude"] = pd.to_numeric(full_data["Longitude"])
     full_data["Latitude"] = pd.to_numeric(full_data["Latitude"])
+
+    newdata_4b = newdata_4b
+    newdata_b = newdata_b
     ## ----end
     data_dict = {
         "sample_data": sample_data,
-        "full_data": full_data
+        "full_data": full_data,
+        "newdata_4b": newdata_4b,
+        "newdata_b": newdata_b
     }
     pickle.dump(data_dict, open(product, "wb"))
 
@@ -1138,6 +1329,8 @@ def sampled_reefs_bart_fit_4_(product, upstream):
     data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_4_"], "rb"))
     sample_data = data_dict["sample_data"]
     full_data = data_dict["full_data"]
+    newdata_4b = data_dict["newdata_4b"]
+    newdata_b = data_dict["newdata_b"]
     ## ---- python sampled data barts fit 4
     X = sample_data[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]]
     Y = sample_data["cover"]
@@ -1153,32 +1346,43 @@ def sampled_reefs_bart_fit_4_(product, upstream):
     with model_4:
         ppc1 = pm.sample_posterior_predictive(idata)
 
-    another_X = full_data[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]].copy()
+    another_X = newdata_b[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]].copy()
     X = another_X[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]]
-    Y = full_data["HCC"]
+    Y = newdata_b["HCC"]
     with model_4:
-            pm.set_data({"data_X": another_X,
-                        "data_Y": np.arange(another_X.shape[0])
-                        })
-            ppc2 = pm.sample_posterior_predictive(idata)
+        pm.set_data({"data_X": another_X,
+                     "data_Y": np.arange(another_X.shape[0])
+                     })
+        ppc2 = pm.sample_posterior_predictive(idata)
+    
+    another_X = newdata_4b[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]].copy()
+    X = another_X[["Year", "Latitude", "Longitude", "CYC", "DHW", "OTHER"]]
+    Y = newdata_4b["HCC"]
+    with model_4:
+        pm.set_data({"data_X": another_X,
+                    "data_Y": np.arange(another_X.shape[0])
+                    })
+        ppc3 = pm.sample_posterior_predictive(idata)
     ## ----end
     trace_dict = {
         "idata": idata,
         "ppc1": ppc1,
-        "ppc2": ppc2
+        "ppc2": ppc2,
+        "ppc3": ppc3
     }
     pickle.dump(trace_dict, open(product, "wb"))
 
 def sampled_reefs_bart_prep_plot_4_(product, upstream):
     paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
     trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_4_"], "rb"))
-    ppc1 = trace_dict["ppc1"]
+    ppc3 = trace_dict["ppc3"]
     data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_4_"], "rb"))
+    newdata_4b = data_dict["newdata_4b"]
     sample_data = data_dict["sample_data"]
     benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
     ## ---- python sampled data barts prep plot 4 
-    posterior_predictive = ppc1.posterior_predictive["y"]  # replace "y_pred" with your variable name
-    year_array = sample_data["Year"].values  # must match the shape of predictions
+    posterior_predictive = ppc3.posterior_predictive["y"]  # replace "y_pred" with your variable name
+    year_array = newdata_4b["Year"].values  # must match the shape of predictions
 
     # Add 'Year' as a coordinate to the xarray
     posterior_predictive = posterior_predictive.assign_coords({"y_dim_0": year_array})
@@ -1237,20 +1441,20 @@ def sampled_reefs_bart_plot_4_(product, upstream):
         return f"{x * 100:.0f}"
     plt.figure(figsize=(8, 6))
     plt.plot(years, cover_mean, "w", lw=3)
-    # Add true mean line
-    plt.plot(
-        benthos_reefs_temporal_summary["Year"],
-        benthos_reefs_temporal_summary["Mean"],
-        label="True mean",
-        color="blue"
-    )
-    # Add true median line
-    plt.plot(
-        benthos_reefs_temporal_summary["Year"],
-        benthos_reefs_temporal_summary["Median"],
-        label="True median",
-        color="green"
-    )
+    # # Add true mean line
+    # plt.plot(
+    #     benthos_reefs_temporal_summary["Year"],
+    #     benthos_reefs_temporal_summary["Mean"],
+    #     label="True mean",
+    #     color="blue"
+    # )
+    # # Add true median line
+    # plt.plot(
+    #     benthos_reefs_temporal_summary["Year"],
+    #     benthos_reefs_temporal_summary["Median"],
+    #     label="True median",
+    #     color="green"
+    # )
     # Add sample mean line
     plt.plot(
         sample_data_summary["Year"],
@@ -1283,6 +1487,32 @@ def sampled_reefs_bart_plot_4_(product, upstream):
     results=1
     pickle.dump(results, open(product, "wb"))
 
+def sampled_reefs_bart_mse_4b_1_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_4_"], "rb"))
+    ppc3 = trace_dict["ppc3"]
+    data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_4_"], "rb"))
+    newdata_4b = data_dict["newdata_4b"]
+    ## ---- python sampled data pymc_barts mse 4b 1 
+    posterior_predictive = ppc3.posterior_predictive["y"]
+    mse = (newdata_4b["HCC"]/100 - posterior_predictive.mean(dim=["draw", "chain"]))**2
+    acc = np.abs(np.exp(np.log(newdata_4b["HCC"]/100) - np.log(posterior_predictive.mean(dim=["draw", "chain"]))) - 1)
+    df = pd.DataFrame({
+        "mse_mean": [np.mean(mse)],
+        "mse_median": [np.median(mse)],
+        "acc_mean": [np.mean(acc)],
+        "acc_median": [np.median(acc)],
+        "model": ["pymc-bart"],
+        "lower": [np.quantile(mse, 0.025)],
+        "upper": [np.quantile(mse, 0.975)],
+        "type": 1,
+        "model_type": "covariates"
+    })
+    df.to_csv(f"{paths['data_path']}/modelled/pymc_bart_4b_mse_1.csv", index=False)
+    ## ----end
+    results=1
+    pickle.dump(results, open(product, "wb"))
+
 def sampled_reefs_bart_prep_plot_4c_(product, upstream):
     paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
     trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_4_"], "rb"))
@@ -1290,10 +1520,11 @@ def sampled_reefs_bart_prep_plot_4c_(product, upstream):
     data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_4_"], "rb"))
     sample_data = data_dict["sample_data"]
     full_data = data_dict["full_data"]
+    newdata_b = data_dict["newdata_b"]
     benthos_reefs_sf = pd.read_csv(f"{paths['data_path']}synthetic/benthos_reefs_sf.csv")
     ## ---- python sampled data barts prep plot 4c 
     posterior_predictive = ppc2.posterior_predictive["y"]  # replace "y_pred" with your variable name
-    year_array = full_data["Year"].values  # must match the shape of predictions
+    year_array = newdata_b["Year"].values  # must match the shape of predictions
 
     # Add 'Year' as a coordinate to the xarray
     posterior_predictive = posterior_predictive.assign_coords({"y_dim_0": year_array})
@@ -1366,22 +1597,22 @@ def sampled_reefs_bart_plot_4c_(product, upstream):
         label="True median",
         color="green"
     )
-    # Add sample mean line
-    plt.plot(
-        sample_data_summary["Year"],
-        sample_data_summary["Mean"]/100,
-        label="Sample mean",
-        color="blue",
-        linestyle="--"
-    )
-    # Add sample mean line
-    plt.plot(
-        sample_data_summary["Year"],
-        sample_data_summary["Median"]/100,
-        label="Sample median",
-        color="green",
-        linestyle="--"
-    )
+    # # Add sample mean line
+    # plt.plot(
+    #     sample_data_summary["Year"],
+    #     sample_data_summary["Mean"]/100,
+    #     label="Sample mean",
+    #     color="blue",
+    #     linestyle="--"
+    # )
+    # # Add sample mean line
+    # plt.plot(
+    #     sample_data_summary["Year"],
+    #     sample_data_summary["Median"]/100,
+    #     label="Sample median",
+    #     color="green",
+    #     linestyle="--"
+    # )
     az.plot_hdi(years, cover, smooth=False,
                 fill_kwargs={"label":"95% HDI"}, hdi_prob=0.95)
     az.plot_hdi(years, cover, smooth=False,
@@ -1395,5 +1626,31 @@ def sampled_reefs_bart_plot_4c_(product, upstream):
     plt.legend()
     ## ----end
     plt.savefig(f"{paths['fig_path']}python_pdp_pymc_bart_4c.png", dpi=300, bbox_inches='tight')
+    results=1
+    pickle.dump(results, open(product, "wb"))
+
+def sampled_reefs_bart_mse_4b_2_(product, upstream):
+    paths = pickle.load(open(upstream["missing_years_global_parameters_"], "rb"))
+    trace_dict = pickle.load(open(upstream["sampled_reefs_bart_fit_4_"], "rb"))
+    ppc2 = trace_dict["ppc2"]
+    data_dict = pickle.load(open(upstream["sampled_reefs_bart_data_4_"], "rb"))
+    newdata_b = data_dict["newdata_b"]
+    ## ---- python sampled data pymc_barts mse 4b 2 
+    posterior_predictive = ppc2.posterior_predictive["y"]
+    mse = (newdata_b["HCC"] - posterior_predictive.mean(dim=["draw", "chain"]))**2
+    acc = np.abs(np.exp(np.log(newdata_b["HCC"]) - np.log(posterior_predictive.mean(dim=["draw", "chain"]))) - 1)
+    df = pd.DataFrame({
+        "mse_mean": [np.mean(mse)],
+        "mse_median": [np.median(mse)],
+        "acc_mean": [np.mean(acc)],
+        "acc_median": [np.median(acc)],
+        "model": ["pymc-bart"],
+        "lower": [np.quantile(mse, 0.025)],
+        "upper": [np.quantile(mse, 0.975)],
+        "type": 2,
+        "model_type": "covariates"
+    })
+    df.to_csv(f"{paths['data_path']}/modelled/pymc_bart_4b_mse_2.csv", index=False)
+    ## ----end
     results=1
     pickle.dump(results, open(product, "wb"))

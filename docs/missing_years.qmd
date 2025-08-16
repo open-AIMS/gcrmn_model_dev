@@ -96,7 +96,19 @@ knitr::knit_code$set(
 )
 ```
 
+```{css, echo=FALSE}
+figcaption {
+  text-align: left !important;
+}
+```
+
 ## Purpose
+
+Still to come
+
+## Conclusions
+
+Still to come
 
 ## Preparations
 
@@ -106,7 +118,7 @@ knitr::knit_code$set(
 
 ```{r}
 #| label: cwd
-#| eval: true
+#| eval: false
 #| echo: false
 #| warning: false
 #| message: false
@@ -421,7 +433,7 @@ year period.
 #| cache: false
 ```
 
-```{r}
+```{python}
 #| label: python missing years sampled simple raw means
 #| results: markup
 #| eval: false
@@ -430,7 +442,7 @@ year period.
 #| cache: false
 ```
 
-```{r}
+```{python}
 #| label: python missing years sampled simple raw means plot
 #| results: markup
 #| eval: false
@@ -533,19 +545,45 @@ Perform the following data preparation steps:
 
 :::: {.panel-tabset}
 
+#### All reefs
+
+```{r}
+#| label: sampled data prep
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+ 
+```{r}
+#| label: newdata
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+ 
+```{r}
+#| label: newdata b
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
 #### All sampled reefs
 
 ```{r}
 #| label: sampled data prep 0
 #| results: markup
-#| eval: false
+#| eval: true
 #| echo: true
 #| cache: false
 ```
 ```{r}
 #| label: newdata 0
 #| results: markup
-#| eval: false
+#| eval: true
 #| echo: true
 #| cache: false
 ```
@@ -556,7 +594,7 @@ Perform the following data preparation steps:
 ```{r}
 #| label: sampled data prep 3
 #| results: markup
-#| eval: false
+#| eval: true
 #| echo: true
 #| cache: false
 ```
@@ -564,7 +602,15 @@ Perform the following data preparation steps:
 ```{r}
 #| label: newdata 3
 #| results: markup
-#| eval: false
+#| eval: true
+#| echo: true
+#| cache: false
+```
+ 
+```{r}
+#| label: newdata 3b
+#| results: markup
+#| eval: true
 #| echo: true
 #| cache: false
 ```
@@ -574,14 +620,23 @@ Perform the following data preparation steps:
 ```{r}
 #| label: sampled data prep 4
 #| results: markup
-#| eval: false
+#| eval: true
 #| echo: true
 #| cache: false
 ```
 ```{r}
 #| label: newdata 4
 #| results: markup
-#| eval: false
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+ 
+```{r}
+#| label: newdata 4b
+#| results: markup
+#| eval: true
 #| echo: true
 #| cache: false
 ```
@@ -592,19 +647,46 @@ Perform the following data preparation steps:
     
 :::: {.panel-tabset}
 
+#### All reefs
+
+```{python}
+#| label: python benthos reefs
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{python}
+#| label: python newdata
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{python}
+#| label: python newdata b
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+
 #### All sampled reefs
 
 ```{python}
 #| label: python missing years sampled data prep 0
 #| results: markup
-#| eval: false
+#| eval: true
 #| echo: true
 #| cache: false
 ```
 ```{python}
 #| label: python missing years newdata 0
 #| results: markup
-#| eval: false
+#| eval: true
 #| echo: true
 #| cache: false
 ```
@@ -614,14 +696,14 @@ Perform the following data preparation steps:
 ```{python}
 #| label: python sampled data prep 3
 #| results: markup
-#| eval: false
+#| eval: true
 #| echo: true
 #| cache: false
 ```
 ```{python}
 #| label: python newdata 3
 #| results: markup
-#| eval: false
+#| eval: true
 #| echo: true
 #| cache: false
 ```
@@ -750,9 +832,42 @@ spatio-temporal (truth) grid.
 
 ::: {.panel-tabset}
 
+
+<!--
 ### All sampled reefs
 
 :::: {.panel-tabset}
+
+#### Data sets
+
+:::::: {.panel-tabset .tabset-left}
+
+##### benthos_fixed_locs_obs_3
+
+These are the **data** used to **fit the model**
+
+```{r}
+#| label: glmmTMB_3 sample data
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+##### newdata_3
+
+```{r}
+#| label: glmmTMB_3 newdata 3
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+::::::
 
 #### glmmTMB
 
@@ -1482,10 +1597,85 @@ mod_stan_0$print(
 
 ::::
 
+-->
 
 ### Temporal gap in some reefs
 
 :::: {.panel-tabset}
+
+
+#### Data sets
+
+:::::: {.panel-tabset .tabset-left}
+
+##### benthos_fixed_locs_obs_3
+
+These are the **data** used to **fit the model**
+
+```{r}
+#| label: glmmTMB_3 sample data
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+##### newdata_3
+
+These are the **sampled years** for calculating marginal means to year level
+
+```{r}
+#| label: glmmTMB_3 newdata 3
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+##### newdata_3b
+
+These are the **sampled data** used to predict the sampled data to reef/year level from **models without covariates**
+
+```{r}
+#| label: glmmTMB_3 newdata 3b
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+##### newdata
+
+These are the **full data years** used for calculating marginal means to year level
+
+```{r}
+#| label: glmmTMB_3 newdata
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+##### newdata_b
+
+These are the **full data** used to predict the full data to reef/year level from **all models**
+
+```{r}
+#| label: glmmTMB_3 newdata_b
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+::::::
 
 #### glmmTMB
 
@@ -1502,6 +1692,77 @@ mod_stan_0$print(
 ::::: {.panel-tabset}
 
 ##### Partial dependency plot
+
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_glmmTMB_3.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: glmmTMB_3_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- glmmTMB modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: glmmTMB_3_mse_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_glmmTMB_3.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: glmmTMB_3_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- glmmTMB modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: glmmTMB_3_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
+
 
 ```{r}
 #| label: glmmTMB_3_emmeans
@@ -1578,6 +1839,139 @@ mod_glmmTMB_3 |> summary()
 
 :::::
 
+
+#### glmmTMB + coveriates
+
+
+```{r}
+#| label: glmmTMB_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_glmmTMB_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: glmmTMB_3b_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+   
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- glmmTMB modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: glmmTMB_3b_mse_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_glmmTMB_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: glmmTMB_3b_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- glmmTMB modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: glmmTMB_3b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
+
+##### Model Validation
+
+```{r}
+#| label: glmmTMB_3b_dharma
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_3b_dharma plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 4
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_3"
+```
+
+![](../output/figures/R_dharma_mod_glmmTMB_3b.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: glmmTMB_3b_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_3b"
+mod_glmmTMB_3b <- readRDS(
+  file = paste0(data_path, "synthetic/mod_glmmTMB_3b.rds")
+)
+mod_glmmTMB_3b |> summary()
+```
+
+:::::
+
+ 
 #### brms
 
 ```{r}
@@ -1600,37 +1994,78 @@ mod_glmmTMB_3 |> summary()
 ```
 
 ::::: {.panel-tabset}
+
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_brms_3.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: brms_3_emmeans
+#| label: brms_3_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- brms modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: brms_3_emmeans plot
+#| label: brms_3_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 12
-#| fig-height: 6
+#| cache: false
 #| code-fold: true
-#| cache: true
-#| dependson: "brms_3"
 ```
 
-![](../output/figures/R_pdp_mod_brms_3.png){width=900px}
+###### All reefs
 
-- left figure compares brms modelled estimates to the sample data
-- right figure compares brms modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- brms modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_brms_3.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: brms_3_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- brms modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: brms_3_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
 
 ##### Sampling diagnostics
 
@@ -1735,6 +2170,205 @@ mod_brms_3 |> summary()
 
 :::::
 
+#### brms + covariates
+
+```{r}
+#| label: brms_pre_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: brms_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_brms_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: brms_3b_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- brms modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: brms_3b_mse_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_brms_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: brms_3b_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- brms modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: brms_3b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: brms_trace_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_3b"
+```
+
+![](../output/figures/R_brms_trace_3b.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: brms_ac_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_3b"
+```
+
+![](../output/figures/R_brms_ac_3b.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: brms_rhat_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_3b"
+```
+
+![](../output/figures/R_brms_rhat_3b.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: brms_ess_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_3b"
+```
+
+![](../output/figures/R_brms_ess_3b.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: brms_ppc_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_3b"
+```
+
+![](../output/figures/R_brms_ppc_3b.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: brms_3b_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_3b"
+mod_brms_3b <- readRDS(
+  file = paste0(data_path, "synthetic/mod_brms_3b.rds")
+)
+mod_brms_3b |> summary()
+```
+
+:::::
+
+
 #### stan
 
 ```{r}
@@ -1760,8 +2394,33 @@ mod_brms_3 |> summary()
 
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_stan_3.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: stan_3_pdp
+#| label: stan_3_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- stan modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: stan_3_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
@@ -1769,27 +2428,41 @@ mod_brms_3 |> summary()
 #| code-fold: true
 ```
 
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_stan_3.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: stan_3_pdp plot
+#| label: stan_3_pred_2
 #| results: markup
-#| echo: true
 #| eval: false
-#| fig-width: 12
-#| fig-height: 6
+#| echo: true
+#| cache: false
 #| code-fold: true
-#| cache: true
-#| dependson: "stan_3"
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- stan modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: stan_3_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_stan_3.png){width=900px}
-
-- left figure compares stan modelled estimates to the sample data
-- right figure compares stan modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- stan modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
+::::::
 
 ##### Sampling diagnostics
 
@@ -1882,6 +2555,7 @@ mod_brms_3 |> summary()
 ```{r}
 #| label: stan_3_summary
 #| results: markup
+#| eval: true
 #| echo: true
 #| code-fold: true
 #| cache: true
@@ -1889,6 +2563,7 @@ mod_brms_3 |> summary()
 mod_stan_3 <- readRDS(
   file = paste0(data_path, "synthetic/mod_stan_3.rds")
 )
+
 mod_stan_3$print(
   variables = c("phi", "beta", "sd_1", "sd_2", "sd_3"),
   max_rows = 20
@@ -1900,6 +2575,7 @@ mod_stan_3$print(
 ```
 
 :::::
+
 
 #### GBM
 
@@ -1925,37 +2601,78 @@ mod_stan_3$print(
 
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_gbm_3.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: gbm_pdp_3
+#| label: gbm_3_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- gbm modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: pdp_gbm_3_plot_
+#| label: gbm_3_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
 #| cache: false
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_3.png){width=900px}
+###### All reefs
 
-- left figure compares gbm modelled estimates to the sample data
-- right figure compares gbm modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- gbm modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
-- gbm derived predictions lack uncertainty estimates
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_gbm_3.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: gbm_3_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- gbm modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: gbm_3_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
 
 :::::
+
 
 #### GBM + covariates
 
@@ -1979,75 +2696,77 @@ mod_stan_3$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot (sample data only)
+##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_gbm_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: gbm_pdp_3b
+#| label: gbm_3b_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- gbm modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: pdp_pdp_3b plot
-#| results: markup
-#| eval: false
-#| echo: true
-#| fig-width: 8
-#| fig-height: 6
-#| cache: false
-#| code-fold: true
-```
-
-![](../output/figures/R_pdp_mod_gbm_3b.png){width=900px}
-![](../output/figures/R_infl_mod_gbm_3b.png){width=900px}
-
-- left figure compares gbm modelled estimates to the sample data
-- right figure compares gbm modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- gbm modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
-- gbm derived predictions lack uncertainty estimates
-- relative influences mainly space/time
-
-##### Partial dependency plot (full domain)
-
-```{r}
-#| label: gbm_pdp_3c
+#| label: gbm_3b_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_gbm_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: pdp_pdp_3c plot
+#| label: gbm_3b_pred_2
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- gbm modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: gbm_3b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
 #| cache: false
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_3c.png){width=900px}
-![](../output/figures/R_infl_mod_gbm_3c.png){width=900px}
-
-- left figure compares gbm modelled estimates to the sample data
-- right figure compares gbm modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- gbm modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
-- gbm derived predictions lack uncertainty estimates
-- relative influences mainly space/time (though note that this is
-  because this partial is the result of the same model, just predicted
-  onto the full data grid)
+::::::
 
 :::::
 
@@ -2066,36 +2785,79 @@ mod_stan_3$print(
 
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_dbarts_3.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: dbarts_pdp_3
+#| label: dbarts_3_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- dbarts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: dbarts_3_pdp plot
+#| label: dbarts_3_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
 #| cache: false
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_3.png){width=900px}
+###### All reefs
 
-- left figure compares dbarts modelled estimates to the sample data
-- right figure compares dbarts modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- dbarts modelled estimates are slightly lower than the 25 site,
-  replacement data, and thus biased lower than the "truth"
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_dbarts_3.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: dbarts_3_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- dbarts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: dbarts_3_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
 
 :::::
+
+
 
 #### dbarts + covariates
 
@@ -2110,75 +2872,166 @@ mod_stan_3$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot (sample data only)
+##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_dbarts_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: dbarts_pdp_3b
+#| label: dbarts_3b_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- dbarts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: dbarts_3b_pdp plot
-#| results: markup
-#| eval: false
-#| echo: true
-#| fig-width: 8
-#| fig-height: 6
-#| cache: false
-#| code-fold: true
-```
-
-![](../output/figures/R_pdp_mod_dbarts_3b.png){width=900px}
-![](../output/figures/R_infl_mod_dbarts_3b.png){width=900px}
-
-- left figure compares dbarts modelled estimates to the sample data
-- right figure compares dbarts modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- dbarts modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
-- relative influences mainly space/time 
-
-##### Partial dependency plot (full domain)
-
-```{r}
-#| label: dbarts_pdp_3c
+#| label: dbarts_3b_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_dbarts_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: dbarts_3c_pdp plot
+#| label: dbarts_3b_pred_2
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- dbarts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: dbarts_3b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
 #| cache: false
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_3c.png){width=900px}
-![](../output/figures/R_infl_mod_dbarts_3b.png){width=900px}
-
-- left figure compares dbarts modelled estimates to the sample data
-- right figure compares dbarts modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- dbarts modelled estimates are slightly higher than the 25 site,
-  replacement data, yet biased lower than the "truth"
-- relative influences mainly space/time (though note that this is
-  because this partial is the result of the same model, just predicted
-  onto the full data grid)
-  
 :::::
+
+::::
+
+#### xgboost + covariates
+
+```{r}
+#| label: xgboost_3b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_xgboost_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: xgboost_3b_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- xgboost modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: xgboost_3b_mse_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_xgboost_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: xgboost_3b_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- xgboost modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: xgboost_3b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+:::::
+
+::::
 
 #### pymc-bart + covariates
 
@@ -2204,8 +3057,14 @@ mod_stan_3$print(
 
 ##### Partial dependency plot (sample data only)
 
-![](../output/figures/python_pdp_pymc_bart_3b.png){width=700px}
+:::::: {.panel-tabset}
 
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/python_pdp_pymc_bart_3b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{python}
 #| label: python sampled data barts prep plot 3
 #| results: markup
@@ -2214,7 +3073,6 @@ mod_stan_3$print(
 #| cache: false
 #| code-fold: true
 ```
-
 ```{python}
 #| label: python sampled data barts plot 3
 #| results: markup
@@ -2223,11 +3081,32 @@ mod_stan_3$print(
 #| cache: false
 #| code-fold: true
 ```
+ 
+ 
+Partial dependencies based on estimated marginalised means for year
 
-##### Partial dependency plot (full domain)
+- sampled reefs (blue and green dashed lines)
+- pymc-barts modelled estimates (orange ribbon, white line)
+::::
+:::
 
-![](../output/figures/python_pdp_pymc_bart_3c.png){width=700px}
+Calculate MSE of predictions to **Sampled reefs**
+```{python}
+#| label: python sampled data pymc_barts mse 3b 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
 
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/python_pdp_pymc_bart_3c.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{python}
 #| label: python sampled data barts prep plot 3c
 #| results: markup
@@ -2244,13 +3123,164 @@ mod_stan_3$print(
 #| cache: false
 #| code-fold: true
 ```
+ 
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- pymc-barts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{python}
+#| label: python sampled data pymc_barts mse 3b 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+
 :::::
 
 ::::
 
+#### Comparisons
+     
+```{r}
+#| label: comparison_3
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: false
+```
+ 
+::: {#fig-mse_3_1}
+![](../output/figures/mse_3_1.png){width=800px}
+
+Mean square error (MSE) of models build on Northern reefs data (25
+reefs) and compared to either reef/year level data. This represents
+the models' ability to represent median-scale spatio-temporal
+patterns. Smaller values imply smaller error since predicted values
+are closer to the observed values. Panel columns condition MSE into
+predicting data from either all Northern reefs, all Southern reefs or
+only the sampled Northern reefs. Panel rows condition MSE into whether
+models contained covariates or not.
+
+:::
+
+::: {#fig-mse_3_2}
+![](../output/figures/mse_3_2.png){width=800px}
+
+Mean inaccuracy (%) of models build on Northern reefs data (25
+reefs) and compared to either reef/year level data. This represents
+the models' ability to represent median-scale spatio-temporal
+patterns. Smaller values imply smaller inaccuracy since predicted values
+are closer to the observed values. Panel columns condition MSE into
+predicting data from either all Northern reefs, all Southern reefs or
+only the sampled Northern reefs. Panel rows condition MSE into whether
+models contained covariates or not.
+
+:::
+
+```{r}
+#| label: comparison_3_tab
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: false
+comps_3 <- readRDS(file = paste0(data_path,
+                                        "synthetic/comps_3.rds")
+                          ) 
+comps_3 |> knitr::kable()
+```
+      
+::::
+ 
 ### Temporal gap in all reefs
 
 :::: {.panel-tabset}
+
+
+#### Data sets
+
+:::::: {.panel-tabset .tabset-left}
+
+##### benthos_fixed_locs_obs_4
+
+These are the **data** used to **fit the model**
+
+```{r}
+#| label: glmmTMB_4 sample data
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+##### newdata_4
+
+These are the **sampled years** for calculating marginal means to year level
+
+```{r}
+#| label: glmmTMB_4 newdata 4
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+##### newdata_4b
+
+These are the **sampled data** used to predict the sampled data to reef/year level from **models without covariates**
+
+```{r}
+#| label: glmmTMB_4 newdata 4b
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+##### newdata
+
+These are the **full data years** used for calculating marginal means to year level
+
+```{r}
+#| label: glmmTMB_3 newdata
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+##### newdata_b
+
+These are the **full data** used to predict the full data to reef/year level from **all models**
+
+```{r}
+#| label: glmmTMB_3 newdata_b
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+::::::
+
 
 #### glmmTMB
 
@@ -2268,6 +3298,77 @@ mod_stan_3$print(
 
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_glmmTMB_4.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: glmmTMB_4_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- glmmTMB modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: glmmTMB_4_mse_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_glmmTMB_4.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: glmmTMB_4_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- glmmTMB modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: glmmTMB_4_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
+
+
 ```{r}
 #| label: glmmTMB_4_emmeans
 #| results: markup
@@ -2282,7 +3383,7 @@ mod_stan_3$print(
 #| eval: false
 #| results: markup
 #| echo: true
-#| fig-width: 8
+#| fig-width: 12
 #| fig-height: 6
 #| code-fold: true
 #| cache: true
@@ -2294,11 +3395,10 @@ mod_stan_3$print(
 - left figure compares glmmTMB modelled estimates to the sample data
 - right figure compares glmmTMB modelled estimates to the simple
   hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- glmmTMB modelled estimates are slightly higher than the 5 site,
+- sampled reefs (blue and khaki dashed lines) are lower than the true
+  global average (blue and purple) - right side figure
+- glmmTMB modelled estimates are consistent with the 25 site,
   replacement data, yet biased lower than the "truth"
-- the uncertainty is relatively high
 
 ##### Model Validation
 
@@ -2332,6 +3432,7 @@ mod_stan_3$print(
 ```{r}
 #| label: glmmTMB_4_summary
 #| results: markup
+#| eval: true
 #| echo: true
 #| code-fold: true
 #| cache: true
@@ -2345,6 +3446,138 @@ mod_glmmTMB_4 |> summary()
 :::::
 
 
+#### glmmTMB + coveriates
+
+
+```{r}
+#| label: glmmTMB_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_glmmTMB_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: glmmTMB_4b_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+   
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- glmmTMB modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: glmmTMB_4b_mse_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_glmmTMB_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: glmmTMB_4b_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- glmmTMB modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: glmmTMB_4b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
+
+##### Model Validation
+
+```{r}
+#| label: glmmTMB_4b_dharma
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: glmmTMB_4b_dharma plot
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 4
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_4"
+```
+
+![](../output/figures/R_dharma_mod_glmmTMB_4b.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: glmmTMB_4b_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "glmmTMB_4b"
+mod_glmmTMB_4b <- readRDS(
+  file = paste0(data_path, "synthetic/mod_glmmTMB_4b.rds")
+)
+mod_glmmTMB_4b |> summary()
+```
+
+:::::
+
+ 
 #### brms
 
 ```{r}
@@ -2367,38 +3600,78 @@ mod_glmmTMB_4 |> summary()
 ```
 
 ::::: {.panel-tabset}
+
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_brms_4.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: brms_4_emmeans
+#| label: brms_4_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- brms modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: brms_4_emmeans plot
+#| label: brms_4_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
+#| cache: false
 #| code-fold: true
-#| cache: true
-#| dependson: "brms_4"
 ```
 
-![](../output/figures/R_pdp_mod_brms_4.png){width=900px}
+###### All reefs
 
-- left figure compares brms modelled estimates to the sample data
-- right figure compares brms modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- brms modelled estimates are slightly higher than the 5 site,
-  replacement data, yet biased lower than the "truth"
-- the uncertainty is relatively high
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_brms_4.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: brms_4_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- brms modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: brms_4_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
 
 ##### Sampling diagnostics
 
@@ -2503,6 +3776,205 @@ mod_brms_4 |> summary()
 
 :::::
 
+#### brms + covariates
+
+```{r}
+#| label: brms_pre_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+```{r}
+#| label: brms_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "read sampled reefs data"
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_brms_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: brms_4b_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- brms modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: brms_4b_mse_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_brms_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: brms_4b_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- brms modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: brms_4b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
+
+##### Sampling diagnostics
+
+:::::: {.panel-tabset}
+
+###### Traceplots
+
+```{r}
+#| label: brms_trace_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_4b"
+```
+
+![](../output/figures/R_brms_trace_4b.png){width=500px}
+
+###### Autocorrelation plots
+
+```{r}
+#| label: brms_ac_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_4b"
+```
+
+![](../output/figures/R_brms_ac_4b.png){width=500px}
+
+###### Rhat
+
+```{r}
+#| label: brms_rhat_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_4b"
+```
+
+![](../output/figures/R_brms_rhat_4b.png){width=500px}
+
+###### Effective sample size
+
+```{r}
+#| label: brms_ess_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_4b"
+```
+
+![](../output/figures/R_brms_ess_4b.png){width=500px}
+
+::::::
+
+##### Model validation
+
+```{r}
+#| label: brms_ppc_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| fig-width: 8
+#| fig-height: 6
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_4b"
+```
+
+![](../output/figures/R_brms_ppc_4b.png){width=500px}
+
+##### Summary
+
+```{r}
+#| label: brms_4b_summary
+#| results: markup
+#| echo: true
+#| code-fold: true
+#| cache: true
+#| dependson: "brms_4b"
+mod_brms_4b <- readRDS(
+  file = paste0(data_path, "synthetic/mod_brms_4b.rds")
+)
+mod_brms_4b |> summary()
+```
+
+:::::
+
+
 #### stan
 
 ```{r}
@@ -2528,8 +4000,33 @@ mod_brms_4 |> summary()
 
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_stan_4.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: stan_4_pdp
+#| label: stan_4_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- stan modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: stan_4_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
@@ -2537,28 +4034,41 @@ mod_brms_4 |> summary()
 #| code-fold: true
 ```
 
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_stan_4.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: stan_4_pdp plot
+#| label: stan_4_pred_2
 #| results: markup
-#| echo: true
 #| eval: false
-#| fig-width: 8
-#| fig-height: 6
+#| echo: true
+#| cache: false
 #| code-fold: true
-#| cache: true
-#| dependson: "stan_4"
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- stan modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: stan_4_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_stan_4.png){width=900px}
-
-- left figure compares brms modelled estimates to the sample data
-- right figure compares brms modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- brms modelled estimates are slightly higher than the 5 site,
-  replacement data, yet biased lower than the "truth"
-- the uncertainty is relatively high, but not as high as brms or glmmTMB
+::::::
 
 ##### Sampling diagnostics
 
@@ -2651,6 +4161,7 @@ mod_brms_4 |> summary()
 ```{r}
 #| label: stan_4_summary
 #| results: markup
+#| eval: true
 #| echo: true
 #| code-fold: true
 #| cache: true
@@ -2658,12 +4169,13 @@ mod_brms_4 |> summary()
 mod_stan_4 <- readRDS(
   file = paste0(data_path, "synthetic/mod_stan_4.rds")
 )
+
 mod_stan_4$print(
-  variables = c("phi", "beta", "sd_2", "sd_2", "sd_3"),
+  variables = c("phi", "beta", "sd_1", "sd_2", "sd_3"),
   max_rows = 20
 )
 mod_stan_4$print(
-  variables = "Years",
+  variables = "cellmeans",
   max_rows = 20
 )
 ```
@@ -2694,37 +4206,78 @@ mod_stan_4$print(
 
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_gbm_4.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: gbm_pdp_4
+#| label: gbm_4_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- gbm modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: pdp_gbm_4_plot_
+#| label: gbm_4_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
 #| cache: false
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_4.png){width=900px}
+###### All reefs
 
-- left figure compares gbm modelled estimates to the sample data
-- right figure compares gbm modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- gbm modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
-- gbm derived predictions lack uncertainty estimates
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_gbm_4.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: gbm_4_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- gbm modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: gbm_4_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
 
 :::::
+
 
 #### GBM + covariates
 
@@ -2748,75 +4301,77 @@ mod_stan_4$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot (sample data only)
+##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_gbm_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: gbm_pdp_4b
+#| label: gbm_4b_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- gbm modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: pdp_pdp_4b plot
-#| results: markup
-#| eval: false
-#| echo: true
-#| fig-width: 8
-#| fig-height: 6
-#| cache: false
-#| code-fold: true
-```
-
-![](../output/figures/R_pdp_mod_gbm_4b.png){width=900px}
-![](../output/figures/R_infl_mod_gbm_4b.png){width=900px}
-
-- left figure compares gbm modelled estimates to the sample data
-- right figure compares gbm modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- gbm modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
-- gbm derived predictions lack uncertainty estimates
-- relative influences mainly space/time
-
-##### Partial dependency plot (full domain)
-
-```{r}
-#| label: gbm_pdp_4c
+#| label: gbm_4b_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_gbm_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: pdp_pdp_4c plot
+#| label: gbm_4b_pred_2
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- gbm modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: gbm_4b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
 #| cache: false
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_gbm_4c.png){width=900px}
-![](../output/figures/R_infl_mod_gbm_4c.png){width=900px}
-
-- left figure compares gbm modelled estimates to the sample data
-- right figure compares gbm modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- gbm modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
-- gbm derived predictions lack uncertainty estimates
-- relative influences mainly space/time (though note that this is
-  because this partial is the result of the same model, just predicted
-  onto the full data grid)
+::::::
 
 :::::
 
@@ -2835,34 +4390,75 @@ mod_stan_4$print(
 
 ##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_dbarts_4.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: dbarts_pdp_4
+#| label: dbarts_4_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- dbarts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: dbarts_4_pdp plot
+#| label: dbarts_4_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
 #| cache: false
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_4.png){width=900px}
+###### All reefs
 
-- left figure compares dbarts modelled estimates to the sample data
-- right figure compares dbarts modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- dbarts modelled estimates are slightly lower than the 25 site,
-  replacement data, and thus biased lower than the "truth"
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_dbarts_4.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: dbarts_4_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- dbarts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: dbarts_4_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::::
 
 :::::
 
@@ -2879,75 +4475,167 @@ mod_stan_4$print(
 
 ::::: {.panel-tabset}
 
-##### Partial dependency plot (sample data only)
+##### Partial dependency plot
 
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_dbarts_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: dbarts_pdp_4b
+#| label: dbarts_4b_pred_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- dbarts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
 ```{r}
-#| label: dbarts_4b_pdp plot
-#| results: markup
-#| eval: false
-#| echo: true
-#| fig-width: 8
-#| fig-height: 6
-#| cache: false
-#| code-fold: true
-```
-
-![](../output/figures/R_pdp_mod_dbarts_4b.png){width=900px}
-![](../output/figures/R_infl_mod_dbarts_4b.png){width=900px}
-
-- left figure compares dbarts modelled estimates to the sample data
-- right figure compares dbarts modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- dbarts modelled estimates are consistent with the 25 site,
-  replacement data, yet biased lower than the "truth"
-- relative influences mainly space/time 
-
-##### Partial dependency plot (full domain)
-
-```{r}
-#| label: dbarts_pdp_4c
+#| label: dbarts_4b_mse_1
 #| results: markup
 #| eval: false
 #| echo: true
 #| cache: false
 #| code-fold: true
 ```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_dbarts_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{r}
-#| label: dbarts_4c_pdp plot
+#| label: dbarts_4b_pred_2
 #| results: markup
 #| eval: false
 #| echo: true
-#| fig-width: 8
-#| fig-height: 6
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- dbarts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: dbarts_4b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
 #| cache: false
 #| code-fold: true
 ```
 
-![](../output/figures/R_pdp_mod_dbarts_4c.png){width=900px}
-![](../output/figures/R_infl_mod_dbarts_4b.png){width=900px}
-
-- left figure compares dbarts modelled estimates to the sample data
-- right figure compares dbarts modelled estimates to the simple
-  hierarchical sampled means/medians and the true means/medians
-- sampled reefs (blue and green dashed lines) are lower than the true
-  global average (orange and khaki) - right side figure
-- dbarts modelled estimates are slightly higher than the 25 site,
-  replacement data, yet biased lower than the "truth"
-- relative influences mainly space/time (though note that this is
-  because this partial is the result of the same model, just predicted
-  onto the full data grid)
-  
 :::::
+
+::::
+
+
+#### xgboost + covariates
+
+```{r}
+#| label: xgboost_4b
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+::::: {.panel-tabset}
+
+##### Partial dependency plot
+
+:::::: {.panel-tabset}
+
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_1_mod_xgboost_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: xgboost_4b_pred_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- xgboost modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **Sampled reefs**
+```{r}
+#| label: xgboost_4b_mse_1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/R_pdp_2_mod_xgboost_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
+```{r}
+#| label: xgboost_4b_pred_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- xgboost modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{r}
+#| label: xgboost_4b_mse_2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
+:::::
+
+::::
 
 #### pymc-bart + covariates
 
@@ -2973,8 +4661,14 @@ mod_stan_4$print(
 
 ##### Partial dependency plot (sample data only)
 
-![](../output/figures/python_pdp_pymc_bart_4b.png){width=700px}
+:::::: {.panel-tabset}
 
+###### Sampled reefs
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/python_pdp_pymc_bart_4b.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{python}
 #| label: python sampled data barts prep plot 4
 #| results: markup
@@ -2983,7 +4677,6 @@ mod_stan_4$print(
 #| cache: false
 #| code-fold: true
 ```
-
 ```{python}
 #| label: python sampled data barts plot 4
 #| results: markup
@@ -2992,11 +4685,31 @@ mod_stan_4$print(
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
 
-##### Partial dependency plot (full domain)
+- sampled reefs (blue and green dashed lines)
+- pymc-barts modelled estimates (orange ribbon, white line)
+::::
+:::
 
-![](../output/figures/python_pdp_pymc_bart_4c.png){width=700px}
+Calculate MSE of predictions to **Sampled reefs**
+```{python}
+#| label: python sampled data pymc_barts mse 4b 1
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
 
+###### All reefs
+
+::: {.columns}
+:::: {.column width="50%"}
+![](../output/figures/python_pdp_pymc_bart_4c.png){width=350px}
+::::
+:::: {.column width="50%"}
 ```{python}
 #| label: python sampled data barts prep plot 4c
 #| results: markup
@@ -3013,10 +4726,82 @@ mod_stan_4$print(
 #| cache: false
 #| code-fold: true
 ```
+ 
+Partial dependencies based on estimated marginalised means for year
+
+- sampled reefs (blue and green dashed lines)
+- pymc-barts modelled estimates (orange ribbon, white line)
+::::
+:::
+
+Calculate MSE of predictions to **All reefs**
+
+```{python}
+#| label:  python sampled data pymc_barts mse 4b 2
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+#| code-fold: true
+```
+
 :::::
 
- 
 ::::
+
+#### Comparisons
+     
+```{r}
+#| label: comparison_4
+#| results: markup
+#| eval: false
+#| echo: true
+#| code-fold: true
+#| cache: false
+```
+ 
+::: {#fig-mse_4_1}
+![](../output/figures/mse_4_1.png){width=800px}
+
+Mean square error (MSE) of models build on Northern reefs data (25
+reefs) and compared to either reef/year level data. This represents
+the models' ability to represent median-scale spatio-temporal
+patterns. Smaller values imply smaller error since predicted values
+are closer to the observed values. Panel columns condition MSE into
+predicting data from either all Northern reefs, all Southern reefs or
+only the sampled Northern reefs. Panel rows condition MSE into whether
+models contained covariates or not.
+
+:::
+
+::: {#fig-mse_4_2}
+![](../output/figures/mse_4_2.png){width=800px}
+
+Mean inaccuracy (%) of models build on Northern reefs data (25
+reefs) and compared to either reef/year level data. This represents
+the models' ability to represent median-scale spatio-temporal
+patterns. Smaller values imply smaller inaccuracy since predicted values
+are closer to the observed values. Panel columns condition MSE into
+predicting data from either all Northern reefs, all Southern reefs or
+only the sampled Northern reefs. Panel rows condition MSE into whether
+models contained covariates or not.
+
+:::
+
+```{r}
+#| label: comparison_4_tab
+#| results: markup
+#| eval: true
+#| echo: true
+#| code-fold: true
+#| cache: false
+comps_4 <- readRDS(file = paste0(data_path,
+                                        "synthetic/comps_4.rds")
+                          ) 
+comps_4 |> knitr::kable()
+```
+      
+
 
 :::
 

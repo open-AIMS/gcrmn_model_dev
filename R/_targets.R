@@ -8,6 +8,7 @@ tar_option_set(
   packages = c("tidyverse", "sf", "synthos",
     "glmmTMB", "emmeans", "DHARMa", "patchwork",
     "brms", "rstan", "bayesplot", "tidybayes",
+    "caret", "xgboost", "tidymodels",
     "posterior", "gbm", "dbarts", "HDInterval"),  # Load required packages
   format = "rds"                    # Default storage format
 )
