@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build-and-render:
+  new-build-and-render:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,9 +21,31 @@ jobs:
           docker pull ghcr.io/open-aims/gcrmn_model_dev:main
 
       # Step 3: Run the Docker container and execute `make R_container`
-      - name: Run R_container
+      - name: Run R
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:/home/Project \
             ghcr.io/open-aims/gcrmn_model_dev:main \
             make run_R
+
+      # Step 4: Run the Docker container and execute `make run_python`
+      - name: Run python
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/home/Project \
+            ghcr.io/open-aims/gcrmn_model_dev:main \
+            make run_python
+
+      # Step 5: Render the documents `render_docs`
+      - name: Render docs
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/home/Project \
+            ghcr.io/open-aims/gcrmn_model_dev:main \
+            make render_docs
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: docs

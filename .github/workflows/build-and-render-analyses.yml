@@ -1,4 +1,4 @@
-name: Build and render analyses
+name: Docker based build and render analyses
 
 on:
   workflow_dispatch:

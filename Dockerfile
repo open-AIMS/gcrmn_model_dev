@@ -14,8 +14,8 @@ RUN apt-get update \
     libharfbuzz-dev \
     libfribidi-dev \
     glpk-utils \
-    libglpk-dev \ 
-    git \ 
+    libglpk-dev \
+    git \
   && rm -rf /var/lib/apt/lists/*
 
 # Install R packages
@@ -110,6 +110,13 @@ RUN R -e "options(repos = \
   pak::pkg_install(c('open-AIMS/synthos')); \
 "
 
+RUN R -e "options(repos = \
+    list(CRAN = \"https://packagemanager.posit.co/cran/2025-04-11/\")); \
+  pak::pkg_install(c('caret')); \
+  pak::pkg_install(c('xgboost')); \
+  pak::pkg_install(c('tidymodels')); \
+"
+
 ## ## A selection of tidyverse packages
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
@@ -120,14 +127,14 @@ RUN R -e "options(repos = \
 ##   install.packages('stringr'); \
 ##   install.packages('tidyr'); \
 ##   install.packages('tidyverse'); \
-## "  
+## "
 
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
 ##   install.packages('crayon'); \
 ##   install.packages('cli'); \
 ##   install.packages('validate'); \
-## "  
+## "
 
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
@@ -147,20 +154,20 @@ RUN R -e "options(repos = \
 ##   install.packages('bookdown'); \
 ##   install.packages('rmarkdown'); \
 ##   install.packages('quarto'); \
-## "  
+## "
 
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
 ##   install.packages('testthat'); \
 ##   install.packages('assertthat'); \
-## "  
+## "
 
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
 ##   install.packages('plotly'); \
-## "  
+## "
 
-## ## Install extra packages required for quarto 
+## ## Install extra packages required for quarto
 ## RUN apt-get update \
 ##   && apt-get install -y --no-install-recommends \
 ##     curl \
@@ -175,14 +182,14 @@ RUN R -e "options(repos = \
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
 ##   install.packages('sf'); \
-## "  
+## "
 
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
 ##   install.packages('emmeans');   \
 ##   install.packages('DHARMa');   \
 ##   install.packages('patchwork');   \
-## "  
+## "
 
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
@@ -190,21 +197,21 @@ RUN R -e "options(repos = \
 ##   install.packages('purrr');   \
 ##   install.packages('insight');   \
 ##   install.packages('gridGraphics');   \
-## "  
+## "
 
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
 ##   install.packages("fmesher"); \
 ##   remotes::install_version("INLA", version="24.05.10",repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/testing"), dep=TRUE); \
 ## "
-  
+
 ## RUN R -e "options(repos = \
 ##   list(CRAN = 'https://packagemanager.posit.co/cran/2025-04-11/')); \
 ##   install.packages('glmmTMB');   \
 ##   install.packages('brms');   \
 ##   install.packages('emdstanr');   \
 ##   install.packages('cmdstanr');   \
-## "  
+## "
 
 RUN pip3 install --break-system-packages seaborn
 
