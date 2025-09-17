@@ -8,11 +8,37 @@ Most of the dependencies can be inferred by examination of the
 run is the build a docker image from the `Dockerfile` and run within a
 container.
 
+## Running in the container
+
+To run these models inside the docker container (after building the
+container), use the following steps:
+
+1. `make R_container`: this will run the the following analyses in R:
+  - `synthetic_data()`: to generate the synthetic data
+  - `site_replacement()`: R based models for exploring site
+    replacement scenarios
+  - `missing_years()`: R based models for exploring missing years
+    scenarios
+  - `incomplete_spatial()`: R based models for exploring incomplete
+    spatial scenarios
+2. `make python_container`: this will run the the following analyses
+   in R:
+  - `site_replacement()`: python based models for exploring site
+    replacement scenarios
+  - `missing_years()`: python based models for exploring missing years
+    scenarios
+  - `incomplete_spatial()`: python based models for exploring
+    incomplete spatial scenarios
+3. `make R_container`: a second time (after `make python_container`) in order to 
+   combine the previous R and python models together for the purpose
+   of comparing the models
+4. `make docs_container`: this will render each of the quarto documents
+
+## Running the codes
+
 Nevertheless, if you are running on bare metal, then ensure that both
 `R` and `python` are installed and that their respective packages
 indicated in the Dockerfile are installed and available.
-
-## Running the codes
 
 Ideally, it should be possible to run in the following order:
 
@@ -22,7 +48,10 @@ Ideally, it should be possible to run in the following order:
 2. `make run_python`: this will run all the python based analyes using
    the `ploomber` library to ensure all steps are performed in the
    correct order
-3. `make render_docs`: this will render each of the quarto documents
+3. `make run_R`: a second time (after `make run_python`) in order to 
+   combine the previous R and python models together for the purpose
+   of comparing the models
+4. `make render_docs`: this will render each of the quarto documents
 
 I say ideally, because in my haste and to quickly knit together the
 python analyses and R analyses so that they can be compared, I

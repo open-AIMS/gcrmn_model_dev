@@ -42,6 +42,7 @@ def site_replacement_global_parameters_(product):
     paths = {
         "data_path": data_path,
         "synthetic_path": f"{data_path}synthetic/",
+        "modelled_path": f"{data_path}modelled/",
         "fig_path": f"{output_path}figures/"
     }
     # Ensure the directories exist

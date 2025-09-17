@@ -1790,7 +1790,7 @@ missing_years <- function() {
     ## xgboost + covariates -------------------------------------------
     tar_target(mod_xgboost_3b_prep_, {
       benthos_fixed_locs_obs_3 <- missing_years_data_prep_3_
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       ## ---- xgboost_3_prep
       data_train_3b <- benthos_fixed_locs_obs_3 |>
         dplyr::select(cover, Year, Latitude, Longitude, CYC, DHW, OTHER) 
@@ -1799,7 +1799,7 @@ missing_years <- function() {
     }),
     tar_target(mod_xgboost_3b_tune_, {
       data_train_3b <- mod_xgboost_3b_prep_
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       ## ---- xgboost_3_tune
       ## Define the recipe
       tune_recipe <- recipe(cover ~ ., data = data_train_3b) |> 
@@ -1845,7 +1845,7 @@ missing_years <- function() {
     }),
     tar_target(mod_xgboost_3b_fit_, {
       data_train_3b <- mod_xgboost_3b_prep_
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       tune_recipe = mod_xgboost_3b_tune_$tune_recipe
       tune_model = mod_xgboost_3b_tune_$tune_model
       tune_workflow = mod_xgboost_3b_tune_$tune_workflow
@@ -1944,25 +1944,35 @@ missing_years <- function() {
     }),
 
     ## Comparisons ----------------------------------------------------
-    tar_target(mse_1_mod_pymc_barts_3b_file_,
-      paste0(
-        incomplete_spatial_global_parameters_$data_path,
+
+    tar_target(mse_1_mod_pymc_barts_3b_file_, {
+      fl <- paste0(
+        missing_years_global_parameters_$data_path,
         "modelled/pymc_bart_3b_mse_1.csv"
-      ), format = "file"),
+      )
+      if (!file.exists(fl)) return(NULL)
+      fl
+    }, format = "file"),
     tar_target(mse_1_mod_pymc_barts_3b_, {
+      if(is.null(mse_1_mod_pymc_barts_3b_file_)) return(NULL)
       read_csv(file = mse_1_mod_pymc_barts_3b_file_) 
-    }),
-    tar_target(mse_2_mod_pymc_barts_3b_file_,
-      paste0(
-        incomplete_spatial_global_parameters_$data_path,
+    }, cue = tar_cue(mode = "always")),
+
+    tar_target(mse_2_mod_pymc_barts_3b_file_, {
+      fl <- paste0(
+        missing_years_global_parameters_$data_path,
         "modelled/pymc_bart_3b_mse_2.csv"
-      ), format = "file"),
+      )
+      if (!file.exists(fl)) return(NULL)
+      fl
+    }, format = "file"),
     tar_target(mse_2_mod_pymc_barts_3b_, {
+      if(is.null(mse_2_mod_pymc_barts_3b_file_)) return(NULL)
       read_csv(file = mse_2_mod_pymc_barts_3b_file_) 
-    }),
-    
+    }, cue = tar_cue(mode = "always")),
+
     tar_target(comparisons_3_, {
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       mse_1_mod_glmmTMB_3 <- mse_1_mod_glmmTMB_3_
       mse_2_mod_glmmTMB_3 <- mse_2_mod_glmmTMB_3_
       mse_1_mod_glmmTMB_3b <- mse_1_mod_glmmTMB_3b_
@@ -2055,7 +2065,7 @@ missing_years <- function() {
     }),
     tar_target(comparisons_3_plots_, {
       comps_3 <- comparisons_3_
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- comparisons_3_tab
       g <-
@@ -3565,7 +3575,7 @@ missing_years <- function() {
     ## xgboost + covariates -------------------------------------------
     tar_target(mod_xgboost_4b_prep_, {
       benthos_fixed_locs_obs_4 <- missing_years_data_prep_4_
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       ## ---- xgboost_4_prep
       data_train_4b <- benthos_fixed_locs_obs_4 |>
         dplyr::select(cover, Year, Latitude, Longitude, CYC, DHW, OTHER) 
@@ -3574,7 +3584,7 @@ missing_years <- function() {
     }),
     tar_target(mod_xgboost_4b_tune_, {
       data_train_4b <- mod_xgboost_4b_prep_
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       ## ---- xgboost_4_tune
       ## Define the recipe
       tune_recipe <- recipe(cover ~ ., data = data_train_4b) |> 
@@ -3620,7 +3630,7 @@ missing_years <- function() {
     }),
     tar_target(mod_xgboost_4b_fit_, {
       data_train_4b <- mod_xgboost_4b_prep_
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       tune_recipe = mod_xgboost_4b_tune_$tune_recipe
       tune_model = mod_xgboost_4b_tune_$tune_model
       tune_workflow = mod_xgboost_4b_tune_$tune_workflow
@@ -3723,24 +3733,33 @@ missing_years <- function() {
     }),
     
     ## Comparisons ----------------------------------------------------
-    tar_target(mse_1_mod_pymc_barts_4b_file_,
-      paste0(
-        incomplete_spatial_global_parameters_$data_path,
+    tar_target(mse_1_mod_pymc_barts_4b_file_, {
+      fl <- paste0(
+        missing_years_global_parameters_$data_path,
         "modelled/pymc_bart_4b_mse_1.csv"
-      ), format = "file"),
+      )
+      if (!file.exists(fl)) return(NULL)
+      fl
+    }, format = "file"),
     tar_target(mse_1_mod_pymc_barts_4b_, {
+      if(is.null(mse_1_mod_pymc_barts_4b_file_)) return(NULL)
       read_csv(file = mse_1_mod_pymc_barts_4b_file_) 
-    }),
-    tar_target(mse_2_mod_pymc_barts_4b_file_,
-      paste0(
-        incomplete_spatial_global_parameters_$data_path,
+    }, cue = tar_cue(mode = "always")),
+    tar_target(mse_2_mod_pymc_barts_4b_file_, {
+      fl <- paste0(
+        missing_years_global_parameters_$data_path,
         "modelled/pymc_bart_4b_mse_2.csv"
-      ), format = "file"),
+      )
+      if (!file.exists(fl)) return(NULL)
+      fl
+    },
+      format = "file"),
     tar_target(mse_2_mod_pymc_barts_4b_, {
+      if(is.null(mse_2_mod_pymc_barts_4b_file_)) return(NULL)
       read_csv(file = mse_2_mod_pymc_barts_4b_file_) 
-    }),
+    }, cue = tar_cue(mode = "always")),
     tar_target(comparisons_4_, {
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       mse_1_mod_glmmTMB_4 <- mse_1_mod_glmmTMB_4_
       mse_2_mod_glmmTMB_4 <- mse_2_mod_glmmTMB_4_
       mse_1_mod_glmmTMB_4b <- mse_1_mod_glmmTMB_4b_
@@ -3833,7 +3852,7 @@ missing_years <- function() {
     }),
     tar_target(comparisons_4_plots_, {
       comps_4 <- comparisons_4_
-      data_path <- incomplete_spatial_global_parameters_$data_path
+      data_path <- missing_years_global_parameters_$data_path
       fig_path <- site_replacement_global_parameters_$fig_path
       ## ---- comparisons_4_tab
       g <-

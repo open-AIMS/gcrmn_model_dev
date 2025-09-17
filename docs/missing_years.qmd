@@ -4174,10 +4174,10 @@ mod_stan_4$print(
   variables = c("phi", "beta", "sd_1", "sd_2", "sd_3"),
   max_rows = 20
 )
-mod_stan_4$print(
-  variables = "cellmeans",
-  max_rows = 20
-)
+## mod_stan_4$print(
+##   variables = "cellmeans",
+##   max_rows = 20
+## )
 ```
 
 :::::

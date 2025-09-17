@@ -1,3 +1,7 @@
+check_file_exists <- function(path) {
+  if (file.exists(path)) path
+  else NA_character_
+}
 
 ## ---- make_brms_dharma_res_functions
 make_brms_dharma_res <- function(brms_model, seed = 10, ...) {

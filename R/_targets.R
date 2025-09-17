@@ -1,3 +1,7 @@
+## for interactive development within the docker container
+## cd ~/Projects/gcrmn_model_dev
+## docker run --rm -it -v $PWD:/home/Project gcrmn_dev
+## setwd("R")
 
 # Load the targets package
 library(targets)
@@ -22,12 +26,13 @@ source("incomplete_spatial.R")  # Load the modelling of incomplete spatial scrip
 
 list(
   ## tar_target(synthetic_data_output,
-  synthetic_data(),
-  ## ),
-  ## tar_target(site_replacement_output,
-  site_replacement(),
-  ## )
-  missing_years(),
   helper_functions(),
+  synthetic_data(),
+  ## ## ),
+  ## ## tar_target(site_replacement_output,
+  site_replacement(),
+  ## ## )
+  missing_years(),
+  ## helper_functions(),
   incomplete_spatial()
 )
